@@ -1,35 +1,36 @@
 # Computer Shop
 
-## Quickstart 
-1. **Kết nối đến cơ sở dữ liệu PostgreSQL trên Azure (không cần cài DB local).**
+## Quickstart
+1. **Cấu hình kết nối đến PostgreSQL (local hoặc remote).**
 2. **Chạy backend Spring Boot (Java 17 + Maven).**
 3. **Khởi động frontend React/Vite (Node 18+).**
 
 ## Chuẩn bị
-- **PostgreSQL client** (ví dụ `psql`) để kiểm tra dữ liệu.
+- **PostgreSQL 15+** (local hoặc dịch vụ managed như Render, Neon, Supabase).
 - **Java 17** và **Maven 3.8+** cho backend.
 - **Node.js 18+** và **npm** (hoặc pnpm/yarn) cho frontend.
 
 ## 1. Cơ sở dữ liệu
-Dự án sử dụng Azure PostgreSQL được quản lý sẵn; không cần chạy DB trên máy.
+Tạo file `.env` tại thư mục `backend/` (file này đã nằm trong `.gitignore`):
 
-```
-Host: huuhieudb.postgres.database.azure.com
-Port: 5432
-Database: pc_shop_database
-Username: huuhieu56
-Password: Abc1234@
+```env
+DATABASE_URL=jdbc:postgresql://<YOUR_DB_HOST>:5432/<YOUR_DB_NAME>
+DB_USERNAME=<YOUR_DB_USERNAME>
+DB_PASSWORD=<YOUR_DB_PASSWORD>
 ```
 
-Kết nối mẫu qua `psql` (bật SSL):
+Ví dụ kết nối local:
+
+```env
+DATABASE_URL=jdbc:postgresql://localhost:5432/pc_shop_database_2
+DB_USERNAME=postgres
+DB_PASSWORD=your_password_here
+```
+
+Kết nối mẫu qua `psql`:
 
 ```bash
-PGPASSWORD=Abc1234@ psql \
-	-h huuhieudb.postgres.database.azure.com \
-	-p 5432 \
-	-U huuhieu56 \
-	-d pc_shop_database \
-	--set=sslmode=require
+psql -h <YOUR_DB_HOST> -p 5432 -U <YOUR_DB_USERNAME> -d <YOUR_DB_NAME>
 ```
 
 ## 2. Backend
@@ -55,13 +56,11 @@ npm run dev
 - Frontend mặc định tại `http://localhost:5173` (có thể chỉnh trong `vite.config.ts`).
 - Đảm bảo frontend gọi đúng backend URL trong `src/services/api.ts` hoặc biến môi trường nếu cần.
 
-Hoàn tất: kết nối DB Azure, chạy backend rồi frontend để sử dụng web.
-
-## 4. Các tài khoản để test 
+## 4. Các tài khoản để test
 
 ```bash
 ROLE ADMIN
-username: admin 
+username: admin
 password: Abc1234@
 
 ROLE STAFF
@@ -73,22 +72,17 @@ username: customer
 password: Abc1234@
 ```
 
-## 5. Truy cập web đã được deploy sẵn 
-Option 1: Truy cập web deploy thông qua docker trên VPS Linux 
-```bash
-Frontend: https://brave-tree-054333100.1.azurestaticapps.net/
-Backend: https://huuhieube-aqctdyhfbeeyabgr.eastasia-01.azurewebsites.net
-``` 	
+## 5. Truy cập web đã được deploy trên Render
 
+> **Lưu ý:** Dự án sử dụng Render Free Tier. Service sẽ tự động **sleep sau ~15 phút không có traffic**. Lần truy cập đầu tiên sau khi service ngủ có thể mất **30–60 giây** để khởi động lại (cold start). Vui lòng chờ và reload lại trang.
 
-Option 2: Còn web dưới đây là do web deploy thông qua services free, nên mở web lên thì vui lòng chờ 5p để backend tự động chạy, rồi reload lại trang frontend là được ^_^.
-```bash
-Frontend: https://brave-tree-054333100.1.azurestaticapps.net/
-Backend: https://huuhieube-aqctdyhfbeeyabgr.eastasia-01.azurewebsites.net
+```
+Frontend: https://<your-render-frontend>.onrender.com
+Backend:  https://<your-render-backend>.onrender.com
 ```
 
 ## 6. Triển khai bằng Docker Compose
-Sử dụng Docker để build và chạy frontend + backend trên cùng VPS. Database vẫn kết nối trực tiếp đến Azure PostgreSQL theo cấu hình sẵn.
+Sử dụng Docker để build và chạy frontend + backend. Tạo file `.env` cùng cấp `docker-compose.yml` với các biến `DATABASE_URL`, `DB_USERNAME`, `DB_PASSWORD`.
 
 ### Cấu trúc container
 - **backend**: Spring Boot 3 (Java 17). Dockerfile nằm trong `backend/Dockerfile` sử dụng multi-stage Maven build.
@@ -106,3 +100,7 @@ docker compose up -d --build
 docker compose logs -f backend
 docker compose logs -f frontend
 ```
+
+## 7. CI/CD
+- **CI (GitHub Actions):** Mỗi push/PR vào `main` sẽ tự động chạy build & test cho cả backend (`mvn verify`) và frontend (`npm run build`). Xem workflow tại `.github/workflows/ci.yml`.
+- **CD (Render):** Render tự động deploy khi có push vào branch `main`. Cấu hình blueprint tại `render.yaml`.

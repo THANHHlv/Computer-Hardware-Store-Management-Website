@@ -7,7 +7,7 @@
  * Priority: VITE_API_BASE_URL env var -> localhost (dev fallback)
  */
 export const getBackendBaseUrl = (): string => {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL as string;
+  const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL) as string;
 
   // If env var is set, use it
   if (apiBaseUrl) {
@@ -23,7 +23,7 @@ export const getBackendBaseUrl = (): string => {
  * Used for building image URLs and other static resources
  */
 export const getBackendOrigin = (): string => {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL as string;
+  const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL) as string;
 
   let origin = apiBaseUrl || '';
   if (!origin) {

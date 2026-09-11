@@ -4,10 +4,9 @@ spring:
 
   # Database Configuration
   datasource:
-  
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://huuhieudb.postgres.database.azure.com:5432/pc_shop_database_2}
-    username: ${SPRING_DATASOURCE_USERNAME:huuhieu56}
-    password: ${SPRING_DATASOURCE_PASSWORD:Abc1234@}
+    url: ${DATABASE_URL:${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/pc_shop_database_2}}
+    username: ${DB_USERNAME:${SPRING_DATASOURCE_USERNAME:postgres}}
+    password: ${DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:}}
     driver-class-name: org.postgresql.Driver
 
     hikari:
@@ -24,8 +23,8 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:validate}
-    show-sql: ${SPRING_JPA_SHOW_SQL:false}
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+    show-sql: ${SPRING_JPA_SHOW_SQL:true}
     open-in-view: false
     properties:
       hibernate:
@@ -41,40 +40,37 @@ spring:
       write-dates-as-timestamps: false
     time-zone: ${APP_TIMEZONE:Asia/Ho_Chi_Minh}
 
-
   servlet:
     multipart:
-      max-file-size: ${APP_FILE_MAX_SIZE:10MB}
-      max-request-size: ${APP_FILE_MAX_REQUEST_SIZE:10MB}
-
+      max-file-size: ${APP_FILE_MAX_SIZE:20MB}
+      max-request-size: ${APP_FILE_MAX_REQUEST_SIZE:25MB}
 
 # Server Configuration
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${PORT:8080}
   error:
     include-message: always
 
 # App Custom Configurations
 app:
   cors:
-    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:*}
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
     allowed-methods: ${APP_CORS_ALLOWED_METHODS:GET,POST,PUT,DELETE,PATCH,OPTIONS}
     allowed-headers: ${APP_CORS_ALLOWED_HEADERS:*}
     allow-credentials: ${APP_CORS_ALLOW_CREDENTIALS:true}
 
   file-storage:
-    location: ${APP_FILE_STORAGE_LOCATION:images}
+    location: ${APP_FILE_STORAGE_LOCATION:uploads}
 
   inventory:
     default-low-stock-threshold: ${APP_DEFAULT_LOW_STOCK_THRESHOLD:10}
-
 
 # Logging Configuration
 logging:
   level:
     root: INFO
-    com.computershop: ${LOGGING_LEVEL_COMPUTERSHOP:DEBUG}
-    org.hibernate.SQL: ${LOGGING_LEVEL_HIBERNATE_SQL:DEBUG}
-    org.hibernate.type.descriptor.sql.BasicBinder: ${LOGGING_LEVEL_BINDER:TRACE}
+    com.computershop: ${LOGGING_LEVEL_COMPUTERSHOP:INFO}
+    org.hibernate.SQL: ${LOGGING_LEVEL_HIBERNATE_SQL:WARN}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${LOGGING_LEVEL_BINDER:ERROR}
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %-5level [%thread] %logger{36} : %msg%n"
