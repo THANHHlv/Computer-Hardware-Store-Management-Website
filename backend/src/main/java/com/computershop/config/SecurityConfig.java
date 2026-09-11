@@ -85,7 +85,8 @@ public class SecurityConfig {
                         // Bình luận tổng hợp - chỉ staff/admin
                         .requestMatchers(HttpMethod.GET, "/api/v1/comments").hasAnyRole("STAFF", "ADMIN")
 
-                        // Endpoint phục vụ phát triển
+                        // Endpoint phục vụ phát triển & health check
+                        .requestMatchers("/api/v1/health").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/error").permitAll()
