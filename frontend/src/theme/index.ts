@@ -22,42 +22,42 @@ import { components } from './components';
 // ===== BASE THEME CONFIGURATION =====
 const themeOptions: ThemeOptions = {
   palette: {
-    mode: 'light',
+    mode: 'dark',
     primary: {
       main: colors.primary.main,
       light: colors.primary.light,
       dark: colors.primary.dark,
-      contrastText: colors.common.white,
+      contrastText: colors.primary.contrastText,
     },
     secondary: {
       main: colors.secondary.main,
       light: colors.secondary.light,
       dark: colors.secondary.dark,
-      contrastText: colors.common.white,
+      contrastText: colors.secondary.contrastText,
     },
     error: {
       main: colors.error.main,
       light: colors.error.light,
       dark: colors.error.dark,
-      contrastText: colors.common.white,
+      contrastText: colors.error.contrastText,
     },
     warning: {
       main: colors.warning.main,
       light: colors.warning.light,
       dark: colors.warning.dark,
-      contrastText: colors.common.white,
+      contrastText: colors.warning.contrastText,
     },
     info: {
       main: colors.info.main,
       light: colors.info.light,
       dark: colors.info.dark,
-      contrastText: colors.common.white,
+      contrastText: colors.info.contrastText,
     },
     success: {
       main: colors.success.main,
       light: colors.success.light,
       dark: colors.success.dark,
-      contrastText: colors.common.white,
+      contrastText: colors.success.contrastText,
     },
     grey: colors.grey,
     background: {
