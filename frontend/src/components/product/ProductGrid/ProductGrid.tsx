@@ -63,13 +63,12 @@ const DEFAULT_COLUMNS: Record<'xs' | 'sm' | 'md' | 'lg' | 'xl', string> = {
 
 // ===== SKELETON COMPONENTS =====
 const ProductCardSkeleton: React.FC = () => (
-  <Box>
-    <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 1 }} />
-    <Box sx={{ p: 2 }}>
-      <Skeleton variant="text" height={20} width="60%" />
-      <Skeleton variant="text" height={24} width="100%" />
-      <Skeleton variant="text" height={20} width="40%" />
-      <Skeleton variant="rectangular" height={36} sx={{ mt: 2, borderRadius: 1 }} />
+  <Box sx={{ bgcolor: '#131B2E', p: 1.5, borderRadius: 3, border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+    <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 2, bgcolor: 'rgba(255, 255, 255, 0.04)' }} />
+    <Box sx={{ p: 1.5 }}>
+      <Skeleton variant="text" height={18} width="40%" sx={{ bgcolor: 'rgba(255, 255, 255, 0.06)', mb: 1 }} />
+      <Skeleton variant="text" height={24} width="90%" sx={{ bgcolor: 'rgba(255, 255, 255, 0.08)' }} />
+      <Skeleton variant="text" height={22} width="50%" sx={{ mt: 2, bgcolor: 'rgba(0, 240, 255, 0.1)' }} />
     </Box>
   </Box>
 );

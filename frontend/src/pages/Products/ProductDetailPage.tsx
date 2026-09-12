@@ -11,7 +11,6 @@ import {
   Typography,
   Box,
   Alert,
-  CircularProgress,
   Card,
   CardContent,
   Button,
@@ -19,6 +18,8 @@ import {
   Divider,
   TextField,
   IconButton,
+  Stack,
+  Skeleton,
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -26,6 +27,13 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ReplyIcon from '@mui/icons-material/Reply';
 import EditIcon from '@mui/icons-material/Edit';
 import SendIcon from '@mui/icons-material/Send';
+import ViewInArIcon from '@mui/icons-material/ViewInAr';
+import CollectionsIcon from '@mui/icons-material/Collections';
+import { motion } from 'framer-motion';
+
+// Components
+import { MotionPage } from '../../components/common/MotionPage';
+import { ProductViewer3D } from '../../components/3d/ProductViewer3D';
 
 // Services & Types
 import { productService } from '../../services/product.service';
@@ -55,6 +63,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = () => {
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [detailViewMode, setDetailViewMode] = useState<'gallery' | '3d'>('gallery');
 
   // Comments state
   const [comments, setComments] = useState<CommentResponse[]>([]);
@@ -230,11 +239,19 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = () => {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center' }}>
-        <CircularProgress />
-        <Typography variant="h6" sx={{ mt: 2 }}>
-          Đang tải dữ liệu...
-        </Typography>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Skeleton variant="rectangular" width={150} height={38} sx={{ mb: 3, borderRadius: 2 }} />
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
+          <Box sx={{ flex: 1 }}>
+            <Skeleton variant="rectangular" height={420} sx={{ borderRadius: 3 }} />
+          </Box>
+          <Box sx={{ flex: 1 }}>
+            <Skeleton variant="text" width="80%" height={48} />
+            <Skeleton variant="text" width="40%" height={40} sx={{ my: 2 }} />
+            <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 2, my: 2 }} />
+            <Skeleton variant="rectangular" height={52} sx={{ borderRadius: 2 }} />
+          </Box>
+        </Box>
       </Container>
     );
   }
@@ -269,23 +286,66 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = () => {
     (product?.images && product.images.length) || (product?.image_url || (product as any)?.imageUrl ? 1 : 0);
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Button
-        variant="outlined"
-        startIcon={<ArrowBackIcon />}
-        onClick={handleGoBack}
-        sx={{ mb: 3 }}
-      >
-        Trở về trang chủ
-      </Button>
+    <MotionPage>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBackIcon />}
+          onClick={handleGoBack}
+          sx={{ mb: 3 }}
+        >
+          Trở về danh sách
+        </Button>
 
-      {/* Main Content */}
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
-        {/* Left: Images */}
-        <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Box sx={{ position: 'relative', width: '100%', maxWidth: 600, textAlign: 'center' }}>
-            {/* Prev */}
-            {imagesCount > 1 && (
+        {/* Main Content */}
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
+          {/* Left: Images / 3D Viewer */}
+          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            {/* View Mode Toggle */}
+            <Stack direction="row" spacing={1} sx={{ mb: 2, bgcolor: 'rgba(255,255,255,0.05)', p: 0.5, borderRadius: 2, alignSelf: 'flex-start' }}>
+              <Button
+                size="small"
+                startIcon={<CollectionsIcon fontSize="small" />}
+                onClick={() => setDetailViewMode('gallery')}
+                sx={{
+                  bgcolor: detailViewMode === 'gallery' ? '#00F0FF' : 'transparent',
+                  color: detailViewMode === 'gallery' ? '#0A0E17' : '#94A3B8',
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  borderRadius: 1.5,
+                  '&:hover': { bgcolor: detailViewMode === 'gallery' ? '#00F0FF' : 'rgba(255,255,255,0.08)' },
+                }}
+              >
+                Ảnh chi tiết (2D)
+              </Button>
+              <Button
+                size="small"
+                startIcon={<ViewInArIcon fontSize="small" />}
+                onClick={() => setDetailViewMode('3d')}
+                sx={{
+                  bgcolor: detailViewMode === '3d' ? '#00F0FF' : 'transparent',
+                  color: detailViewMode === '3d' ? '#0A0E17' : '#94A3B8',
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  borderRadius: 1.5,
+                  '&:hover': { bgcolor: detailViewMode === '3d' ? '#00F0FF' : 'rgba(255,255,255,0.08)' },
+                }}
+              >
+                Xoay 360° (3D)
+              </Button>
+            </Stack>
+
+            {detailViewMode === '3d' ? (
+              <ProductViewer3D
+                productName={product.name}
+                categoryName={product.category?.name}
+                fallbackImageUrl={imageSrc}
+                height={420}
+              />
+            ) : (
+              <Box sx={{ position: 'relative', width: '100%', maxWidth: 600, textAlign: 'center' }}>
+                {/* Prev */}
+                {imagesCount > 1 && (
               <Button
                 onClick={() => setCurrentImageIndex(idx => (idx - 1 + imagesCount) % imagesCount)}
                 disableElevation
@@ -365,24 +425,25 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = () => {
               </Button>
             )}
 
-            {/* Dots */}
-            <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center', gap: 1 }}>
-              {Array.from({ length: imagesCount }).map((_, i) => (
-                <Box
-                  key={i}
-                  sx={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    bgcolor: i === currentImageIndex ? 'primary.main' : 'grey.400',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => setCurrentImageIndex(i)}
-                />
-              ))}
-            </Box>
+                {/* Dots */}
+                <Box sx={{ mt: 1, display: 'flex', justifyContent: 'center', gap: 1 }}>
+                  {Array.from({ length: imagesCount }).map((_, i) => (
+                    <Box
+                      key={i}
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        bgcolor: i === currentImageIndex ? 'primary.main' : 'grey.400',
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => setCurrentImageIndex(i)}
+                    />
+                  ))}
+                </Box>
+              </Box>
+            )}
           </Box>
-        </Box>
 
         {/* Right: Info */}
         <Box sx={{ flex: 1 }}>
@@ -411,18 +472,27 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = () => {
           )}
 
           {!!product.specifications && (
-            <Card sx={{ mb: 3 }}>
+            <Card sx={{ mb: 3, border: '1px solid rgba(255, 255, 255, 0.08)', bgcolor: '#131B2E' }}>
               <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Thông số sản phẩm
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: '#F8FAFC' }}>
+                  Thông số kỹ thuật
                 </Typography>
-                <Divider sx={{ mb: 2 }} />
-                {Object.entries(product.specifications).map(([key, value]) => (
-                  <Box key={key} sx={{ mb: 1 }}>
-                    <Typography variant="body2" component="span" sx={{ fontWeight: 'bold' }}>
+                <Divider sx={{ mb: 2, borderColor: 'rgba(255,255,255,0.06)' }} />
+                {Object.entries(product.specifications).map(([key, value], idx) => (
+                  <Box
+                    key={key}
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      p: 1.25,
+                      borderRadius: 1,
+                      bgcolor: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.03)' : 'transparent',
+                    }}
+                  >
+                    <Typography variant="body2" sx={{ color: '#94A3B8', fontWeight: 600 }}>
                       {formatSpecLabel(key)}:
                     </Typography>
-                    <Typography variant="body2" component="span" sx={{ ml: 1 }}>
+                    <Typography variant="body2" className="tabular-nums font-mono-numbers" sx={{ color: '#F8FAFC', fontWeight: 500 }}>
                       {formatSpecValue(value)}
                     </Typography>
                   </Box>
@@ -461,12 +531,26 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = () => {
           )}
 
           <Button
+            component={motion.button as any}
+            whileTap={{ scale: 0.97 }}
             variant="contained"
             size="large"
             startIcon={<ShoppingCartIcon />}
             onClick={handleAddToCart}
             disabled={product.quantity === 0 || isRestrictedUser}
             fullWidth
+            sx={{
+              py: 1.5,
+              fontWeight: 700,
+              fontSize: '1rem',
+              bgcolor: '#00F0FF',
+              color: '#0A0E17',
+              boxShadow: '0 0 20px rgba(0, 240, 255, 0.35)',
+              '&:hover': {
+                bgcolor: '#38BDF8',
+                boxShadow: '0 0 25px rgba(0, 240, 255, 0.5)',
+              },
+            }}
           >
             {product.quantity === 0
               ? 'Hết hàng'
@@ -698,6 +782,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = () => {
         </CardContent>
       </Card>
     </Container>
+  </MotionPage>
   );
 };
 
