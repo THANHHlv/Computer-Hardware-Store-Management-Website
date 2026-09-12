@@ -37,6 +37,7 @@ import type { Product, Category } from '../../../types/product.types';
 import { useSnackbar } from '../../../hooks/useSnackbar';
 import { useDebounce } from '../../../hooks/useDebounce';
 import AdminFiltersBar from '../../../components/common/AdminFiltersBar';
+import { MotionPage } from '../../../components/common/MotionPage';
 
 const PAGE_SIZE = 24;
 
@@ -210,78 +211,79 @@ const ProductsList: React.FC = () => {
   // bulk action UI removed; keep selection state for other uses
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-        <Typography variant="h5">Quản lý sản phẩm</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/admin/products/create')}>
-          Tạo sản phẩm
-        </Button>
-      </Box>
-
-      {/* Unified filters bar */}
-      <AdminFiltersBar
-        searchValue={searchKeyword}
-        onSearchChange={(v) => setSearchKeyword(v)}
-        placeholder="Tìm kiếm sản phẩm..."
-        loading={loading}
-        onRefresh={fetchProducts}
-        actions={(
-          <Button variant="outlined" startIcon={<FilterIcon />} onClick={clearFilters} size="small">
-            Xóa lọc
+    <MotionPage>
+      <Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>Quản lý sản phẩm</Typography>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/admin/products/create')}>
+            Tạo sản phẩm
           </Button>
-        )}
-      >
-        {/* left/inline filter controls */}
-        <FormControl sx={{ minWidth: 180 }}>
-          <InputLabel>Danh mục</InputLabel>
-          <Select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value as number | '')}
-            label="Danh mục"
-            size="small"
-          >
-            <MenuItem value="">Tất cả</MenuItem>
-            {categories.map((category) => (
-              <MenuItem key={category.id} value={category.id}>
-                {category.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        </Box>
 
-        {/* Bỏ lọc Trạng thái */}
+        {/* Unified filters bar */}
+        <AdminFiltersBar
+          searchValue={searchKeyword}
+          onSearchChange={(v) => setSearchKeyword(v)}
+          placeholder="Tìm kiếm sản phẩm..."
+          loading={loading}
+          onRefresh={fetchProducts}
+          actions={(
+            <Button variant="outlined" startIcon={<FilterIcon />} onClick={clearFilters} size="small">
+              Xóa lọc
+            </Button>
+          )}
+        >
+          {/* left/inline filter controls */}
+          <FormControl sx={{ minWidth: 180 }}>
+            <InputLabel>Danh mục</InputLabel>
+            <Select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value as number | '')}
+              label="Danh mục"
+              size="small"
+            >
+              <MenuItem value="">Tất cả</MenuItem>
+              {categories.map((category) => (
+                <MenuItem key={category.id} value={category.id}>
+                  {category.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-        <FormControl sx={{ minWidth: 140 }}>
-          <InputLabel>Tồn kho</InputLabel>
-          <Select
-            value={stockFilter}
-            onChange={(e) => setStockFilter(e.target.value as any)}
-            label="Tồn kho"
-            size="small"
-          >
-            <MenuItem value="all">Tất cả</MenuItem>
-            <MenuItem value="in_stock">Còn hàng</MenuItem>
-            <MenuItem value="low_stock">Sắp hết</MenuItem>
-            <MenuItem value="out_of_stock">Hết hàng</MenuItem>
-          </Select>
-        </FormControl>
+          {/* Bỏ lọc Trạng thái */}
 
-        {/* Bỏ lựa chọn Sắp xếp và Thứ tự */}
-      </AdminFiltersBar>
+          <FormControl sx={{ minWidth: 140 }}>
+            <InputLabel>Tồn kho</InputLabel>
+            <Select
+              value={stockFilter}
+              onChange={(e) => setStockFilter(e.target.value as any)}
+              label="Tồn kho"
+              size="small"
+            >
+              <MenuItem value="all">Tất cả</MenuItem>
+              <MenuItem value="in_stock">Còn hàng</MenuItem>
+              <MenuItem value="low_stock">Sắp hết</MenuItem>
+              <MenuItem value="out_of_stock">Hết hàng</MenuItem>
+            </Select>
+          </FormControl>
 
-      {/* Bulk operations panel intentionally removed per UX request */}
+          {/* Bỏ lựa chọn Sắp xếp và Thứ tự */}
+        </AdminFiltersBar>
 
-  <Card>
-        <CardContent>
-          {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
+        {/* Bulk operations panel intentionally removed per UX request */}
+
+        <Card sx={{ bgcolor: '#131B2E', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 2 }}>
+          <CardContent>
+            {loading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+                <CircularProgress />
+              </Box>
+            ) : (
+              <TableContainer>
+                <Table>
+                  <TableHead sx={{ bgcolor: 'rgba(255, 255, 255, 0.03)' }}>
+                    <TableRow>
                     <TableCell padding="checkbox">
                       <Checkbox
                         checked={selectedProducts.length === products.length && products.length > 0}
@@ -331,13 +333,13 @@ const ProductsList: React.FC = () => {
                           />
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" fontWeight="medium">
+                          <Typography variant="body2" className="tabular-nums font-mono-numbers" sx={{ fontWeight: 600, color: '#00F0FF' }}>
                             {p.price?.toLocaleString('vi-VN')} ₫
                           </Typography>
                         </TableCell>
                         <TableCell>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography variant="body2">
+                            <Typography variant="body2" className="tabular-nums font-mono-numbers" sx={{ fontWeight: 600 }}>
                               {p.quantity ?? 0}
                             </Typography>
                             <Chip 
@@ -360,7 +362,7 @@ const ProductsList: React.FC = () => {
                           />
                         </TableCell>
                         <TableCell>
-                          <Typography variant="caption">
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                             {new Date(p.updated_at).toLocaleDateString('vi-VN')}
                           </Typography>
                         </TableCell>
@@ -436,6 +438,7 @@ const ProductsList: React.FC = () => {
         </CardContent>
       </Card>
     </Box>
+  </MotionPage>
   );
 };
 

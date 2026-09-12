@@ -46,19 +46,20 @@ export const components = (theme: Theme): Components => ({
       },
       containedPrimary: {
         backgroundColor: theme.palette.primary.main,
-        color: theme.palette.common.white,
+        color: theme.palette.primary.contrastText,
+        fontWeight: 600,
         '&:hover': {
-          // Don't hard-darken primary; keep same hue and elevate via shadow
-          backgroundColor: theme.palette.primary.main,
-          boxShadow: theme.shadows[4],
+          backgroundColor: theme.palette.primary.light,
+          boxShadow: '0 0 16px rgba(0, 240, 255, 0.4)',
         },
       },
       containedSecondary: {
         backgroundColor: theme.palette.secondary.main,
-        color: theme.palette.common.white,
+        color: theme.palette.secondary.contrastText,
+        fontWeight: 600,
         '&:hover': {
-          backgroundColor: theme.palette.secondary.main,
-          boxShadow: theme.shadows[4],
+          backgroundColor: theme.palette.secondary.light,
+          boxShadow: '0 0 16px rgba(16, 185, 129, 0.4)',
         },
       },
       outlined: {

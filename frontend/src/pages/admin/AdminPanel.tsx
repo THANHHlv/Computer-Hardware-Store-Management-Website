@@ -29,6 +29,9 @@ import { useSnackbar } from '../../hooks/useSnackbar';
 import { adminDashboardService } from '../../services/admin.service';
 import { orderService } from '../../services/order.service';
 import StatCard from '../../components/common/StatCard';
+import { MotionPage } from '../../components/common/MotionPage';
+import { CountUp } from '../../components/common/CountUp';
+import { AdminTrendChart } from '../../components/admin/AdminTrendChart';
 
 interface DashboardStats {
   totalProducts: number;
@@ -220,8 +223,9 @@ const AdminPanel: React.FC = () => {
   // Use shared StatCard component from components/common/StatCard
 
   return (
-    <Box sx={{ p: 3 }}>
-  <Paper sx={{ p: 3, mb: 3, bgcolor: 'background.paper' }} elevation={1}>
+    <MotionPage>
+      <Box sx={{ p: 3 }}>
+        <Paper sx={{ p: 3, mb: 3, bgcolor: '#131B2E', border: '1px solid rgba(255,255,255,0.08)' }} elevation={1}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
           <Box>
             <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>Bảng điều khiển quản trị</Typography>
@@ -243,30 +247,41 @@ const AdminPanel: React.FC = () => {
       <Card
         elevation={2}
         sx={{
-          mb: 2,
+          mb: 3,
           p: 0,
-          background: (theme) => `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
-          color: (theme) => theme.palette.success.contrastText,
+          background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.95) 100%)',
+          border: '1px solid rgba(16, 185, 129, 0.3)',
+          boxShadow: '0 8px 24px rgba(16, 185, 129, 0.25)',
+          color: '#FFFFFF',
         }}
       >
         <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
           <Box>
-            <Typography variant="overline" sx={{ opacity: 0.9 }}>Tổng doanh thu</Typography>
-            <Typography variant="h3" sx={{ fontWeight: 800, letterSpacing: '-0.5px' }}>{currency(stats.totalRevenue)}</Typography>
+            <Typography variant="overline" sx={{ opacity: 0.9, fontWeight: 700, letterSpacing: 1 }}>Tổng doanh thu toàn hệ thống</Typography>
+            <Typography variant="h3" className="tabular-nums font-mono-numbers" sx={{ fontWeight: 800, letterSpacing: '-0.5px' }}>
+              <CountUp end={stats.totalRevenue} formatter={currency} />
+            </Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            <Chip label={`Hôm nay: ${currency(todayRevenue)}`} color="success" variant="filled" sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'inherit' }} />
-            <Chip label={`Tháng này: ${currency(monthlyRevenue)}`} color="success" variant="filled" sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'inherit' }} />
+            <Chip label={`Hôm nay: ${currency(todayRevenue)}`} color="success" variant="filled" sx={{ bgcolor: 'rgba(0,0,0,0.3)', color: '#FFFFFF', fontWeight: 600 }} />
+            <Chip label={`Tháng này: ${currency(monthlyRevenue)}`} color="success" variant="filled" sx={{ bgcolor: 'rgba(0,0,0,0.3)', color: '#FFFFFF', fontWeight: 600 }} />
           </Box>
         </CardContent>
       </Card>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2,1fr)', md: 'repeat(4,1fr)' }, gap: 2, mb: 2 }}>
-        <StatCard title="Tổng sản phẩm" value={nf.format(stats.totalProducts)} icon={<Inventory2Icon />} color="#1976d2" hint={`${nf.format(stats.lowStockProducts)} sản phẩm sắp hết`} />
-        <StatCard title="Người dùng" value={nf.format(stats.totalUsers)} icon={<PeopleIcon />} color="#9c27b0" hint={`${nf.format(stats.recentComments)} bình luận gần đây`} />
-        <StatCard title="Đơn hàng (tháng này)" value={nf.format(monthlyOrderCount)} icon={<ShoppingCartIcon />} color="#ff9800" sparklineData={monthlyOrdersTrend} delta={ordersDelta} />
-        <StatCard title="Doanh thu (tháng này)" value={currency(monthlyRevenue)} icon={<AttachMoneyIcon />} color="#2e7d32" sparklineData={monthlyRevenueTrend} delta={revenueDelta} />
+      {/* Quick KPI StatCards with CountUp */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2,1fr)', md: 'repeat(4,1fr)' }, gap: 2, mb: 3 }}>
+        <StatCard title="Tổng sản phẩm" value={<CountUp end={stats.totalProducts} />} icon={<Inventory2Icon />} color="#00F0FF" hint={`${nf.format(stats.lowStockProducts)} sản phẩm sắp hết`} />
+        <StatCard title="Người dùng" value={<CountUp end={stats.totalUsers} />} icon={<PeopleIcon />} color="#A855F7" hint={`${nf.format(stats.recentComments)} bình luận gần đây`} />
+        <StatCard title="Đơn hàng (tháng này)" value={<CountUp end={monthlyOrderCount} />} icon={<ShoppingCartIcon />} color="#F59E0B" sparklineData={monthlyOrdersTrend} delta={ordersDelta} />
+        <StatCard title="Doanh thu (tháng này)" value={<CountUp end={monthlyRevenue} formatter={currency} />} icon={<AttachMoneyIcon />} color="#10B981" sparklineData={monthlyRevenueTrend} delta={revenueDelta} />
       </Box>
+
+      {/* Interactive Revenue & Orders Trend Chart */}
+      <AdminTrendChart
+        monthlyRevenueTrend={monthlyRevenueTrend.length ? monthlyRevenueTrend : undefined}
+        monthlyOrdersTrend={monthlyOrdersTrend.length ? monthlyOrdersTrend : undefined}
+      />
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
         <Box>
@@ -323,6 +338,7 @@ const AdminPanel: React.FC = () => {
         </Box>
       </Box>
     </Box>
+  </MotionPage>
   );
 };
 

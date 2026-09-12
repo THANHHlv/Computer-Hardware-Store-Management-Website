@@ -32,6 +32,10 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
+// Components
+import { CheckoutStepper } from '../../components/cart/CheckoutStepper';
+import { MotionPage } from '../../components/common/MotionPage';
+
 // Hooks
 import { useCart } from '../../hooks/useCart';
 import { useAuth } from '../../hooks/useAuth';
@@ -159,10 +163,13 @@ const CartPage: React.FC = () => {
 
   // Nội dung chính
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Giỏ hàng
-      </Typography>
+    <MotionPage>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <CheckoutStepper activeStep={0} />
+
+        <Typography variant="h4" fontWeight={700} gutterBottom sx={{ color: '#F8FAFC' }}>
+          Giỏ hàng của bạn
+        </Typography>
 
       {!isAuthenticated && (
         <Alert severity="info" sx={{ mb: 3 }}>
@@ -502,6 +509,7 @@ const CartPage: React.FC = () => {
         </Box>
       </Box>
     </Container>
+  </MotionPage>
   );
 };
 

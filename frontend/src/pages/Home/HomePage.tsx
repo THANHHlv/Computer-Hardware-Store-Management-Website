@@ -39,10 +39,15 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import SavingsIcon from '@mui/icons-material/Savings';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import ViewInArIcon from '@mui/icons-material/ViewInAr';
+import CollectionsIcon from '@mui/icons-material/Collections';
 
 // Components
 import { ProductGrid } from '../../components/product/ProductGrid';
 import { ProductSearch } from '../../components/product/ProductSearch';
+import { MotionPage } from '../../components/common/MotionPage';
+import { HeroPCModel } from '../../components/3d/HeroPCModel';
+import { BentoCategories } from '../../components/home/BentoCategories';
 
 import { productService } from '../../services/product.service';
 
@@ -229,6 +234,7 @@ export const HomePage: React.FC = () => {
     'https://tanthanhdanh.vn/wp-content/uploads/2025/11/activity_PBA-800x440-1-727x400.png',
   ];
   const [heroImageIndex, setHeroImageIndex] = useState(0);
+  const [heroVisualMode, setHeroVisualMode] = useState<'3d' | 'gallery'>('3d');
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -410,8 +416,8 @@ export const HomePage: React.FC = () => {
       sx={{
         position: 'relative',
         overflow: 'hidden',
-        pt: { xs: 9, md: 12 },
-        pb: { xs: 10, md: 14 },
+        pt: { xs: 8, md: 10 },
+        pb: { xs: 8, md: 12 },
         mb: { xs: 6, md: 8 },
       }}
     >
@@ -419,7 +425,7 @@ export const HomePage: React.FC = () => {
         sx={{
           position: 'absolute',
           inset: 0,
-          background: `radial-gradient(circle at 5% 15%, ${alpha(theme.palette.primary.light, 0.4)} 0%, transparent 45%), radial-gradient(circle at 90% 10%, ${alpha(theme.palette.secondary.main, 0.25)} 0%, transparent 45%), linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.92)}, ${alpha(theme.palette.primary.light, 0.15)})`,
+          background: 'radial-gradient(circle at 10% 25%, rgba(0, 240, 255, 0.12) 0%, transparent 45%), radial-gradient(circle at 85% 20%, rgba(16, 185, 129, 0.12) 0%, transparent 45%), linear-gradient(180deg, rgba(10, 14, 23, 0.95) 0%, #0A0E17 100%)',
           zIndex: 0,
         }}
       />
@@ -427,33 +433,41 @@ export const HomePage: React.FC = () => {
         <Grid container spacing={{ xs: 6, md: 4 }} alignItems="center">
           <Grid size={{ xs: 12, md: 6 }}>
             <Chip
-              icon={<BoltIcon fontSize="small" />}
-              label="Ưu đãi linh kiện tháng này"
-              color="secondary"
-              variant="outlined"
+              icon={<BoltIcon fontSize="small" sx={{ color: '#00F0FF !important' }} />}
+              label="THẾ HỆ LINH KIỆN MỚI 2026"
               sx={{
                 mb: 3,
                 px: 2,
                 py: 1,
-                fontWeight: 600,
-                borderColor: alpha(theme.palette.secondary.main, 0.45),
-                bgcolor: alpha(theme.palette.secondary.light, 0.2),
+                fontWeight: 700,
+                color: '#00F0FF',
+                borderColor: 'rgba(0, 240, 255, 0.4)',
+                bgcolor: 'rgba(0, 240, 255, 0.08)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid',
               }}
             />
             <Typography
-              variant="h2"
+              variant="h1"
               component="h1"
               gutterBottom
-              sx={{ fontWeight: 800, lineHeight: 1.1, mb: 2 }}
+              sx={{
+                fontWeight: 800,
+                lineHeight: 1.1,
+                mb: 2,
+                background: 'linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 60%, #00F0FF 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
             >
               Xây dựng dàn PC đỉnh cao cho mọi nhu cầu
             </Typography>
             <Typography
               variant="h6"
               paragraph
-              sx={{ color: 'text.secondary', maxWidth: 520, mb: 4 }}
+              sx={{ color: '#94A3B8', maxWidth: 520, mb: 4, lineHeight: 1.6 }}
             >
-              Khám phá kho linh kiện chính hãng với cấu hình tối ưu cho Gaming, Designer, Streaming và Doanh nghiệp.
+              Khám phá kho linh kiện chính hãng với cấu hình tối ưu cho Gaming 4K, Designer, AI Rendering và Doanh nghiệp.
             </Typography>
             <Stack
               direction={{ xs: 'column', sm: 'row' }}
@@ -462,16 +476,25 @@ export const HomePage: React.FC = () => {
             >
               <Button
                 variant="contained"
-                color="primary"
                 size="large"
                 onClick={() => handleCategoryClick(0)}
-                sx={{ px: 4, py: 1.4, fontWeight: 700 }}
+                sx={{
+                  px: 4,
+                  py: 1.4,
+                  fontWeight: 700,
+                  bgcolor: '#00F0FF',
+                  color: '#0A0E17',
+                  boxShadow: '0 0 20px rgba(0, 240, 255, 0.35)',
+                  '&:hover': {
+                    bgcolor: '#38BDF8',
+                    boxShadow: '0 0 25px rgba(0, 240, 255, 0.5)',
+                  },
+                }}
               >
-                Xem sản phẩm
+                Khám phá sản phẩm
               </Button>
               <Button
                 variant="outlined"
-                color="secondary"
                 size="large"
                 onClick={() => navigate('/build-pc')}
                 sx={{
@@ -479,10 +502,12 @@ export const HomePage: React.FC = () => {
                   py: 1.35,
                   fontWeight: 700,
                   borderWidth: 2,
-                  borderColor: alpha(theme.palette.secondary.main, 0.5),
+                  borderColor: 'rgba(16, 185, 129, 0.5)',
+                  color: '#10B981',
                   '&:hover': {
-                    borderColor: theme.palette.secondary.main,
-                    bgcolor: alpha(theme.palette.secondary.main, 0.12),
+                    borderColor: '#10B981',
+                    bgcolor: 'rgba(16, 185, 129, 0.12)',
+                    boxShadow: '0 0 20px rgba(16, 185, 129, 0.25)',
                   },
                 }}
               >
@@ -493,7 +518,7 @@ export const HomePage: React.FC = () => {
               {HERO_METRICS.map((metric) => (
                 <Grid size={{ xs: 12, sm: 4 }} key={metric.label}>
                   <Box sx={{ textAlign: 'left' }}>
-                    <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                    <Typography variant="h5" className="tabular-nums font-mono-numbers" sx={{ fontWeight: 800, color: '#00F0FF' }}>
                       {metric.value}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
@@ -504,95 +529,145 @@ export const HomePage: React.FC = () => {
               ))}
             </Grid>
           </Grid>
+
+          {/* Right Column: 3D Showcase & Gallery Toggle */}
           <Grid size={{ xs: 12, md: 6 }}>
             <Paper
               elevation={0}
               sx={{
                 p: { xs: 1.5, md: 2 },
                 borderRadius: 4,
-                border: `1px solid ${alpha(theme.palette.primary.main, 0.08)}`,
-                bgcolor: alpha(theme.palette.background.paper, 0.9),
-                boxShadow: '0 24px 60px rgba(15, 23, 42, 0.18)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                bgcolor: '#131B2E',
+                background: 'linear-gradient(135deg, rgba(19, 27, 46, 0.9) 0%, rgba(10, 14, 23, 0.95) 100%)',
+                boxShadow: '0 24px 60px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 240, 255, 0.08)',
+                position: 'relative',
               }}
             >
               <Stack spacing={2}>
-                <Box>
-                  <Chip size="small" color="primary" label="Ưu đãi build PC" sx={{ fontWeight: 600 }} />
-                  <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>
-                    Giảm đến 5.000.000đ + vệ sinh trọn đời cho combo full-case
-                  </Typography>
-                </Box>
-                <Box sx={{ position: 'relative', overflow: 'hidden', borderRadius: 3 }}>
-                  {(() => {
-                    const slideCount = FIXED_BUILD_PC_IMAGES.length;
-                    const clampIndex = slideCount > 0 ? heroImageIndex % slideCount : 0;
-                    const translatePercent = slideCount > 0 ? (clampIndex * 100) / slideCount : 0;
-                    const slideWidthPercent = slideCount > 0 ? 100 / slideCount : 100;
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Box>
+                    <Chip size="small" color="primary" label="SHOWCASE ĐẲNG CẤP" sx={{ fontWeight: 700, fontSize: '0.7rem' }} />
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 0.5, fontSize: '0.8rem' }}>
+                      Card đồ họa thế hệ mới • Quạt RGB tản nhiệt
+                    </Typography>
+                  </Box>
 
-                    return (
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          width: `${Math.max(slideCount, 1) * 100}%`,
-                          transform: `translateX(-${translatePercent}%)`,
-                          transition: 'transform 750ms cubic-bezier(.4,0,.2,1)',
-                        }}
-                      >
-                        {FIXED_BUILD_PC_IMAGES.map((imageUrl, idx) => (
-                          <Box
-                            key={`hero-slide-${imageUrl}-${idx}`}
-                            sx={{
-                              minWidth: `${slideWidthPercent}%`,
-                              flex: `0 0 ${slideWidthPercent}%`,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              bgcolor: alpha('#000', 0.85),
-                              borderRadius: 3,
-                            }}
-                          >
+                  {/* Mode Switcher */}
+                  <Stack direction="row" spacing={0.5} sx={{ bgcolor: 'rgba(255,255,255,0.05)', p: 0.5, borderRadius: 2 }}>
+                    <Button
+                      size="small"
+                      startIcon={<ViewInArIcon fontSize="small" />}
+                      onClick={() => setHeroVisualMode('3d')}
+                      sx={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        py: 0.4,
+                        px: 1.2,
+                        borderRadius: 1.5,
+                        bgcolor: heroVisualMode === '3d' ? '#00F0FF' : 'transparent',
+                        color: heroVisualMode === '3d' ? '#0A0E17' : '#94A3B8',
+                        '&:hover': {
+                          bgcolor: heroVisualMode === '3d' ? '#00F0FF' : 'rgba(255,255,255,0.1)',
+                        },
+                      }}
+                    >
+                      3D Model
+                    </Button>
+                    <Button
+                      size="small"
+                      startIcon={<CollectionsIcon fontSize="small" />}
+                      onClick={() => setHeroVisualMode('gallery')}
+                      sx={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        py: 0.4,
+                        px: 1.2,
+                        borderRadius: 1.5,
+                        bgcolor: heroVisualMode === 'gallery' ? '#00F0FF' : 'transparent',
+                        color: heroVisualMode === 'gallery' ? '#0A0E17' : '#94A3B8',
+                        '&:hover': {
+                          bgcolor: heroVisualMode === 'gallery' ? '#00F0FF' : 'rgba(255,255,255,0.1)',
+                        },
+                      }}
+                    >
+                      Ảnh thực tế
+                    </Button>
+                  </Stack>
+                </Stack>
+
+                {heroVisualMode === '3d' ? (
+                  <HeroPCModel height={390} />
+                ) : (
+                  <Box sx={{ position: 'relative', overflow: 'hidden', borderRadius: 3, height: 390, display: 'flex', alignItems: 'center' }}>
+                    {(() => {
+                      const slideCount = FIXED_BUILD_PC_IMAGES.length;
+                      const clampIndex = slideCount > 0 ? heroImageIndex % slideCount : 0;
+                      const translatePercent = slideCount > 0 ? (clampIndex * 100) / slideCount : 0;
+                      const slideWidthPercent = slideCount > 0 ? 100 / slideCount : 100;
+
+                      return (
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            width: `${Math.max(slideCount, 1) * 100}%`,
+                            transform: `translateX(-${translatePercent}%)`,
+                            transition: 'transform 750ms cubic-bezier(.4,0,.2,1)',
+                          }}
+                        >
+                          {FIXED_BUILD_PC_IMAGES.map((imageUrl, idx) => (
                             <Box
-                              component="img"
-                              src={imageUrl}
-                              alt={`Build PC showcase ${idx + 1}`}
-                              loading="lazy"
+                              key={`hero-slide-${imageUrl}-${idx}`}
                               sx={{
-                                width: '100%',
-                                aspectRatio: '16 / 9',
-                                objectFit: 'contain',
+                                minWidth: `${slideWidthPercent}%`,
+                                flex: `0 0 ${slideWidthPercent}%`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                bgcolor: '#000',
                                 borderRadius: 3,
                               }}
-                            />
-                          </Box>
-                        ))}
-                      </Box>
-                    );
-                  })()}
+                            >
+                              <Box
+                                component="img"
+                                src={imageUrl}
+                                alt={`Build PC showcase ${idx + 1}`}
+                                loading="lazy"
+                                sx={{
+                                  width: '100%',
+                                  height: 380,
+                                  objectFit: 'contain',
+                                  borderRadius: 3,
+                                }}
+                              />
+                            </Box>
+                          ))}
+                        </Box>
+                      );
+                    })()}
 
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    sx={{ position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)' }}
-                  >
-                    {FIXED_BUILD_PC_IMAGES.map((_, idx) => (
-                      <Box
-                        key={`hero-dot-${idx}`}
-                        sx={{
-                          width: idx === heroImageIndex ? 30 : 12,
-                          height: 8,
-                          bgcolor: idx === heroImageIndex ? theme.palette.primary.main : alpha('#fff', 0.7),
-                          borderRadius: 999,
-                          transition: 'all 220ms ease',
-                          boxShadow: '0 3px 8px rgba(0,0,0,0.25)',
-                          cursor: 'pointer',
-                        }}
-                        onClick={() => {
-                          setHeroImageIndex(idx);
-                        }}
-                      />
-                    ))}
-                  </Stack>
-                </Box>
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      sx={{ position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)' }}
+                    >
+                      {FIXED_BUILD_PC_IMAGES.map((_, idx) => (
+                        <Box
+                          key={`hero-dot-${idx}`}
+                          sx={{
+                            width: idx === heroImageIndex ? 26 : 10,
+                            height: 6,
+                            bgcolor: idx === heroImageIndex ? '#00F0FF' : 'rgba(255,255,255,0.4)',
+                            borderRadius: 999,
+                            transition: 'all 220ms ease',
+                            cursor: 'pointer',
+                          }}
+                          onClick={() => setHeroImageIndex(idx)}
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
+                )}
               </Stack>
             </Paper>
           </Grid>
@@ -605,7 +680,7 @@ export const HomePage: React.FC = () => {
     <Container maxWidth="lg" sx={{ mb: { xs: 6, md: 8 } }}>
       <Grid container spacing={3}>
         {SERVICE_FEATURES.map((feature) => {
-          const Icon = feature.icon;
+          const Icon = feature.icon as React.ComponentType<any>;
           return (
             <Grid size={{ xs: 12, sm: 6, md: 3 }} key={feature.title}>
               <Paper
@@ -718,7 +793,7 @@ export const HomePage: React.FC = () => {
                 const slides = hasMinimumProducts ? chunkArray(products, CATEGORY_SLIDE_SIZE) : [];
                 const slidesCount = slides.length;
                 const activeIndex = categorySlideIndex[row.id] ?? 0;
-                const IconComponent = row.icon;
+                const IconComponent = row.icon as React.ComponentType<any>;
                 const rowError = categoryErrors[row.id];
                 const hasProducts = slidesCount > 0;
 
@@ -950,13 +1025,14 @@ export const HomePage: React.FC = () => {
   );
 
   return (
-    <Box>
+    <MotionPage>
       {renderHeroSection()}
+      <BentoCategories />
       {renderServiceHighlights()}
       {renderSearchSection()}
       {renderCategoryShowcase()}
       {renderPromoBanner()}
-    </Box>
+    </MotionPage>
   );
 };
 

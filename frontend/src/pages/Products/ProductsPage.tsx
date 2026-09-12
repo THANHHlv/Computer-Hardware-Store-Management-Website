@@ -12,7 +12,6 @@ import {
   Collapse,
   Container,
   Typography,
-  CircularProgress,
   Button,
   Select,
   MenuItem,
@@ -36,6 +35,7 @@ import { categoryService } from '../../services/category.service';
 import { ProductGrid } from '../../components/product/ProductGrid';
 import { ProductFilters } from '../../components/product/ProductFilters';
 import { ProductSearch } from '../../components/product/ProductSearch';
+import { MotionPage } from '../../components/common/MotionPage';
 
 // categories are handled server-side; no local fetch required for sidebar
 
@@ -444,8 +444,9 @@ export const ProductsPage: React.FC = () => {
   }, [isMdUp]);
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Page Header */}
+    <MotionPage>
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        {/* Page Header */}
       <Box sx={{ mb: 4 }}>
         <Typography
           variant="h4"
@@ -522,10 +523,11 @@ export const ProductsPage: React.FC = () => {
         {/* Products Grid */}
         <Box sx={{ flex: 1 }}>
           {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-              {/* disableShrink avoids stroke-dasharray/dashoffset animations that block compositor */}
-              <CircularProgress size={48} disableShrink />
-            </Box>
+            <ProductGrid
+              products={[]}
+              loading={true}
+              pageSize={12}
+            />
           ) : error ? (
             <Box sx={{ textAlign: 'center', py: 8 }}>
               <Typography color="error" variant="h6" gutterBottom>
@@ -600,6 +602,7 @@ export const ProductsPage: React.FC = () => {
         </Box>
       </Box>
     </Container>
+  </MotionPage>
   );
 };
 
