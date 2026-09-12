@@ -605,7 +605,7 @@ export const HomePage: React.FC = () => {
     <Container maxWidth="lg" sx={{ mb: { xs: 6, md: 8 } }}>
       <Grid container spacing={3}>
         {SERVICE_FEATURES.map((feature) => {
-          const Icon = feature.icon;
+          const Icon = feature.icon as React.ComponentType<any>;
           return (
             <Grid size={{ xs: 12, sm: 6, md: 3 }} key={feature.title}>
               <Paper
@@ -718,7 +718,7 @@ export const HomePage: React.FC = () => {
                 const slides = hasMinimumProducts ? chunkArray(products, CATEGORY_SLIDE_SIZE) : [];
                 const slidesCount = slides.length;
                 const activeIndex = categorySlideIndex[row.id] ?? 0;
-                const IconComponent = row.icon;
+                const IconComponent = row.icon as React.ComponentType<any>;
                 const rowError = categoryErrors[row.id];
                 const hasProducts = slidesCount > 0;
 
