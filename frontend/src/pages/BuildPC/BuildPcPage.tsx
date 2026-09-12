@@ -10,10 +10,9 @@ import { CompatibilityChecker } from './components/CompatibilityChecker.tsx';
 import { usePcBuilderMultiState } from './state/usePcBuilderMultiState';
 import type { Product } from '../../types/product.types';
 import { useNavigate } from 'react-router-dom';
-import { aggregateCompatibility } from './utils/compatibility';
-import { aiAdvisorService, buildAdvisorPayload } from '../../services/aiAdvisor.service';
-
-// page title constant removed
+import { analyzeDetailedCompatibility } from './utils/compatibility';
+import { aiAdvisorService, generateLocalExpertAnalysis, type AdvisorResponse } from '../../services/aiAdvisor.service';
+import { MotionPage } from '../../components/common/MotionPage';
 
 const BuildPcPage: React.FC = () => {
     const multi = usePcBuilderMultiState();
@@ -23,13 +22,24 @@ const BuildPcPage: React.FC = () => {
     const actions = multi.actions;
     const navigate = useNavigate();
 
-    const compatibilityIssues = useMemo(() => aggregateCompatibility(selectedParts), [selectedParts]);
-    const advisorEnabled = aiAdvisorService.isConfigured();
+    const hasAnyPart = useMemo(() => Object.values(selectedParts).some(Boolean), [selectedParts]);
+
+    const compatibilityAnalysis = useMemo(() => analyzeDetailedCompatibility(selectedParts), [selectedParts]);
+    const compatibilityIssues = compatibilityAnalysis.issues;
+
+    const [advisorData, setAdvisorData] = useState<AdvisorResponse | null>(null);
     const [advisorLoading, setAdvisorLoading] = useState(false);
     const [advisorError, setAdvisorError] = useState<string | null>(null);
-    const [advisorSuggestions, setAdvisorSuggestions] = useState<string[]>([]);
 
-    const hasAnyPart = useMemo(() => Object.values(selectedParts).some(Boolean), [selectedParts]);
+    // Cập nhật cố vấn AI sơ bộ ngay trong thời gian thực khi chọn/đổi linh kiện
+    useEffect(() => {
+        setAdvisorError(null);
+        if (hasAnyPart) {
+            setAdvisorData(generateLocalExpertAnalysis(selectedParts, compatibilityIssues));
+        } else {
+            setAdvisorData(null);
+        }
+    }, [selectedParts, compatibilityIssues, hasAnyPart]);
 
     // Rename dialog state
     const [renameOpen, setRenameOpen] = useState(false);
@@ -86,46 +96,22 @@ const BuildPcPage: React.FC = () => {
         navigate('/order/build-pc', { state: { source: 'buildpc', items: buildItems } });
     };
 
-    useEffect(() => {
-        setAdvisorError(null);
-        setAdvisorSuggestions([]);
-    }, [compatibilityIssues]);
-
     const handleAdvisorRequest = useCallback(async () => {
-        if (!advisorEnabled) {
-            setAdvisorError('Chức năng AI chưa được cấu hình. Vui lòng kiểm tra các biến môi trường Gemini/custom advisor.');
-            return;
-        }
         setAdvisorLoading(true);
         setAdvisorError(null);
         try {
-            const payload = buildAdvisorPayload(selectedParts, compatibilityIssues);
-            const response = await aiAdvisorService.analyzeBuild(payload);
-            const items = Array.isArray(response.advice) ? response.advice.filter(Boolean) : [];
-            const suggestions: string[] = [];
-            if (typeof response.compatibility_score === 'number' && !Number.isNaN(response.compatibility_score)) {
-                suggestions.push(`Điểm tương thích: ${response.compatibility_score.toFixed(1)}/10`);
-            }
-            if (response.bottleneck_analysis) {
-                suggestions.push(`Bottleneck: ${response.bottleneck_analysis}`);
-            }
-            if (response.summary) {
-                suggestions.push(response.summary);
-            }
-            suggestions.push(...items);
-            setAdvisorSuggestions(suggestions);
+            const response = await aiAdvisorService.analyzeBuild(selectedParts, compatibilityIssues);
+            setAdvisorData(response);
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Không thể lấy gợi ý từ AI';
             setAdvisorError(message);
         } finally {
             setAdvisorLoading(false);
         }
-    }, [advisorEnabled, compatibilityIssues, selectedParts]);
+    }, [compatibilityIssues, selectedParts]);
 
     return (
-        <>
-            {/* Page title removed - meta description removed with Helmet */}
-
+        <MotionPage>
             <Container maxWidth="lg" sx={{ py: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                     <Box />
@@ -168,18 +154,16 @@ const BuildPcPage: React.FC = () => {
                 <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3 }}>
                     <Box>
                         <ComponentSelector selectedParts={selectedParts} onSelect={actions.selectPart} onRemove={actions.removePart} />
-                        {/* Compatibility check removed as requested */}
                     </Box>
 
                     <Box sx={{ position: { md: 'sticky' }, top: { md: 88 }, display: 'flex', flexDirection: 'column', gap: 2 }}>
                         <CompatibilityChecker
                             selectedParts={selectedParts}
                             warnings={compatibilityIssues}
+                            advisorData={advisorData}
                             onRequestAdvice={handleAdvisorRequest}
-                            advisorEnabled={advisorEnabled}
                             advisorLoading={advisorLoading}
                             advisorError={advisorError}
-                            advisorSuggestions={advisorSuggestions}
                         />
                         <PCBuilderSummary selectedParts={selectedParts} quantities={multi.quantities} totals={totals} onRemove={actions.removePart} onUpdateQuantity={actions.updateQuantity} onReset={actions.reset} canExport={hasAnyPart} onCheckout={handleCheckout} />
                     </Box>
@@ -196,11 +180,13 @@ const BuildPcPage: React.FC = () => {
                     mt: 2,
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    backdropFilter: 'saturate(180%) blur(8px)'
+                    backdropFilter: 'saturate(180%) blur(8px)',
+                    bgcolor: 'rgba(19, 27, 46, 0.9)',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.08)'
                 }} aria-label="Tổng tiền cấu hình">
                     <Box>
                         <Typography variant="caption" color="text.secondary">Tổng ước tính</Typography>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{totals.total.toLocaleString('vi-VN')} ₫</Typography>
+                        <Typography variant="subtitle1" className="tabular-nums font-mono-numbers" sx={{ fontWeight: 700, color: '#00F0FF' }}>{totals.total.toLocaleString('vi-VN')} ₫</Typography>
                     </Box>
                     <Button variant="contained" disabled={!hasAnyPart} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Xem chi tiết cấu hình">
                         Xem chi tiết
@@ -225,7 +211,7 @@ const BuildPcPage: React.FC = () => {
                     <Button variant="contained" onClick={confirmRename} disabled={!renameValue.trim()}>Lưu</Button>
                 </DialogActions>
             </Dialog>
-        </>
+        </MotionPage>
     );
 };
 

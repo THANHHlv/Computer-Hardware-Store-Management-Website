@@ -16,9 +16,9 @@ interface Props {
 
 export const PCBuilderSummary: React.FC<Props> = ({ selectedParts, quantities = {} as SelectedQuantities, totals, onRemove, onUpdateQuantity, onReset, canExport, onCheckout }) => {
     return (
-        <Card variant="outlined">
+        <Card variant="outlined" sx={{ bgcolor: '#131B2E', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 3 }}>
             <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>Tóm tắt cấu hình</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: '#F8FAFC' }}>Tóm tắt cấu hình</Typography>
                 <Stack spacing={1.25}>
                     {Object.entries(selectedParts).map(([key, p]) => (
                         <Box
@@ -32,8 +32,8 @@ export const PCBuilderSummary: React.FC<Props> = ({ selectedParts, quantities = 
                             }}
                         >
                             <Box sx={{ minWidth: 120 }}>
-                                <Typography variant="body2" color="text.secondary">{key.toUpperCase()}</Typography>
-                                <Typography variant="body2">{p ? p.name : '-'}</Typography>
+                                <Typography variant="caption" sx={{ color: '#00F0FF', fontWeight: 600 }}>{key.toUpperCase()}</Typography>
+                                <Typography variant="body2" sx={{ color: '#F8FAFC' }}>{p ? p.name : '-'}</Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: { xs: '100%', sm: 'auto' }, justifyContent: { xs: 'flex-start', sm: 'flex-end' }, flexWrap: 'wrap' }}>
                                 {p ? (
@@ -47,7 +47,7 @@ export const PCBuilderSummary: React.FC<Props> = ({ selectedParts, quantities = 
                                             sx={{ width: 100 }}
                                             InputProps={{ endAdornment: <InputAdornment position="end">cái</InputAdornment> }}
                                         />
-                                        <Typography variant="body2" sx={{ minWidth: 120, textAlign: 'right' }}>{((p.price * (quantities?.[key as keyof SelectedParts] ?? 1))).toLocaleString('vi-VN')} ₫</Typography>
+                                        <Typography variant="body2" className="tabular-nums font-mono-numbers" sx={{ minWidth: 120, textAlign: 'right', fontWeight: 600, color: '#F8FAFC' }}>{((p.price * (quantities?.[key as keyof SelectedParts] ?? 1))).toLocaleString('vi-VN')} ₫</Typography>
                                         <Button size="small" onClick={() => onRemove(key as keyof SelectedParts)}>Xóa</Button>
                                     </>
                                 ) : (
@@ -58,15 +58,15 @@ export const PCBuilderSummary: React.FC<Props> = ({ selectedParts, quantities = 
                     ))}
                 </Stack>
 
-                <Divider sx={{ my: 2 }} />
+                <Divider sx={{ my: 2, borderColor: 'rgba(255, 255, 255, 0.08)' }} />
 
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr auto', rowGap: 0.75 }}>
                     <Typography color="text.secondary">Tạm tính</Typography>
-                    <Typography>{totals.subtotal.toLocaleString('vi-VN')} ₫</Typography>
+                    <Typography className="tabular-nums font-mono-numbers">{totals.subtotal.toLocaleString('vi-VN')} ₫</Typography>
                     <Typography color="text.secondary">Thuế (VAT)</Typography>
-                    <Typography>{totals.tax.toLocaleString('vi-VN')} ₫</Typography>
-                    <Typography sx={{ fontWeight: 700 }}>Tổng</Typography>
-                    <Typography sx={{ fontWeight: 700, color: 'primary.main' }}>{totals.total.toLocaleString('vi-VN')} ₫</Typography>
+                    <Typography className="tabular-nums font-mono-numbers">{totals.tax.toLocaleString('vi-VN')} ₫</Typography>
+                    <Typography sx={{ fontWeight: 700, color: '#F8FAFC' }}>Tổng thanh toán</Typography>
+                    <Typography className="tabular-nums font-mono-numbers" sx={{ fontWeight: 800, color: '#00F0FF', fontSize: '1.15rem' }}>{totals.total.toLocaleString('vi-VN')} ₫</Typography>
                 </Box>
 
                 <Stack
