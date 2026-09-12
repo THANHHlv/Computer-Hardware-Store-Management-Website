@@ -29,6 +29,10 @@ import { cartService } from '../../services/cart.service';
 import { api } from '../../services/api';
 import { promotionService } from '../../services/promotion.service';
 
+// Components
+import { CheckoutStepper } from '../../components/cart/CheckoutStepper';
+import { MotionPage } from '../../components/common/MotionPage';
+
 type DisplayItem = {
   id: string | number;
   name?: string;
@@ -612,14 +616,19 @@ const OrderCreatePage: React.FC = () => {
   }, [localSummary, baseSummary, displayItems.length]);
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Stack spacing={3}>
-        <Box>
-          <Typography variant="h4" fontWeight={700}>Tạo đơn hàng mới</Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
-            Hoàn thiện thông tin giao hàng và xác nhận đơn hàng của bạn.
-          </Typography>
-        </Box>
+    <MotionPage>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <CheckoutStepper activeStep={1} />
+
+        <Stack spacing={3}>
+          <Box>
+            <Typography variant="h4" fontWeight={700} sx={{ color: '#F8FAFC' }}>
+              Xác nhận thông tin đặt hàng
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
+              Hoàn thiện thông tin nhận hàng và xác nhận đơn hàng của bạn.
+            </Typography>
+          </Box>
 
         {is_guest_mode && (
           <Alert severity="info">
@@ -928,6 +937,7 @@ const OrderCreatePage: React.FC = () => {
         </DialogActions>
       </Dialog>
     </Container>
+  </MotionPage>
   );
 };
 export default OrderCreatePage;
