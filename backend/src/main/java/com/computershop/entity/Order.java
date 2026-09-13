@@ -65,6 +65,14 @@ public class Order extends BaseEntity {
     @Column(name = "payment_method", length = 20)
     private PaymentMethod paymentMethod = PaymentMethod.COD;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", length = 20)
+    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
+
+    /** Mã giao dịch VNPay (vnp_TransactionNo) — dùng để đối soát, nullable */
+    @Column(name = "vnpay_transaction_no", length = 100)
+    private String vnpayTransactionNo;
+
     @NotNull
     @Column(name = "shipping_address", nullable = false, columnDefinition = "TEXT")
     private String shippingAddress;
@@ -98,6 +106,11 @@ public class Order extends BaseEntity {
     }
 
     public enum PaymentMethod {
-        COD
+        COD, BANK_TRANSFER, VNPAY
+    }
+
+    public enum PaymentStatus {
+        PENDING, PAID, FAILED
     }
 }
+

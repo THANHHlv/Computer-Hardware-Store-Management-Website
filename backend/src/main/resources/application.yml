@@ -74,3 +74,17 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: ${LOGGING_LEVEL_BINDER:ERROR}
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %-5level [%thread] %logger{36} : %msg%n"
+
+# VNPay Payment Gateway Configuration (Sandbox)
+# Đăng ký tài khoản merchant sandbox tại: https://sandbox.vnpayment.vn
+# KHÔNG hardcode giá trị thật — dùng biến môi trường trên Render/server
+vnpay:
+  tmn-code: ${VNPAY_TMN_CODE:}
+  hash-secret: ${VNPAY_HASH_SECRET:}
+  pay-url: ${VNPAY_PAY_URL:https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
+  return-url: ${VNPAY_RETURN_URL:http://localhost:5173/order/vnpay-return}
+  ipn-url: ${VNPAY_IPN_URL:http://localhost:8080/api/payments/vnpay/ipn}
+  version: "2.1.0"
+  command: pay
+  curr-code: VND
+  locale: vn

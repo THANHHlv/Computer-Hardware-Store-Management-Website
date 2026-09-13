@@ -21,7 +21,12 @@ import {
   ListItemAvatar,
   Avatar,
   Alert,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
 } from '@mui/material';
+import LocalAtmIcon from '@mui/icons-material/LocalAtm';
+import PaymentIcon from '@mui/icons-material/Payment';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../../hooks/useCart';
 import { useSnackbar } from '../../hooks/useSnackbar';
@@ -103,6 +108,7 @@ type OrderCreatePayload = {
   customer_email: string;
   notes: string;
   promotion_id?: number | string;
+  payment_method?: string;
 };
 
 type BuildPcCheckoutSession = {
@@ -256,6 +262,9 @@ const OrderCreatePage: React.FC = () => {
   const [promoDialogOpen, setPromoDialogOpen] = useState(false);
   const [promotions, setPromotions] = useState<PromotionSummary[]>([]);
   const [loadingPromotions, setLoadingPromotions] = useState(false);
+
+  // Phương thức thanh toán
+  const [paymentMethod, setPaymentMethod] = useState<'COD' | 'VNPAY'>('COD');
 
   // Đơn hàng tạo thành công
   const [createdOrder, setCreatedOrder] = useState<CreatedOrderSummary | null>(null);
@@ -500,6 +509,7 @@ const OrderCreatePage: React.FC = () => {
         customer_name: customerName,
         customer_email: customerEmail,
         notes: notesToSend,
+        payment_method: paymentMethod,
       };
 
       if (localSummary?.promotion?.id) {
@@ -548,8 +558,35 @@ const OrderCreatePage: React.FC = () => {
       const created: any = body?.data || body;
       showSuccess('Tạo đơn hàng thành công');
       try { sessionStorage.removeItem('build_pc_checkout'); } catch { }
-      setCreatedOrder(created);
-      setSuccessDialogOpen(true);
+
+      // Nếu chọn VNPay → tạo URL thanh toán và redirect
+      if (paymentMethod === 'VNPAY' && created?.id) {
+        try {
+          const vnpayResp = await api.post<any>(`/payments/vnpay/create/${created.id}`, {}, {
+            baseURL: (api.defaults?.baseURL || '').replace('/api/v1', ''),
+          });
+          const vnpayBody = vnpayResp?.data || vnpayResp;
+          const paymentUrl = vnpayBody?.paymentUrl || vnpayBody?.data?.paymentUrl;
+          if (paymentUrl) {
+            // Redirect sang trang thanh toán VNPay (KHÔNG mở tab mới)
+            window.location.href = paymentUrl;
+            return;
+          } else {
+            showError('Không thể tạo link thanh toán VNPay. Vui lòng thử lại từ trang đơn hàng.');
+            setCreatedOrder(created);
+            setSuccessDialogOpen(true);
+          }
+        } catch (vnpayErr: any) {
+          console.error('OrderCreatePage: VNPay create payment URL failed', vnpayErr);
+          showError('Đơn hàng đã tạo nhưng không thể kết nối VNPay. Vui lòng thanh toán lại từ trang đơn hàng.');
+          setCreatedOrder(created);
+          setSuccessDialogOpen(true);
+        }
+      } else {
+        // COD / flow bình thường
+        setCreatedOrder(created);
+        setSuccessDialogOpen(true);
+      }
       shouldRefreshCartAfterOrder = !usingBuildPc;
     } catch (e) {
       console.error('OrderCreatePage: create order error', e);

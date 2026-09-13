@@ -36,4 +36,8 @@ public class OrderRequest {
 
     @JsonProperty("promotion_id")
     private Long promotionId;
+
+    @Size(max = 20, message = "Phương thức thanh toán không được vượt quá 20 ký tự")
+    @JsonProperty("payment_method")
+    private String paymentMethod;
 }

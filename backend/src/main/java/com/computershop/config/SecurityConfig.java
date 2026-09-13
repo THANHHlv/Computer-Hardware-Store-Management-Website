@@ -94,6 +94,12 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
 
+                        // VNPay Payment — IPN và Return phải public (VNPay gọi trực tiếp)
+                        .requestMatchers(HttpMethod.POST, "/api/payments/vnpay/ipn").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/payments/vnpay/return").permitAll()
+                        // VNPay create payment URL — yêu cầu đăng nhập (CUSTOMER)
+                        .requestMatchers(HttpMethod.POST, "/api/payments/vnpay/create/**").hasRole("CUSTOMER")
+
                         // Quản trị người dùng - chỉ ADMIN
                         .requestMatchers(HttpMethod.GET, "/api/v1/users").hasRole("ADMIN") // Lấy tất cả người dùng
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/role/**").hasRole("ADMIN") // Lấy theo role

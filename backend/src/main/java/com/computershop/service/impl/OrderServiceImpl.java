@@ -115,7 +115,20 @@ public class OrderServiceImpl implements OrderService {
         order.setUser(user);
         order.setTotalAmount(subtotal);
         order.setStatus(Order.OrderStatus.PENDING);
-        order.setPaymentMethod(Order.PaymentMethod.COD);
+        order.setPaymentStatus(Order.PaymentStatus.PENDING);
+
+        // Đọc phương thức thanh toán từ request, default COD
+        if (request.getPaymentMethod() != null && !request.getPaymentMethod().isBlank()) {
+            try {
+                Order.PaymentMethod pm = Order.PaymentMethod.valueOf(request.getPaymentMethod().toUpperCase());
+                order.setPaymentMethod(pm);
+            } catch (IllegalArgumentException e) {
+                // Phương thức không hợp lệ → fallback COD
+                order.setPaymentMethod(Order.PaymentMethod.COD);
+            }
+        } else {
+            order.setPaymentMethod(Order.PaymentMethod.COD);
+        }
 
 
         if (request.getCustomerName() != null && !request.getCustomerName().isBlank()) {
