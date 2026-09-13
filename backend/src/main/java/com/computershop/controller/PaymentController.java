@@ -23,7 +23,7 @@ import java.util.Map;
  * - POST /api/payments/vnpay/ipn             — VNPay server-to-server callback (public, nguồn tin cậy duy nhất)
  */
 @RestController
-@RequestMapping("/api/payments/vnpay")
+@RequestMapping({"/api/v1/payments/vnpay", "/api/payments/vnpay"})
 @RequiredArgsConstructor
 @Slf4j
 public class PaymentController {
