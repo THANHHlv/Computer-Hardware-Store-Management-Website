@@ -24,6 +24,11 @@ services:
         value: "8080"
       - key: APP_CORS_ALLOWED_ORIGINS
         sync: false
+      # VNPay Payment Gateway (Sandbox) — điền giá trị trên Render Dashboard
+      - key: VNPAY_TMN_CODE
+        sync: false
+      - key: VNPAY_HASH_SECRET
+        sync: false
 
   # ───────────────────────────────────────────
   # Frontend: React / Vite (Static Site)

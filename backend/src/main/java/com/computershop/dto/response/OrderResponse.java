@@ -74,6 +74,15 @@ public class OrderResponse {
 
     private String status;
 
+    @JsonProperty("payment_method")
+    private String paymentMethod;
+
+    @JsonProperty("payment_status")
+    private String paymentStatus;
+
+    @JsonProperty("vnpay_transaction_no")
+    private String vnpayTransactionNo;
+
     @JsonProperty("shipping_address")
     private String shippingAddress;
 
@@ -114,6 +123,9 @@ public class OrderResponse {
                 .customerEmail(order.getCustomerEmail())
                 .shippingPhone(order.getShippingPhone())
                 .status(order.getStatus().toString())
+                .paymentMethod(order.getPaymentMethod() != null ? order.getPaymentMethod().toString() : "COD")
+                .paymentStatus(order.getPaymentStatus() != null ? order.getPaymentStatus().toString() : "PENDING")
+                .vnpayTransactionNo(order.getVnpayTransactionNo())
                 .shippingAddress(order.getShippingAddress())
                 .notes(order.getNotes())
                 .createdAt(order.getCreatedAt())
@@ -162,6 +174,9 @@ public class OrderResponse {
                 .taxAmount(taxAmount)
                 .shippingCost(shippingCost)
                 .status(order.getStatus().toString())
+                .paymentMethod(order.getPaymentMethod() != null ? order.getPaymentMethod().toString() : "COD")
+                .paymentStatus(order.getPaymentStatus() != null ? order.getPaymentStatus().toString() : "PENDING")
+                .vnpayTransactionNo(order.getVnpayTransactionNo())
                 .shippingAddress(order.getShippingAddress())
                 .notes(order.getNotes())
                 .createdAt(order.getCreatedAt())

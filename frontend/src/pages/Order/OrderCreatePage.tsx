@@ -21,7 +21,12 @@ import {
   ListItemAvatar,
   Avatar,
   Alert,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
 } from '@mui/material';
+import LocalAtmIcon from '@mui/icons-material/LocalAtm';
+import PaymentIcon from '@mui/icons-material/Payment';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../../hooks/useCart';
 import { useSnackbar } from '../../hooks/useSnackbar';
@@ -103,6 +108,7 @@ type OrderCreatePayload = {
   customer_email: string;
   notes: string;
   promotion_id?: number | string;
+  payment_method?: string;
 };
 
 type BuildPcCheckoutSession = {
@@ -256,6 +262,9 @@ const OrderCreatePage: React.FC = () => {
   const [promoDialogOpen, setPromoDialogOpen] = useState(false);
   const [promotions, setPromotions] = useState<PromotionSummary[]>([]);
   const [loadingPromotions, setLoadingPromotions] = useState(false);
+
+  // Phương thức thanh toán
+  const [paymentMethod, setPaymentMethod] = useState<'COD' | 'VNPAY'>('COD');
 
   // Đơn hàng tạo thành công
   const [createdOrder, setCreatedOrder] = useState<CreatedOrderSummary | null>(null);
@@ -500,6 +509,7 @@ const OrderCreatePage: React.FC = () => {
         customer_name: customerName,
         customer_email: customerEmail,
         notes: notesToSend,
+        payment_method: paymentMethod,
       };
 
       if (localSummary?.promotion?.id) {
@@ -548,8 +558,33 @@ const OrderCreatePage: React.FC = () => {
       const created: any = body?.data || body;
       showSuccess('Tạo đơn hàng thành công');
       try { sessionStorage.removeItem('build_pc_checkout'); } catch { }
-      setCreatedOrder(created);
-      setSuccessDialogOpen(true);
+
+      // Nếu chọn VNPay → tạo URL thanh toán và redirect
+      if (paymentMethod === 'VNPAY' && created?.id) {
+        try {
+          const vnpayResp: any = await api.post(`/payments/vnpay/create/${created.id}`);
+          const vnpayBody = vnpayResp?.data || vnpayResp;
+          const paymentUrl = vnpayBody?.paymentUrl || vnpayBody?.data?.paymentUrl;
+          if (paymentUrl) {
+            // Redirect sang trang thanh toán VNPay (KHÔNG mở tab mới)
+            window.location.href = paymentUrl;
+            return;
+          } else {
+            showError('Không thể tạo link thanh toán VNPay. Vui lòng thử lại từ trang đơn hàng.');
+            setCreatedOrder(created);
+            setSuccessDialogOpen(true);
+          }
+        } catch (vnpayErr: any) {
+          console.error('OrderCreatePage: VNPay create payment URL failed', vnpayErr);
+          showError('Đơn hàng đã tạo nhưng không thể kết nối VNPay. Vui lòng thanh toán lại từ trang đơn hàng.');
+          setCreatedOrder(created);
+          setSuccessDialogOpen(true);
+        }
+      } else {
+        // COD / flow bình thường
+        setCreatedOrder(created);
+        setSuccessDialogOpen(true);
+      }
       shouldRefreshCartAfterOrder = !usingBuildPc;
     } catch (e) {
       console.error('OrderCreatePage: create order error', e);
@@ -816,6 +851,85 @@ const OrderCreatePage: React.FC = () => {
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
                   Các chương trình ưu đãi có thể thay đổi theo thời gian. Vui lòng kiểm tra điều kiện áp dụng trước khi gửi đơn.
                 </Typography>
+              </Paper>
+
+              {/* Phương thức thanh toán */}
+              <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
+                <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
+                  Phương thức thanh toán
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Chọn hình thức thanh toán thuận tiện nhất cho bạn.
+                </Typography>
+
+                <RadioGroup
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value as 'COD' | 'VNPAY')}
+                >
+                  <Paper
+                    variant="outlined"
+                    sx={{
+                      p: 2,
+                      mb: 1.5,
+                      borderRadius: 2,
+                      cursor: 'pointer',
+                      borderColor: paymentMethod === 'COD' ? 'primary.main' : 'divider',
+                      bgcolor: paymentMethod === 'COD' ? 'rgba(59, 130, 246, 0.08)' : 'transparent',
+                      transition: 'all 0.2s ease',
+                      '&:hover': { borderColor: 'primary.light' },
+                    }}
+                    onClick={() => setPaymentMethod('COD')}
+                  >
+                    <FormControlLabel
+                      value="COD"
+                      control={<Radio />}
+                      label={
+                        <Box sx={{ ml: 1 }}>
+                          <Stack direction="row" alignItems="center" spacing={1}>
+                            <LocalAtmIcon color={paymentMethod === 'COD' ? 'primary' : 'action'} />
+                            <Typography fontWeight={600}>Thanh toán khi nhận hàng (COD)</Typography>
+                          </Stack>
+                          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                            Thanh toán bằng tiền mặt khi nhân viên giao hàng đến tận nơi.
+                          </Typography>
+                        </Box>
+                      }
+                      sx={{ m: 0, width: '100%', alignItems: 'flex-start' }}
+                    />
+                  </Paper>
+
+                  <Paper
+                    variant="outlined"
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      cursor: 'pointer',
+                      borderColor: paymentMethod === 'VNPAY' ? 'primary.main' : 'divider',
+                      bgcolor: paymentMethod === 'VNPAY' ? 'rgba(59, 130, 246, 0.08)' : 'transparent',
+                      transition: 'all 0.2s ease',
+                      '&:hover': { borderColor: 'primary.light' },
+                    }}
+                    onClick={() => setPaymentMethod('VNPAY')}
+                  >
+                    <FormControlLabel
+                      value="VNPAY"
+                      control={<Radio />}
+                      label={
+                        <Box sx={{ ml: 1 }}>
+                          <Stack direction="row" alignItems="center" spacing={1}>
+                            <PaymentIcon color={paymentMethod === 'VNPAY' ? 'primary' : 'action'} />
+                            <Typography fontWeight={600}>Thanh toán qua VNPay</Typography>
+                            <Chip size="small" label="Sandbox / Test" color="primary" variant="outlined" />
+                          </Stack>
+                          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                            Quét mã VNPAY-QR, thẻ ATM nội địa hoặc thẻ quốc tế (Visa, Mastercard, JCB).
+                          </Typography>
+                        </Box>
+                      }
+                      sx={{ m: 0, width: '100%', alignItems: 'flex-start' }}
+                    />
+                  </Paper>
+                </RadioGroup>
               </Paper>
 
               <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>

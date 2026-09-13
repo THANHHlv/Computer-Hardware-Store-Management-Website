@@ -31,6 +31,9 @@ const OrderDetailPage = React.lazy(
 const BuildPcCheckoutPage = React.lazy(
   () => import("../pages/Order/BuildPcCheckoutPage")
 );
+const VNPayReturnPage = React.lazy(
+  () => import("../pages/Order/VNPayReturnPage")
+);
 const BuildPcPage = React.lazy(() => import("../pages/BuildPC/BuildPcPage"));
 const SupportPage = React.lazy(() => import("../pages/Support"));
 const WarrantyPolicyPage = React.lazy(
@@ -145,6 +148,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="cart" element={<CartPage />} />
           <Route path="order/create" element={<OrderCreatePage />} />
           <Route path="order/build-pc" element={<BuildPcCheckoutPage />} />
+          <Route path="order/vnpay-return" element={<VNPayReturnPage />} />
           <Route path="order/:id" element={<OrderDetailPage />} />
           <Route path="build-pc" element={<BuildPcPage />} />
           <Route path="support" element={<SupportPage />} />
