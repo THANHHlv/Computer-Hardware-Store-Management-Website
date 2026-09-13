@@ -1,7 +1,7 @@
 /**
  * 🛍️ PRODUCT CARD COMPONENT - Computer Shop E-commerce
- * Dark Gaming Theme & Micro-interactions
- * Tuân thủ ui-ux-pro-max design system MASTER.md
+ * International Clean & Bright Theme + Silky Ultra-Smooth Micro-interactions
+ * Optimized for high conversion, Apple/NZXT-grade aesthetic, and 60fps fluidity
  */
 
 import React, { useState } from 'react';
@@ -13,23 +13,23 @@ import {
   Chip,
   IconButton,
   Tooltip,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import CheckIcon from '@mui/icons-material/Check';
 import { motion, useReducedMotion } from 'framer-motion';
 
-// Types - chỉ sử dụng backend Product
+// Types
 import type { Product } from '../../../types/product.types';
 import { buildImageUrl } from '../../../utils/urlHelpers';
 import type { ProductCardProps } from './ProductCard.types';
 
-// Extended props to support onAddToCart
 export interface ExtendedProductCardProps extends ProductCardProps {
   onAddToCart?: (product: Product) => void;
 }
 
-// ===== HELPER FUNCTIONS =====
 const formatPrice = (price: number): string => {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
@@ -97,6 +97,8 @@ export const ProductCard: React.FC<ExtendedProductCardProps> = ({
   imageAspectRatio = '1/1',
   dimensions,
 }) => {
+  const theme = useTheme();
+  const isLight = theme.palette.mode === 'light';
   const shouldReduceMotion = useReducedMotion();
   const [addedBounce, setAddedBounce] = useState(false);
   const imageUrl = getImageUrl(product);
@@ -139,8 +141,8 @@ export const ProductCard: React.FC<ExtendedProductCardProps> = ({
   return (
     <Card
       component={shouldReduceMotion ? 'div' : motion.div}
-      whileHover={shouldReduceMotion ? undefined : { y: -6, scale: 1.02 }}
-      transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1.0] }}
+      whileHover={shouldReduceMotion ? undefined : { y: -6, scale: 1.015 }}
+      transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
       className={className}
       onClick={handleProductClick}
       sx={{
@@ -158,25 +160,29 @@ export const ProductCard: React.FC<ExtendedProductCardProps> = ({
         flexDirection: 'column',
         boxSizing: 'border-box',
         cursor: onProductClick ? 'pointer' : 'default',
-        borderRadius: 3,
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        backgroundColor: '#131B2E',
-        boxShadow: '0 8px 20px rgba(0, 0, 0, 0.4)',
+        borderRadius: 3.5,
+        border: `1px solid ${theme.palette.divider}`,
+        backgroundColor: theme.palette.background.paper,
+        boxShadow: isLight
+          ? '0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 6px 16px -4px rgba(15, 23, 42, 0.06)'
+          : '0 8px 24px rgba(0, 0, 0, 0.4)',
         position: 'relative',
         overflow: 'hidden',
         transition: 'border-color 220ms ease, box-shadow 220ms ease',
         '&:hover': {
-          borderColor: 'rgba(0, 240, 255, 0.3)',
-          boxShadow: '0 16px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.15)',
+          borderColor: alpha(theme.palette.primary.main, 0.4),
+          boxShadow: isLight
+            ? `0 18px 36px -4px rgba(15, 23, 42, 0.1), 0 0 0 1px ${alpha(theme.palette.primary.main, 0.25)}`
+            : `0 16px 36px rgba(0, 0, 0, 0.6), 0 0 20px ${alpha(theme.palette.primary.main, 0.2)}`,
           '& .product-card-img': {
-            transform: shouldReduceMotion ? 'none' : 'scale(1.06)',
+            transform: shouldReduceMotion ? 'none' : 'scale(1.05)',
           },
-          '& .quick-action-bar': {
+          '& .quick-action-button': {
             opacity: 1,
-            transform: 'translateY(0)',
+            transform: 'scale(1)',
           },
         },
-        opacity: product.is_active ? 1 : 0.6,
+        opacity: product.is_active ? 1 : 0.65,
         ...sx,
       }}
     >
@@ -190,11 +196,12 @@ export const ProductCard: React.FC<ExtendedProductCardProps> = ({
           maxHeight: imageHeights,
           aspectRatio: imageAspectRatio,
           overflow: 'hidden',
-          bgcolor: '#0F172A',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+          bgcolor: isLight ? '#F8FAFC' : '#0B0F19',
+          borderBottom: `1px solid ${theme.palette.divider}`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          p: 1.5,
         }}
       >
         <Box
@@ -207,8 +214,8 @@ export const ProductCard: React.FC<ExtendedProductCardProps> = ({
           sx={{
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
-            transition: 'transform 300ms ease',
+            objectFit: 'contain',
+            transition: 'transform 350ms cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         />
 
@@ -219,32 +226,38 @@ export const ProductCard: React.FC<ExtendedProductCardProps> = ({
           size="small"
           sx={{
             position: 'absolute',
-            top: 8,
-            right: 8,
-            fontSize: '0.7rem',
+            top: 10,
+            right: 10,
+            fontSize: '0.68rem',
             fontWeight: 700,
             backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
           }}
         />
 
         {/* Quick View Button */}
         {onQuickView && (
           <IconButton
+            className="quick-action-button"
             onClick={handleQuickView}
             aria-label={`Xem nhanh ${product.name}`}
             size="small"
             sx={{
               position: 'absolute',
-              top: 8,
-              left: 8,
-              backgroundColor: 'rgba(10, 14, 23, 0.75)',
-              backdropFilter: 'blur(6px)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              color: '#F8FAFC',
+              top: 10,
+              left: 10,
+              opacity: 0,
+              transform: 'scale(0.85)',
+              backgroundColor: isLight ? 'rgba(255, 255, 255, 0.9)' : 'rgba(17, 24, 39, 0.85)',
+              backdropFilter: 'blur(8px)',
+              border: `1px solid ${theme.palette.divider}`,
+              color: theme.palette.text.primary,
+              boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+              transition: 'all 200ms cubic-bezier(0.16, 1, 0.3, 1)',
               '&:hover': {
-                backgroundColor: '#00F0FF',
-                color: '#0A0E17',
+                backgroundColor: theme.palette.primary.main,
+                color: '#FFFFFF',
+                borderColor: theme.palette.primary.main,
               },
             }}
           >
@@ -260,9 +273,9 @@ export const ProductCard: React.FC<ExtendedProductCardProps> = ({
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          px: { xs: 2, md: 2.5 },
-          pt: 2,
-          pb: 2.5,
+          px: { xs: 2, md: 2.2 },
+          pt: 1.8,
+          pb: 2.2,
         }}
       >
         <Box>
@@ -271,11 +284,12 @@ export const ProductCard: React.FC<ExtendedProductCardProps> = ({
             variant="caption"
             sx={{
               textTransform: 'uppercase',
-              letterSpacing: 0.5,
+              letterSpacing: '0.04em',
               fontWeight: 700,
-              color: '#00F0FF',
+              color: 'primary.main',
               display: 'block',
               mb: 0.5,
+              fontSize: '0.72rem',
             }}
           >
             {product.category?.name || 'LINH KIỆN'}
@@ -287,20 +301,20 @@ export const ProductCard: React.FC<ExtendedProductCardProps> = ({
             component="h3"
             sx={{
               fontWeight: 600,
-              fontSize: '0.95rem',
-              lineHeight: 1.35,
+              fontSize: '0.92rem',
+              lineHeight: 1.4,
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden',
-              color: '#F8FAFC',
-              minHeight: { xs: 38, md: 42 },
+              color: 'text.primary',
+              minHeight: { xs: 36, md: 40 },
             }}
           >
             {product.name}
           </Typography>
 
-          {/* Key Specifications */}
+          {/* Key Specifications / Brand */}
           {product.specifications?.brand && (
             <Typography
               variant="caption"
@@ -309,6 +323,7 @@ export const ProductCard: React.FC<ExtendedProductCardProps> = ({
                 display: 'block',
                 mt: 0.5,
                 fontWeight: 500,
+                fontSize: '0.75rem',
               }}
             >
               Hãng: {product.specifications.brand}
@@ -317,14 +332,24 @@ export const ProductCard: React.FC<ExtendedProductCardProps> = ({
         </Box>
 
         {/* Price & Add to Cart Footer */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2, pt: 1, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mt: 2,
+            pt: 1.2,
+            borderTop: `1px solid ${theme.palette.divider}`,
+          }}
+        >
           <Typography
             variant="h6"
             className="tabular-nums font-mono-numbers"
             sx={{
               fontWeight: 700,
               fontSize: '1.15rem',
-              color: '#00F0FF',
+              color: theme.palette.primary.main,
+              letterSpacing: '-0.02em',
             }}
           >
             {formatPrice(product.price)}
@@ -339,13 +364,22 @@ export const ProductCard: React.FC<ExtendedProductCardProps> = ({
                 size="small"
                 aria-label={`Thêm ${product.name} vào giỏ`}
                 sx={{
-                  bgcolor: addedBounce ? '#10B981' : 'rgba(0, 240, 255, 0.12)',
-                  color: addedBounce ? '#0A0E17' : '#00F0FF',
-                  border: `1px solid ${addedBounce ? '#10B981' : 'rgba(0, 240, 255, 0.3)'}`,
+                  bgcolor: addedBounce 
+                    ? theme.palette.secondary.main 
+                    : alpha(theme.palette.primary.main, 0.08),
+                  color: addedBounce 
+                    ? '#FFFFFF' 
+                    : theme.palette.primary.main,
+                  border: `1px solid ${addedBounce ? theme.palette.secondary.main : alpha(theme.palette.primary.main, 0.25)}`,
+                  borderRadius: 2,
+                  p: 0.8,
+                  transition: 'all 200ms cubic-bezier(0.16, 1, 0.3, 1)',
                   '&:hover': {
-                    bgcolor: '#00F0FF',
-                    color: '#0A0E17',
-                    boxShadow: '0 0 12px rgba(0, 240, 255, 0.4)',
+                    bgcolor: theme.palette.primary.main,
+                    color: '#FFFFFF',
+                    borderColor: theme.palette.primary.main,
+                    boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.35)}`,
+                    transform: 'scale(1.06)',
                   },
                 }}
               >

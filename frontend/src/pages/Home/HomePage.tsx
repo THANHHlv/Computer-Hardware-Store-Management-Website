@@ -226,6 +226,7 @@ const SERVICE_FEATURES: ServiceFeature[] = [
 
 export const HomePage: React.FC = () => {
   const theme = useTheme();
+  const isLight = theme.palette.mode === 'light';
   // Fixed set of images for the Build PC hero carousel (hardcoded as requested)
   const FIXED_BUILD_PC_IMAGES = [
     'https://ducanhpc.com/wp-content/uploads/2021/05/Ducanhpc-case-may-tinh-1-scaled.jpg',
@@ -425,7 +426,9 @@ export const HomePage: React.FC = () => {
         sx={{
           position: 'absolute',
           inset: 0,
-          background: 'radial-gradient(circle at 10% 25%, rgba(0, 240, 255, 0.12) 0%, transparent 45%), radial-gradient(circle at 85% 20%, rgba(16, 185, 129, 0.12) 0%, transparent 45%), linear-gradient(180deg, rgba(10, 14, 23, 0.95) 0%, #0A0E17 100%)',
+          background: isLight
+            ? 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(37, 99, 235, 0.1) 0%, transparent 70%), radial-gradient(circle at 90% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 40%), linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%)'
+            : 'radial-gradient(circle at 10% 25%, rgba(56, 189, 248, 0.12) 0%, transparent 45%), radial-gradient(circle at 85% 20%, rgba(16, 185, 129, 0.12) 0%, transparent 45%), linear-gradient(180deg, rgba(11, 15, 25, 0.95) 0%, #0B0F19 100%)',
           zIndex: 0,
         }}
       />
@@ -433,16 +436,16 @@ export const HomePage: React.FC = () => {
         <Grid container spacing={{ xs: 6, md: 4 }} alignItems="center">
           <Grid size={{ xs: 12, md: 6 }}>
             <Chip
-              icon={<BoltIcon fontSize="small" sx={{ color: '#00F0FF !important' }} />}
+              icon={<BoltIcon fontSize="small" sx={{ color: `${theme.palette.primary.main} !important` }} />}
               label="THẾ HỆ LINH KIỆN MỚI 2026"
               sx={{
                 mb: 3,
                 px: 2,
                 py: 1,
                 fontWeight: 700,
-                color: '#00F0FF',
-                borderColor: 'rgba(0, 240, 255, 0.4)',
-                bgcolor: 'rgba(0, 240, 255, 0.08)',
+                color: theme.palette.primary.main,
+                borderColor: alpha(theme.palette.primary.main, 0.3),
+                bgcolor: alpha(theme.palette.primary.main, 0.08),
                 backdropFilter: 'blur(8px)',
                 border: '1px solid',
               }}
@@ -453,9 +456,12 @@ export const HomePage: React.FC = () => {
               gutterBottom
               sx={{
                 fontWeight: 800,
-                lineHeight: 1.1,
+                lineHeight: 1.15,
                 mb: 2,
-                background: 'linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 60%, #00F0FF 100%)',
+                letterSpacing: '-0.025em',
+                background: isLight
+                  ? 'linear-gradient(135deg, #0F172A 0%, #1E40AF 60%, #2563EB 100%)'
+                  : 'linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 60%, #38BDF8 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}
@@ -465,7 +471,7 @@ export const HomePage: React.FC = () => {
             <Typography
               variant="h6"
               paragraph
-              sx={{ color: '#94A3B8', maxWidth: 520, mb: 4, lineHeight: 1.6 }}
+              sx={{ color: 'text.secondary', maxWidth: 520, mb: 4, lineHeight: 1.6 }}
             >
               Khám phá kho linh kiện chính hãng với cấu hình tối ưu cho Gaming 4K, Designer, AI Rendering và Doanh nghiệp.
             </Typography>
@@ -476,18 +482,16 @@ export const HomePage: React.FC = () => {
             >
               <Button
                 variant="contained"
+                color="primary"
                 size="large"
                 onClick={() => handleCategoryClick(0)}
                 sx={{
                   px: 4,
                   py: 1.4,
                   fontWeight: 700,
-                  bgcolor: '#00F0FF',
-                  color: '#0A0E17',
-                  boxShadow: '0 0 20px rgba(0, 240, 255, 0.35)',
+                  boxShadow: `0 4px 18px ${alpha(theme.palette.primary.main, 0.35)}`,
                   '&:hover': {
-                    bgcolor: '#38BDF8',
-                    boxShadow: '0 0 25px rgba(0, 240, 255, 0.5)',
+                    boxShadow: `0 8px 25px ${alpha(theme.palette.primary.main, 0.45)}`,
                   },
                 }}
               >
@@ -495,6 +499,7 @@ export const HomePage: React.FC = () => {
               </Button>
               <Button
                 variant="outlined"
+                color="secondary"
                 size="large"
                 onClick={() => navigate('/build-pc')}
                 sx={{
@@ -502,12 +507,9 @@ export const HomePage: React.FC = () => {
                   py: 1.35,
                   fontWeight: 700,
                   borderWidth: 2,
-                  borderColor: 'rgba(16, 185, 129, 0.5)',
-                  color: '#10B981',
                   '&:hover': {
-                    borderColor: '#10B981',
-                    bgcolor: 'rgba(16, 185, 129, 0.12)',
-                    boxShadow: '0 0 20px rgba(16, 185, 129, 0.25)',
+                    borderWidth: 2,
+                    bgcolor: alpha(theme.palette.secondary.main, 0.08),
                   },
                 }}
               >
@@ -518,7 +520,7 @@ export const HomePage: React.FC = () => {
               {HERO_METRICS.map((metric) => (
                 <Grid size={{ xs: 12, sm: 4 }} key={metric.label}>
                   <Box sx={{ textAlign: 'left' }}>
-                    <Typography variant="h5" className="tabular-nums font-mono-numbers" sx={{ fontWeight: 800, color: '#00F0FF' }}>
+                    <Typography variant="h5" className="tabular-nums font-mono-numbers" sx={{ fontWeight: 800, color: 'primary.main' }}>
                       {metric.value}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
@@ -537,10 +539,14 @@ export const HomePage: React.FC = () => {
               sx={{
                 p: { xs: 1.5, md: 2 },
                 borderRadius: 4,
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                bgcolor: '#131B2E',
-                background: 'linear-gradient(135deg, rgba(19, 27, 46, 0.9) 0%, rgba(10, 14, 23, 0.95) 100%)',
-                boxShadow: '0 24px 60px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 240, 255, 0.08)',
+                border: `1px solid ${theme.palette.divider}`,
+                bgcolor: theme.palette.background.paper,
+                background: isLight
+                  ? 'linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%)'
+                  : 'linear-gradient(135deg, rgba(19, 27, 46, 0.9) 0%, rgba(10, 14, 23, 0.95) 100%)',
+                boxShadow: isLight
+                  ? '0 20px 45px -10px rgba(15, 23, 42, 0.1), 0 0 0 1px rgba(15, 23, 42, 0.04)'
+                  : '0 24px 60px rgba(0, 0, 0, 0.6), 0 0 25px rgba(56, 189, 248, 0.08)',
                 position: 'relative',
               }}
             >
@@ -554,7 +560,7 @@ export const HomePage: React.FC = () => {
                   </Box>
 
                   {/* Mode Switcher */}
-                  <Stack direction="row" spacing={0.5} sx={{ bgcolor: 'rgba(255,255,255,0.05)', p: 0.5, borderRadius: 2 }}>
+                  <Stack direction="row" spacing={0.5} sx={{ bgcolor: isLight ? 'rgba(15, 23, 42, 0.04)' : 'rgba(255,255,255,0.05)', p: 0.5, borderRadius: 2 }}>
                     <Button
                       size="small"
                       startIcon={<ViewInArIcon fontSize="small" />}
@@ -565,10 +571,10 @@ export const HomePage: React.FC = () => {
                         py: 0.4,
                         px: 1.2,
                         borderRadius: 1.5,
-                        bgcolor: heroVisualMode === '3d' ? '#00F0FF' : 'transparent',
-                        color: heroVisualMode === '3d' ? '#0A0E17' : '#94A3B8',
+                        bgcolor: heroVisualMode === '3d' ? theme.palette.primary.main : 'transparent',
+                        color: heroVisualMode === '3d' ? '#FFFFFF' : 'text.secondary',
                         '&:hover': {
-                          bgcolor: heroVisualMode === '3d' ? '#00F0FF' : 'rgba(255,255,255,0.1)',
+                          bgcolor: heroVisualMode === '3d' ? theme.palette.primary.main : alpha(theme.palette.primary.main, 0.1),
                         },
                       }}
                     >
@@ -584,10 +590,10 @@ export const HomePage: React.FC = () => {
                         py: 0.4,
                         px: 1.2,
                         borderRadius: 1.5,
-                        bgcolor: heroVisualMode === 'gallery' ? '#00F0FF' : 'transparent',
-                        color: heroVisualMode === 'gallery' ? '#0A0E17' : '#94A3B8',
+                        bgcolor: heroVisualMode === 'gallery' ? theme.palette.primary.main : 'transparent',
+                        color: heroVisualMode === 'gallery' ? '#FFFFFF' : 'text.secondary',
                         '&:hover': {
-                          bgcolor: heroVisualMode === 'gallery' ? '#00F0FF' : 'rgba(255,255,255,0.1)',
+                          bgcolor: heroVisualMode === 'gallery' ? theme.palette.primary.main : alpha(theme.palette.primary.main, 0.1),
                         },
                       }}
                     >
@@ -624,7 +630,7 @@ export const HomePage: React.FC = () => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                bgcolor: '#000',
+                                bgcolor: isLight ? '#F8FAFC' : '#000',
                                 borderRadius: 3,
                               }}
                             >
@@ -657,7 +663,7 @@ export const HomePage: React.FC = () => {
                           sx={{
                             width: idx === heroImageIndex ? 26 : 10,
                             height: 6,
-                            bgcolor: idx === heroImageIndex ? '#00F0FF' : 'rgba(255,255,255,0.4)',
+                            bgcolor: idx === heroImageIndex ? theme.palette.primary.main : (isLight ? 'rgba(15,23,42,0.2)' : 'rgba(255,255,255,0.4)'),
                             borderRadius: 999,
                             transition: 'all 220ms ease',
                             cursor: 'pointer',

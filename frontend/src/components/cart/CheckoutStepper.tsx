@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Stack, Typography, useTheme, useMediaQuery } from '@mui/material';
+import { Box, Stack, Typography, useTheme, useMediaQuery, alpha } from '@mui/material';
 import { ShoppingBag, Truck, CreditCard, CheckCircle2 } from 'lucide-react';
 import { motion, useReducedMotion } from 'framer-motion';
 
@@ -16,6 +16,7 @@ const STEPS = [
 
 export const CheckoutStepper: React.FC<CheckoutStepperProps> = ({ activeStep }) => {
   const theme = useTheme();
+  const isLight = theme.palette.mode === 'light';
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const shouldReduceMotion = useReducedMotion();
 
@@ -26,10 +27,12 @@ export const CheckoutStepper: React.FC<CheckoutStepperProps> = ({ activeStep }) 
         py: { xs: 2.5, md: 3 },
         px: { xs: 2, md: 4 },
         mb: { xs: 4, md: 5 },
-        bgcolor: '#131B2E',
-        borderRadius: 3,
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+        bgcolor: theme.palette.background.paper,
+        borderRadius: 3.5,
+        border: `1px solid ${theme.palette.divider}`,
+        boxShadow: isLight
+          ? '0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 4px 16px -2px rgba(15, 23, 42, 0.06)'
+          : '0 8px 24px rgba(0, 0, 0, 0.4)',
       }}
     >
       <Stack
@@ -67,20 +70,20 @@ export const CheckoutStepper: React.FC<CheckoutStepperProps> = ({ activeStep }) 
                     alignItems: 'center',
                     justifyContent: 'center',
                     bgcolor: isDone
-                      ? '#10B981'
+                      ? theme.palette.secondary.main
                       : isCurrent
-                      ? '#00F0FF'
-                      : '#1E293B',
-                    color: isDone || isCurrent ? '#0A0E17' : '#64748B',
+                      ? theme.palette.primary.main
+                      : isLight ? 'rgba(15, 23, 42, 0.06)' : '#1E293B',
+                    color: isDone || isCurrent ? '#FFFFFF' : 'text.secondary',
                     border: isCurrent
-                      ? '2px solid #00F0FF'
+                      ? `2px solid ${theme.palette.primary.main}`
                       : isDone
-                      ? '2px solid #10B981'
-                      : '2px solid rgba(255, 255, 255, 0.1)',
+                      ? `2px solid ${theme.palette.secondary.main}`
+                      : `2px solid ${theme.palette.divider}`,
                     boxShadow: isCurrent
-                      ? '0 0 16px rgba(0, 240, 255, 0.45)'
+                      ? `0 0 16px ${alpha(theme.palette.primary.main, 0.4)}`
                       : isDone
-                      ? '0 0 12px rgba(16, 185, 129, 0.35)'
+                      ? `0 0 12px ${alpha(theme.palette.secondary.main, 0.35)}`
                       : 'none',
                     transition: 'all 250ms ease',
                   }}
@@ -94,10 +97,10 @@ export const CheckoutStepper: React.FC<CheckoutStepperProps> = ({ activeStep }) 
                     sx={{
                       fontWeight: isCurrent ? 700 : isDone ? 600 : 500,
                       color: isCurrent
-                        ? '#00F0FF'
+                        ? theme.palette.primary.main
                         : isDone
-                        ? '#F8FAFC'
-                        : '#64748B',
+                        ? 'text.primary'
+                        : 'text.secondary',
                       fontSize: '0.8rem',
                       textAlign: 'center',
                       whiteSpace: 'nowrap',
@@ -113,13 +116,14 @@ export const CheckoutStepper: React.FC<CheckoutStepperProps> = ({ activeStep }) 
                 <Box
                   sx={{
                     flex: 1,
-                    height: 2,
-                    mx: { xs: 1, md: 2 },
-                    bgcolor: idx < activeStep ? '#10B981' : 'rgba(255, 255, 255, 0.08)',
-                    boxShadow: idx < activeStep ? '0 0 8px rgba(16, 185, 129, 0.4)' : 'none',
+                    height: 3,
+                    mx: { xs: 0.5, md: 2 },
+                    bgcolor: isDone
+                      ? theme.palette.secondary.main
+                      : isLight ? 'rgba(15, 23, 42, 0.1)' : 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: 2,
+                    zIndex: 1,
                     transition: 'background-color 300ms ease',
-                    position: 'relative',
-                    top: isMobile ? 0 : -10,
                   }}
                 />
               )}
@@ -130,5 +134,3 @@ export const CheckoutStepper: React.FC<CheckoutStepperProps> = ({ activeStep }) 
     </Box>
   );
 };
-
-export default CheckoutStepper;

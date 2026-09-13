@@ -7,6 +7,7 @@ import {
   IconButton,
   Divider,
   useTheme,
+  alpha,
 } from '@mui/material';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import YouTubeIcon from '@mui/icons-material/YouTube';
@@ -23,6 +24,7 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
   const theme = useTheme();
+  const isLight = theme.palette.mode === 'light';
   const currentYear = new Date().getFullYear();
 
   if (variant === 'minimal') {
@@ -30,8 +32,8 @@ export const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
       <Box
         component="footer"
         sx={{
-          bgcolor: theme.palette.grey[100],
-          py: 2,
+          bgcolor: isLight ? '#F1F5F9' : '#0B0F19',
+          py: 3,
           mt: 'auto',
           borderTop: `1px solid ${theme.palette.divider}`,
         }}
@@ -49,14 +51,14 @@ export const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
             <Typography variant="body2" color="text.secondary">
               © {currentYear} Computer Shop. Bảo lưu mọi quyền.
             </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Link href="/privacy" color="text.secondary" variant="body2">
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Link href="/privacy" color="text.secondary" variant="body2" underline="hover">
                 Chính sách bảo mật
               </Link>
               <Typography variant="body2" color="text.secondary">
-                |
+                •
               </Typography>
-              <Link href="/terms" color="text.secondary" variant="body2">
+              <Link href="/terms" color="text.secondary" variant="body2" underline="hover">
                 Điều khoản sử dụng
               </Link>
             </Box>
@@ -70,10 +72,12 @@ export const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
     <Box
       component="footer"
       sx={{
-        bgcolor: theme.palette.grey[900],
-        color: theme.palette.common.white,
-        py: 6,
+        bgcolor: isLight ? '#F8FAFC' : '#0B0F19',
+        color: theme.palette.text.primary,
+        py: { xs: 6, md: 8 },
         mt: 'auto',
+        borderTop: `1px solid ${theme.palette.divider}`,
+        transition: 'background-color 250ms ease, color 250ms ease',
       }}
     >
       <Container maxWidth="lg">
@@ -83,150 +87,183 @@ export const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
             gridTemplateColumns: {
               xs: '1fr',
               sm: 'repeat(2, 1fr)',
-              md: 'repeat(4, 1fr)',
+              md: '1.2fr 1fr 1fr 1.2fr',
             },
-            gap: 4,
+            gap: { xs: 4, md: 5 },
           }}
         >
           {/* Company Info */}
           <Box>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+            <Typography
+              variant="h6"
+              gutterBottom
+              sx={{
+                fontWeight: 800,
+                letterSpacing: '-0.01em',
+                background: isLight
+                  ? 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)'
+                  : 'linear-gradient(135deg, #FFFFFF 0%, #38BDF8 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                display: 'inline-block',
+                mb: 1.5,
+              }}
+            >
               Computer Shop
             </Typography>
-            <Typography variant="body2" sx={{ mb: 2, color: 'grey.300' }}>
-              Chuyên cung cấp linh kiện máy tính chính hãng với giá tốt nhất thị trường.
-              Cam kết chất lượng và dịch vụ khách hàng tốt nhất.
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
+              Hệ thống bán lẻ linh kiện máy tính và giải pháp công nghệ cao cấp chính hãng. 
+              Tư vấn cấu hình tối ưu gaming, đồ họa, AI & máy trạm chuyên nghiệp.
             </Typography>
             
             {/* Social Media */}
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <IconButton
-                size="small"
-                sx={{ color: 'grey.300', '&:hover': { color: '#1877f2' } }}
-                aria-label="Facebook"
-              >
-                <FacebookIcon />
-              </IconButton>
-              <IconButton
-                size="small"
-                sx={{ color: 'grey.300', '&:hover': { color: '#ff0000' } }}
-                aria-label="YouTube"
-              >
-                <YouTubeIcon />
-              </IconButton>
-              <IconButton
-                size="small"
-                sx={{ color: 'grey.300', '&:hover': { color: '#E4405F' } }}
-                aria-label="Instagram"
-              >
-                <InstagramIcon />
-              </IconButton>
-              <IconButton
-                size="small"
-                sx={{ color: 'grey.300', '&:hover': { color: '#1DA1F2' } }}
-                aria-label="Twitter"
-              >
-                <TwitterIcon />
-              </IconButton>
+              {[
+                { icon: FacebookIcon, hoverColor: '#1877F2', label: 'Facebook' },
+                { icon: YouTubeIcon, hoverColor: '#FF0000', label: 'YouTube' },
+                { icon: InstagramIcon, hoverColor: '#E4405F', label: 'Instagram' },
+                { icon: TwitterIcon, hoverColor: '#1DA1F2', label: 'Twitter' },
+              ].map(({ icon: IconComp, hoverColor, label }) => (
+                <IconButton
+                  key={label}
+                  size="small"
+                  aria-label={label}
+                  sx={{
+                    color: 'text.secondary',
+                    bgcolor: isLight ? 'rgba(15, 23, 42, 0.04)' : 'rgba(255, 255, 255, 0.06)',
+                    border: `1px solid ${theme.palette.divider}`,
+                    borderRadius: 2,
+                    p: 1,
+                    transition: 'all 200ms ease',
+                    '&:hover': {
+                      color: hoverColor,
+                      bgcolor: alpha(hoverColor, 0.1),
+                      borderColor: alpha(hoverColor, 0.3),
+                      transform: 'translateY(-2px)',
+                    },
+                  }}
+                >
+                  <IconComp fontSize="small" />
+                </IconButton>
+              ))}
             </Box>
           </Box>
 
           {/* Product Categories */}
           <Box>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Danh mục sản phẩm
+            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 700, color: 'text.primary', mb: 2 }}>
+              Danh mục linh kiện
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Link href="/products/cpu" color="grey.300" variant="body2" underline="hover">
-                CPU - Bộ vi xử lý
-              </Link>
-              <Link href="/products/vga" color="grey.300" variant="body2" underline="hover">
-                VGA - Card đồ họa
-              </Link>
-              <Link href="/products/ram" color="grey.300" variant="body2" underline="hover">
-                RAM - Bộ nhớ
-              </Link>
-              <Link href="/products/mainboard" color="grey.300" variant="body2" underline="hover">
-                Mainboard - Bo mạch chủ
-              </Link>
-              <Link href="/products/psu" color="grey.300" variant="body2" underline="hover">
-                PSU - Nguồn máy tính
-              </Link>
-              <Link href="/products/storage" color="grey.300" variant="body2" underline="hover">
-                SSD/HDD - Ổ cứng
-              </Link>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.2 }}>
+              {[
+                { label: 'CPU - Bộ vi xử lý', href: '/products?category=1' },
+                { label: 'VGA - Card màn hình', href: '/products?category=2' },
+                { label: 'RAM - Bộ nhớ trong', href: '/products?category=3' },
+                { label: 'Mainboard - Bo mạch chủ', href: '/products?category=4' },
+                { label: 'SSD/HDD - Ổ cứng lưu trữ', href: '/products?category=5' },
+                { label: 'PSU - Nguồn máy tính', href: '/products?category=6' },
+              ].map(({ label, href }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  variant="body2"
+                  underline="none"
+                  sx={{
+                    color: 'text.secondary',
+                    transition: 'color 180ms ease, transform 180ms ease',
+                    '&:hover': {
+                      color: 'primary.main',
+                      transform: 'translateX(3px)',
+                    },
+                  }}
+                >
+                  {label}
+                </Link>
+              ))}
             </Box>
           </Box>
 
           {/* Customer Service */}
           <Box>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 700, color: 'text.primary', mb: 2 }}>
               Hỗ trợ khách hàng
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Link href="/support" color="grey.300" variant="body2" underline="hover">
-                Trung tâm hỗ trợ
-              </Link>
-              <Link href="/warranty" color="grey.300" variant="body2" underline="hover">
-                Chính sách bảo hành
-              </Link>
-              <Link href="/return-policy" color="grey.300" variant="body2" underline="hover">
-                Chính sách đổi trả
-              </Link>
-              <Link href="/shipping" color="grey.300" variant="body2" underline="hover">
-                Chính sách vận chuyển
-              </Link>
-              <Link href="/payment" color="grey.300" variant="body2" underline="hover">
-                Hướng dẫn thanh toán
-              </Link>
-              <Link href="/build-pc-guide" color="grey.300" variant="body2" underline="hover">
-                Hướng dẫn Build PC
-              </Link>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.2 }}>
+              {[
+                { label: 'Trung tâm hỗ trợ', href: '/support' },
+                { label: 'Chính sách bảo hành', href: '/warranty' },
+                { label: 'Chính sách đổi trả', href: '/return-policy' },
+                { label: 'Chính sách vận chuyển', href: '/shipping' },
+                { label: 'Hướng dẫn thanh toán', href: '/payment' },
+                { label: 'Hướng dẫn Build PC', href: '/build-pc-guide' },
+              ].map(({ label, href }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  variant="body2"
+                  underline="none"
+                  sx={{
+                    color: 'text.secondary',
+                    transition: 'color 180ms ease, transform 180ms ease',
+                    '&:hover': {
+                      color: 'primary.main',
+                      transform: 'translateX(3px)',
+                    },
+                  }}
+                >
+                  {label}
+                </Link>
+              ))}
             </Box>
           </Box>
 
           {/* Contact Info */}
           <Box>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 700, color: 'text.primary', mb: 2 }}>
               Thông tin liên hệ
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <LocationOnIcon sx={{ fontSize: 20, color: 'grey.400' }} />
-                <Typography variant="body2" color="grey.300">
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.8 }}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.2 }}>
+                <LocationOnIcon sx={{ fontSize: 20, color: 'primary.main', mt: 0.2 }} />
+                <Typography variant="body2" color="text.secondary">
                   96A Đ. Trần Phú, P. Mộ Lao, Hà Đông, Hà Nội
                 </Typography>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <PhoneIcon sx={{ fontSize: 20, color: 'grey.400' }} />
-                <Typography variant="body2" color="grey.300">
-                  Hotline: 1900-1234
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
+                <PhoneIcon sx={{ fontSize: 20, color: 'primary.main' }} />
+                <Typography variant="body2" color="text.secondary">
+                  Hotline: <strong>1900-1234</strong> (Miễn phí)
                 </Typography>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <EmailIcon sx={{ fontSize: 20, color: 'grey.400' }} />
-                <Typography variant="body2" color="grey.300">
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
+                <EmailIcon sx={{ fontSize: 20, color: 'primary.main' }} />
+                <Typography variant="body2" color="text.secondary">
                   support@computershop.com
                 </Typography>
               </Box>
               
               {/* Working Hours */}
-              <Box sx={{ mt: 1 }}>
-                <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'grey.300' }}>
-                  Giờ làm việc:
+              <Box
+                sx={{
+                  mt: 0.5,
+                  p: 1.8,
+                  borderRadius: 2.5,
+                  bgcolor: isLight ? 'rgba(15, 23, 42, 0.03)' : 'rgba(255, 255, 255, 0.04)',
+                  border: `1px solid ${theme.palette.divider}`,
+                }}
+              >
+                <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary', mb: 0.5 }}>
+                  Thời gian phục vụ:
                 </Typography>
-                <Typography variant="body2" color="grey.400">
-                  T2 - T6: 8:00 - 20:00
-                </Typography>
-                <Typography variant="body2" color="grey.400">
-                  T7 - CN: 9:00 - 18:00
+                <Typography variant="caption" color="text.secondary" display="block">
+                  T2 - T6: 8:00 - 20:00 • T7 - CN: 9:00 - 18:00
                 </Typography>
               </Box>
             </Box>
           </Box>
         </Box>
 
-        <Divider sx={{ my: 4, borderColor: 'grey.700' }} />
+        <Divider sx={{ my: 4, borderColor: theme.palette.divider }} />
 
         {/* Bottom Bar */}
         <Box
@@ -238,22 +275,22 @@ export const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
             gap: 2,
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <CopyrightIcon sx={{ fontSize: 16 }} />
-            <Typography variant="body2" color="grey.300">
-              {currentYear} Computer Shop. Bảo lưu mọi quyền.
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
+            <CopyrightIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+            <Typography variant="body2" color="text.secondary">
+              {currentYear} Computer Shop. Chuẩn thương mại điện tử quốc tế.
             </Typography>
           </Box>
           
           <Box sx={{ display: 'flex', gap: 3 }}>
-            <Link href="/privacy" color="grey.300" variant="body2" underline="hover">
+            <Link href="/privacy" color="text.secondary" variant="body2" underline="hover">
               Chính sách bảo mật
             </Link>
-            <Link href="/terms" color="grey.300" variant="body2" underline="hover">
-              Điều khoản sử dụng
+            <Link href="/terms" color="text.secondary" variant="body2" underline="hover">
+              Điều khoản dịch vụ
             </Link>
-            <Link href="/cookies" color="grey.300" variant="body2" underline="hover">
-              Chính sách Cookie
+            <Link href="/cookies" color="text.secondary" variant="body2" underline="hover">
+              Cookie & Bảo mật
             </Link>
           </Box>
         </Box>

@@ -1,8 +1,4 @@
 import React, { useEffect } from 'react';
-import { 
-  ThemeProvider,
-  CssBaseline 
-} from '@mui/material';
 import { BrowserRouter } from 'react-router-dom';
 
 // Redux
@@ -11,7 +7,7 @@ import { initializeAuth } from './store/slices/authSlice';
 import { initializeCart } from './store/slices/cartSlice';
 
 // Theme
-import { shopTheme } from './theme';
+import { ThemeModeProvider } from './theme/ThemeContext';
 
 // Routes
 import { AppRoutes } from './routes/AppRoutes';
@@ -22,15 +18,7 @@ import ScrollToTop from './components/common/ScrollToTop';
 
 /**
  * 🏪 MAIN APP COMPONENT - Computer Shop E-commerce
- * 
- * Production-ready app với:
- * - Professional theme system
- * - Routing với lazy loading  
- * - Redux state management
- * - Error boundary protection
- * - Layout system integration
- * 
- * Tuân thủ SYSTEM_DESIGN.md specification
+ * International Clean & Bright Theme with Smooth Animations & Mode Switching
  */
 const App: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -42,15 +30,14 @@ const App: React.FC = () => {
   }, [dispatch]);
 
   return (
-    <ThemeProvider theme={shopTheme}>
-      <CssBaseline />
+    <ThemeModeProvider>
       <GlobalErrorBoundary>
         <BrowserRouter>
           <ScrollToTop />
           <AppRoutes />
         </BrowserRouter>
       </GlobalErrorBoundary>
-    </ThemeProvider>
+    </ThemeModeProvider>
   );
 };
 

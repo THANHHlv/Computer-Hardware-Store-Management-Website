@@ -24,6 +24,7 @@ import {
   Container,
   alpha,
   useScrollTrigger,
+  Tooltip,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
@@ -32,6 +33,8 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import CloseIcon from '@mui/icons-material/Close';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { logoutUser } from '../../store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
@@ -39,6 +42,7 @@ import { SearchField } from '../common/SearchField';
 import { useCart } from '../../hooks/useCart';
 import { categoryService } from '../../services/category.service';
 import type { CategoryTree } from '../../services/category.service';
+import { useThemeMode } from '../../theme/ThemeContext';
 
 // ========= HẰNG SỐ / TIỆN ÍCH NGOÀI COMPONENT =========
 const CACHE_KEY = 'category_tree_v1';
@@ -109,6 +113,7 @@ interface AppBarProps {
 
 export const AppBar: React.FC<AppBarProps> = ({ onMenuToggle, showMenuButton = false }) => {
   const theme = useTheme();
+  const { mode, toggleTheme } = useThemeMode();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isScrolled = useScrollTrigger({ disableHysteresis: true, threshold: 8 });
   const navigate = useNavigate();
@@ -417,14 +422,19 @@ export const AppBar: React.FC<AppBarProps> = ({ onMenuToggle, showMenuButton = f
   }, [closeMobileNav, user?.role, navigate]);
 
   const appBarSurface = useMemo(() => {
-    const baseGradient = `linear-gradient(135deg, ${alpha(theme.palette.primary.main, isScrolled ? 0.92 : 0.7)}, ${alpha(theme.palette.primary.dark, isScrolled ? 0.92 : 0.7)})`;
+    const isLight = theme.palette.mode === 'light';
     return {
-      backgroundImage: baseGradient,
-      color: theme.palette.common.white,
-      backdropFilter: isScrolled ? 'none' : 'blur(14px)',
-      borderBottom: `1px solid ${alpha(theme.palette.common.white, isScrolled ? 0.08 : 0.15)}`,
-      boxShadow: isScrolled ? theme.shadows[4] : 'none',
-      transition: 'all 0.25s ease-in-out',
+      backgroundColor: isLight 
+        ? alpha('#FFFFFF', isScrolled ? 0.94 : 0.85)
+        : alpha('#0B0F19', isScrolled ? 0.94 : 0.82),
+      color: theme.palette.text.primary,
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      borderBottom: `1px solid ${isLight ? 'rgba(15, 23, 42, 0.08)' : 'rgba(255, 255, 255, 0.08)'}`,
+      boxShadow: isScrolled 
+        ? (isLight ? '0 4px 20px -2px rgba(15, 23, 42, 0.06)' : '0 4px 20px rgba(0, 0, 0, 0.5)')
+        : 'none',
+      transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
     };
   }, [isScrolled, theme]);
 
@@ -535,7 +545,16 @@ export const AppBar: React.FC<AppBarProps> = ({ onMenuToggle, showMenuButton = f
             fontWeight: 800,
             letterSpacing: 0.5,
             textTransform: 'uppercase',
-            '&:hover': { opacity: 0.85 },
+            background: theme.palette.mode === 'light'
+              ? 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 50%, #0284C7 100%)'
+              : 'linear-gradient(135deg, #FFFFFF 0%, #38BDF8 60%, #00F0FF 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            '&:hover': { opacity: 0.88 },
+            transition: 'opacity 0.2s ease',
           }}
         >
           Computer Shop
@@ -705,24 +724,24 @@ export const AppBar: React.FC<AppBarProps> = ({ onMenuToggle, showMenuButton = f
             <Box
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  bgcolor: alpha(theme.palette.common.white, 0.12),
+                  bgcolor: theme.palette.mode === 'light' ? 'rgba(15, 23, 42, 0.04)' : 'rgba(255, 255, 255, 0.08)',
                   borderRadius: 3,
-                  transition: 'all 0.3s ease',
-                  '& fieldset': { borderColor: alpha(theme.palette.common.white, 0.18) },
-                  '&:hover fieldset': { borderColor: alpha(theme.palette.common.white, 0.35) },
-                  '&.Mui-focused fieldset': { borderColor: alpha(theme.palette.common.white, 0.75) },
+                  transition: 'all 0.25s ease',
+                  '& fieldset': { borderColor: theme.palette.divider },
+                  '&:hover fieldset': { borderColor: theme.palette.primary.light },
+                  '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },
                   '& .MuiSvgIcon-root': {
-                    color: alpha(theme.palette.common.white, 0.85),
+                    color: theme.palette.text.secondary,
                   },
                 },
                 '& .MuiOutlinedInput-input': {
-                  color: 'white',
-                  '&::placeholder': { color: 'rgba(255, 255, 255, 0.7)', opacity: 1 },
+                  color: theme.palette.text.primary,
+                  '&::placeholder': { color: theme.palette.text.secondary, opacity: 0.8 },
                 },
               }}
             >
               <SearchField
-                placeholder="Tìm kiếm sản phẩm..."
+                placeholder="Tìm kiếm CPU, VGA, RAM, Laptop..."
                 onSearch={handleSearch}
                 autoSearch={false}
                 size="small"
@@ -738,6 +757,33 @@ export const AppBar: React.FC<AppBarProps> = ({ onMenuToggle, showMenuButton = f
           </IconButton>
         )}
 
+        {/* Nút chuyển đổi giao diện Sáng / Tối */}
+        <Tooltip title={mode === 'light' ? 'Chuyển sang giao diện Tối' : 'Chuyển sang giao diện Sáng'}>
+          <IconButton
+            onClick={toggleTheme}
+            aria-label="chuyển đổi giao diện sáng tối"
+            sx={{
+              mr: 1,
+              color: theme.palette.text.primary,
+              bgcolor: theme.palette.mode === 'light' ? 'rgba(15, 23, 42, 0.04)' : 'rgba(255, 255, 255, 0.08)',
+              border: `1px solid ${theme.palette.divider}`,
+              borderRadius: 2.5,
+              transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+              '&:hover': {
+                transform: 'rotate(20deg) scale(1.08)',
+                bgcolor: alpha(theme.palette.primary.main, 0.1),
+                color: theme.palette.primary.main,
+              },
+            }}
+          >
+            {mode === 'light' ? (
+              <DarkModeIcon fontSize="small" sx={{ color: '#4F46E5' }} />
+            ) : (
+              <LightModeIcon fontSize="small" sx={{ color: '#FBBF24' }} />
+            )}
+          </IconButton>
+        </Tooltip>
+
         {/* Giỏ hàng */}
         <IconButton
           color="inherit"
@@ -747,23 +793,23 @@ export const AppBar: React.FC<AppBarProps> = ({ onMenuToggle, showMenuButton = f
             mr: 1,
             animation: isCartShaking ? `${shakeAnimation} 0.6s ease-in-out` : 'none',
             transition: 'all 0.2s ease-in-out',
-            '&:hover': { transform: 'scale(1.1)' },
+            '&:hover': { transform: 'scale(1.08)' },
           }}
         >
           <Badge
             badgeContent={cartItemCount > 0 ? cartItemCount : null}
-            color="error"
+            color="secondary"
             sx={{
               '& .MuiBadge-badge': {
-                backgroundColor: '#ff4444',
-                color: 'white',
-                fontWeight: 600,
-                fontSize: '0.75rem',
-                minWidth: '20px',
-                height: '20px',
-                borderRadius: '10px',
-                border: '2px solid white',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                backgroundColor: theme.palette.secondary.main,
+                color: '#FFFFFF',
+                fontWeight: 700,
+                fontSize: '0.72rem',
+                minWidth: '18px',
+                height: '18px',
+                borderRadius: '9px',
+                border: `2px solid ${theme.palette.background.paper}`,
+                boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
                 animation:
                   cartItemCount > prevCartCount.current ? 'pulse 0.3s ease-in-out' : 'none',
               },
@@ -804,26 +850,32 @@ export const AppBar: React.FC<AppBarProps> = ({ onMenuToggle, showMenuButton = f
               <AccountCircleIcon />
             </IconButton>
           ) : (
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
               <Button
                 color="inherit"
                 onClick={() => navigate('/login')}
                 size="small"
-                sx={{ fontWeight: 600 }}
+                sx={{
+                  fontWeight: 600,
+                  borderRadius: 2,
+                  px: 1.8,
+                  color: theme.palette.text.primary,
+                }}
               >
                 Đăng nhập
               </Button>
               <Button
-                color="inherit"
-                variant="outlined"
+                variant="contained"
+                color="primary"
                 onClick={() => navigate('/register')}
                 size="small"
                 sx={{
-                  borderColor: alpha(theme.palette.common.white, 0.55),
                   fontWeight: 600,
+                  borderRadius: 2,
+                  px: 2,
+                  boxShadow: 'none',
                   '&:hover': {
-                    borderColor: alpha(theme.palette.common.white, 0.85),
-                    bgcolor: alpha(theme.palette.common.white, 0.16),
+                    boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.35)}`,
                   },
                 }}
               >
