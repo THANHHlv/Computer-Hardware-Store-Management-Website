@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Card, CardContent, Typography, Stack, Button } from '@mui/material';
+import { Box, Card, CardContent, Typography, Stack, Button, useTheme } from '@mui/material';
 import { TrendingUp, DollarSign, ShoppingCart } from 'lucide-react';
 import { useReducedMotion } from 'framer-motion';
 
@@ -14,13 +14,15 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
   monthlyOrdersTrend = [35, 52, 64, 58, 76, 94],
   months = ['T4', 'T5', 'T6', 'T7', 'T8', 'T9'],
 }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const shouldReduceMotion = useReducedMotion();
   const [activeMetric, setActiveMetric] = useState<'revenue' | 'orders'>('revenue');
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const data = activeMetric === 'revenue' ? monthlyRevenueTrend : monthlyOrdersTrend;
   const isRevenue = activeMetric === 'revenue';
-  const strokeColor = isRevenue ? '#00F0FF' : '#10B981';
+  const strokeColor = isRevenue ? theme.palette.primary.main : '#10B981';
 
   const maxVal = Math.max(...data, 1);
   const minVal = Math.min(...data, 0);
@@ -40,7 +42,6 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
 
   const pathD = points.reduce((acc, p, idx) => {
     if (idx === 0) return `M ${p.x} ${p.y}`;
-    // Bezier curve smoothing
     const prev = points[idx - 1];
     const cp1x = prev.x + (p.x - prev.x) / 2;
     const cp1y = prev.y;
@@ -59,7 +60,7 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
   };
 
   return (
-    <Card sx={{ bgcolor: '#131B2E', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 3, mb: 3 }}>
+    <Card sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3, mb: 3 }}>
       <CardContent sx={{ p: { xs: 2, md: 3 } }}>
         <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={2} sx={{ mb: 3 }}>
           <Box>
@@ -69,12 +70,12 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
                 XU HƯỚNG TĂNG TRƯỞNG
               </Typography>
             </Stack>
-            <Typography variant="h5" sx={{ fontWeight: 800, color: '#F8FAFC' }}>
+            <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary' }}>
               {isRevenue ? 'Biểu Đồ Doanh Thu 6 Tháng' : 'Biểu Đồ Sản Lượng Đơn Hàng'}
             </Typography>
           </Box>
 
-          <Stack direction="row" spacing={1} sx={{ bgcolor: 'rgba(255,255,255,0.05)', p: 0.5, borderRadius: 2 }}>
+          <Stack direction="row" spacing={1} sx={{ bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', p: 0.5, borderRadius: 2 }}>
             <Button
               size="small"
               startIcon={<DollarSign size={16} />}
@@ -83,9 +84,9 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
                 fontSize: '0.75rem',
                 fontWeight: 600,
                 borderRadius: 1.5,
-                bgcolor: isRevenue ? '#00F0FF' : 'transparent',
-                color: isRevenue ? '#0A0E17' : '#94A3B8',
-                '&:hover': { bgcolor: isRevenue ? '#00F0FF' : 'rgba(255,255,255,0.08)' },
+                bgcolor: isRevenue ? theme.palette.primary.main : 'transparent',
+                color: isRevenue ? '#FFFFFF' : 'text.secondary',
+                '&:hover': { bgcolor: isRevenue ? theme.palette.primary.main : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)') },
               }}
             >
               Doanh thu
@@ -99,8 +100,8 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
                 fontWeight: 600,
                 borderRadius: 1.5,
                 bgcolor: !isRevenue ? '#10B981' : 'transparent',
-                color: !isRevenue ? '#0A0E17' : '#94A3B8',
-                '&:hover': { bgcolor: !isRevenue ? '#10B981' : 'rgba(255,255,255,0.08)' },
+                color: !isRevenue ? '#FFFFFF' : 'text.secondary',
+                '&:hover': { bgcolor: !isRevenue ? '#10B981' : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)') },
               }}
             >
               Đơn hàng
@@ -118,7 +119,7 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
           >
             <defs>
               <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor={strokeColor} stopOpacity={0.35} />
+                <stop offset="0%" stopColor={strokeColor} stopOpacity={0.25} />
                 <stop offset="100%" stopColor={strokeColor} stopOpacity={0.0} />
               </linearGradient>
             </defs>
@@ -133,7 +134,7 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
                   y1={y}
                   x2={width - padX}
                   y2={y}
-                  stroke="rgba(255, 255, 255, 0.06)"
+                  stroke={isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.06)"}
                   strokeDasharray="4 4"
                 />
               );
@@ -150,7 +151,7 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
               strokeWidth={3}
               strokeLinecap="round"
               style={{
-                filter: `drop-shadow(0 0 8px ${strokeColor}66)`,
+                filter: `drop-shadow(0 0 6px ${strokeColor}44)`,
                 transition: shouldReduceMotion ? 'none' : 'd 300ms ease',
               }}
             />
@@ -164,7 +165,7 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
                     cx={p.x}
                     cy={p.y}
                     r={isHovered ? 6 : 4}
-                    fill="#0A0E17"
+                    fill={theme.palette.background.paper}
                     stroke={strokeColor}
                     strokeWidth={2.5}
                     style={{ cursor: 'pointer', transition: 'r 150ms ease' }}
@@ -176,7 +177,7 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
                     x={p.x}
                     y={height - 8}
                     textAnchor="middle"
-                    fill="#94A3B8"
+                    fill={isDark ? "#94A3B8" : "#64748B"}
                     fontSize={12}
                     fontFamily="Space Grotesk, sans-serif"
                     fontWeight={600}
@@ -189,7 +190,7 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
                     x={p.x}
                     y={p.y - 12}
                     textAnchor="middle"
-                    fill={isHovered ? strokeColor : '#CBD5E1'}
+                    fill={isHovered ? strokeColor : (isDark ? '#CBD5E1' : '#475569')}
                     fontSize={11}
                     fontFamily="JetBrains Mono, monospace"
                     fontWeight={isHovered ? 700 : 500}

@@ -37,9 +37,9 @@ export const ComponentSelector: React.FC<ComponentSelectorProps> = ({ selectedPa
     const activeCategoryId = useMemo(() => (activeKey ? resolveCategoryIdByKey(activeKey as any, categories) : null), [activeKey, categories]);
 
     return (
-        <Card variant="outlined" sx={{ bgcolor: '#131B2E', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 3 }}>
+        <Card variant="outlined" sx={{ bgcolor: 'background.paper', borderColor: 'divider', borderRadius: 3 }}>
             <CardContent>
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#F8FAFC' }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
                     Chọn linh kiện cấu hình
                 </Typography>
                 <Stack spacing={1.5}>

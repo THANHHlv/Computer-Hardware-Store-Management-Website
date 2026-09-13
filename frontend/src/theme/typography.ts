@@ -1,7 +1,7 @@
 /**
  * 📝 TYPOGRAPHY SYSTEM - Computer Shop E-commerce
- * Gaming Tech Dark Mode & Tabular Numbers
- * Tuân thủ ui-ux-pro-max design system MASTER.md
+ * International Clean Modern Typography with Tabular Numbers
+ * Optimized for high legibility, clean aesthetics, and fluid scaling
  */
 
 export const typography = {
@@ -23,7 +23,6 @@ export const typography = {
     fontWeight: 700,
     lineHeight: 1.2,
     letterSpacing: '-0.025em',
-    color: '#F8FAFC',
     '@media (max-width:600px)': {
       fontSize: '2rem',
     },
@@ -35,7 +34,6 @@ export const typography = {
     fontWeight: 600,
     lineHeight: 1.25,
     letterSpacing: '-0.02em',
-    color: '#F8FAFC',
     '@media (max-width:600px)': {
       fontSize: '1.75rem',
     },
@@ -47,7 +45,6 @@ export const typography = {
     fontWeight: 600,
     lineHeight: 1.3,
     letterSpacing: '-0.01em',
-    color: '#F8FAFC',
     '@media (max-width:600px)': {
       fontSize: '1.25rem',
     },
@@ -59,21 +56,18 @@ export const typography = {
     fontWeight: 600,
     lineHeight: 1.35,
     letterSpacing: '-0.005em',
-    color: '#F8FAFC',
   },
   
   h5: {
     fontSize: '1.125rem',
     fontWeight: 600,
     lineHeight: 1.4,
-    color: '#F8FAFC',
   },
   
   h6: {
     fontSize: '1rem',
     fontWeight: 600,
     lineHeight: 1.45,
-    color: '#F8FAFC',
   },
   
   subtitle1: {
@@ -81,7 +75,7 @@ export const typography = {
     fontWeight: 500,
     lineHeight: 1.5,
     letterSpacing: '0.005em',
-    color: '#94A3B8',
+    color: 'text.secondary',
   },
   
   subtitle2: {
@@ -89,28 +83,27 @@ export const typography = {
     fontWeight: 500,
     lineHeight: 1.57,
     letterSpacing: '0.005em',
-    color: '#94A3B8',
+    color: 'text.secondary',
   },
   
   body1: {
     fontSize: '1rem',
     fontWeight: 400,
     lineHeight: 1.6,
-    color: '#F8FAFC',
   },
   
   body2: {
     fontSize: '0.875rem',
     fontWeight: 400,
     lineHeight: 1.6,
-    color: '#94A3B8',
+    color: 'text.secondary',
   },
   
   button: {
     fontSize: '0.875rem',
     fontWeight: 600,
     lineHeight: 1.75,
-    letterSpacing: '0.02em',
+    letterSpacing: '0.01em',
     textTransform: 'none' as const,
   },
   
@@ -119,17 +112,17 @@ export const typography = {
     fontWeight: 400,
     lineHeight: 1.66,
     letterSpacing: '0.02em',
-    color: '#64748B',
+    color: 'text.secondary',
   },
   
   overline: {
     fontFamily: '"Space Grotesk", sans-serif',
     fontSize: '0.75rem',
-    fontWeight: 600,
+    fontWeight: 700,
     lineHeight: 2.66,
     letterSpacing: '0.08em',
     textTransform: 'uppercase' as const,
-    color: '#00F0FF',
+    color: 'primary.main',
   },
 };
 
@@ -142,7 +135,7 @@ export const shopTypography = {
       fontWeight: 700,
       lineHeight: 1.2,
       letterSpacing: '-0.02em',
-      color: '#00F0FF',
+      color: '#2563EB',
     },
     original: {
       fontFamily: '"JetBrains Mono", monospace',
@@ -152,7 +145,7 @@ export const shopTypography = {
       lineHeight: 1.2,
       letterSpacing: '0em',
       textDecoration: 'line-through',
-      color: '#64748B',
+      color: '#94A3B8',
     },
     discount: {
       fontFamily: '"JetBrains Mono", monospace',
@@ -167,11 +160,10 @@ export const shopTypography = {
   
   product: {
     name: {
-      fontSize: '1rem',
+      fontSize: '0.95rem',
       fontWeight: 600,
       lineHeight: 1.4,
       letterSpacing: '0em',
-      color: '#F8FAFC',
     },
     code: {
       fontFamily: '"JetBrains Mono", monospace',
@@ -180,16 +172,16 @@ export const shopTypography = {
       lineHeight: 1.2,
       letterSpacing: '0.05em',
       textTransform: 'uppercase' as const,
-      color: '#64748B',
+      color: '#94A3B8',
     },
     category: {
       fontFamily: '"Space Grotesk", sans-serif',
       fontSize: '0.75rem',
-      fontWeight: 600,
+      fontWeight: 700,
       lineHeight: 1.2,
       letterSpacing: '0.04em',
       textTransform: 'uppercase' as const,
-      color: '#00F0FF',
+      color: '#2563EB',
     },
   },
   
@@ -215,16 +207,15 @@ export const shopTypography = {
       fontWeight: 500,
       lineHeight: 1.4,
       letterSpacing: '0em',
-      color: '#94A3B8',
+      color: '#64748B',
     },
     value: {
       fontFamily: '"JetBrains Mono", monospace',
       fontVariantNumeric: 'tabular-nums',
       fontSize: '0.875rem',
-      fontWeight: 500,
+      fontWeight: 600,
       lineHeight: 1.4,
       letterSpacing: '0em',
-      color: '#F8FAFC',
     },
   },
 };

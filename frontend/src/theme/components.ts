@@ -1,47 +1,36 @@
 /**
  * 🎨 COMPONENT THEME OVERRIDES - Computer Shop E-commerce
- * 
- * Design Philosophy:
- * - Professional, clean appearance inspired by successful computer shops
- * - Consistent interaction patterns across all components
- * - Optimized for product browsing and e-commerce workflows
- * - Accessibility-first design
- * 
- * Component Strategy:
- * - Buttons: Clear CTAs with proper contrast
- * - Cards: Clean product presentation
- * - Inputs: Professional forms
- * - Navigation: Intuitive hierarchy
+ * International Clean & Bright Theme with Ultra-Smooth Micro-interactions
+ * Standardized for Apple/NZXT/Framework high-end shopping experience
  */
 
-import type { Theme, Components } from '@mui/material/styles';
+import { alpha, type Theme, type Components } from '@mui/material/styles';
 
 export const components = (theme: Theme): Components => ({
   // ===== BUTTONS =====
   MuiButton: {
     styleOverrides: {
       root: {
-        borderRadius: 8,
+        borderRadius: 10,
         textTransform: 'none',
-        fontWeight: 500,
+        fontWeight: 600,
         fontSize: '0.875rem',
-        padding: theme.spacing(1, 2),
-        // Consistent subtle hover across all buttons: no movement, slight tint
-        // and modest shadow for contained variants. Use action.hover so it
-        // respects light/dark themes.
-        transition: 'background-color 150ms ease, box-shadow 150ms ease, color 150ms ease',
-        willChange: 'background-color, box-shadow',
+        padding: theme.spacing(1, 2.2),
+        transition: 'all 200ms cubic-bezier(0.16, 1, 0.3, 1)',
+        willChange: 'transform, box-shadow, background-color',
         '&:hover': {
           backgroundColor: theme.palette.action.hover,
-          transform: 'none',
+          transform: 'translateY(-1px)',
+        },
+        '&:active': {
+          transform: 'scale(0.98)',
         },
       },
       contained: {
-        boxShadow: theme.shadows[2],
+        boxShadow: '0 2px 8px -2px rgba(15, 23, 42, 0.08)',
         '&:hover': {
-          // Keep color stable; highlight via shadow
-          boxShadow: theme.shadows[4],
-          backgroundColor: theme.palette.action.hover,
+          boxShadow: '0 6px 20px -4px rgba(15, 23, 42, 0.16)',
+          transform: 'translateY(-2px)',
         },
       },
       containedPrimary: {
@@ -49,8 +38,8 @@ export const components = (theme: Theme): Components => ({
         color: theme.palette.primary.contrastText,
         fontWeight: 600,
         '&:hover': {
-          backgroundColor: theme.palette.primary.light,
-          boxShadow: '0 0 16px rgba(0, 240, 255, 0.4)',
+          backgroundColor: theme.palette.primary.dark,
+          boxShadow: `0 8px 24px -4px ${alpha(theme.palette.primary.main, 0.45)}`,
         },
       },
       containedSecondary: {
@@ -58,31 +47,35 @@ export const components = (theme: Theme): Components => ({
         color: theme.palette.secondary.contrastText,
         fontWeight: 600,
         '&:hover': {
-          backgroundColor: theme.palette.secondary.light,
-          boxShadow: '0 0 16px rgba(16, 185, 129, 0.4)',
+          backgroundColor: theme.palette.secondary.dark,
+          boxShadow: `0 8px 24px -4px ${alpha(theme.palette.secondary.main, 0.45)}`,
         },
       },
       outlined: {
         borderWidth: 1.5,
+        borderColor: theme.palette.divider,
+        color: theme.palette.text.primary,
         '&:hover': {
           borderWidth: 1.5,
-          backgroundColor: theme.palette.action.hover,
+          borderColor: theme.palette.primary.main,
+          backgroundColor: alpha(theme.palette.primary.main, 0.04),
+          transform: 'translateY(-1px)',
         },
       },
       text: {
         '&:hover': {
-          backgroundColor: theme.palette.action.hover,
+          backgroundColor: alpha(theme.palette.primary.main, 0.06),
         },
       },
       sizeLarge: {
-        padding: theme.spacing(1.5, 3),
-        fontSize: '1rem',
-        borderRadius: 10,
+        padding: theme.spacing(1.4, 3.2),
+        fontSize: '0.95rem',
+        borderRadius: 12,
       },
       sizeSmall: {
-        padding: theme.spacing(0.75, 1.5),
-        fontSize: '0.75rem',
-        borderRadius: 6,
+        padding: theme.spacing(0.6, 1.6),
+        fontSize: '0.8rem',
+        borderRadius: 8,
       },
     },
   },
@@ -91,12 +84,17 @@ export const components = (theme: Theme): Components => ({
   MuiCard: {
     styleOverrides: {
       root: {
-        borderRadius: 12,
-        boxShadow: theme.shadows[1],
+        borderRadius: 14,
+        backgroundColor: theme.palette.background.paper,
+        boxShadow: theme.palette.mode === 'light'
+          ? '0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 6px 16px -4px rgba(15, 23, 42, 0.06)'
+          : '0 4px 20px rgba(0, 0, 0, 0.4)',
         border: `1px solid ${theme.palette.divider}`,
-        // Make card hover match IconButton: subtle background tint and shadow,
-        // no movement to keep interactions stable and consistent.
-        transition: 'box-shadow 180ms ease',
+        transition: 'transform 240ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 240ms cubic-bezier(0.16, 1, 0.3, 1), border-color 240ms ease',
+        willChange: 'transform, box-shadow',
+        '&:hover': {
+          borderColor: alpha(theme.palette.primary.main, 0.3),
+        },
       },
     },
   },
@@ -105,12 +103,14 @@ export const components = (theme: Theme): Components => ({
   MuiIconButton: {
     styleOverrides: {
       root: {
-        transition: 'background-color 150ms ease, color 150ms ease',
-        borderRadius: 6,
-        // Do not translate or scale on hover — keep interaction subtle and stable
-        transform: 'none',
+        borderRadius: 10,
+        transition: 'all 180ms cubic-bezier(0.16, 1, 0.3, 1)',
         '&:hover': {
-          backgroundColor: theme.palette.action.hover,
+          backgroundColor: alpha(theme.palette.primary.main, 0.08),
+          transform: 'scale(1.06)',
+        },
+        '&:active': {
+          transform: 'scale(0.95)',
         },
       },
     },
@@ -119,9 +119,9 @@ export const components = (theme: Theme): Components => ({
   MuiCardContent: {
     styleOverrides: {
       root: {
-        padding: theme.spacing(2),
+        padding: theme.spacing(2.2),
         '&:last-child': {
-          paddingBottom: theme.spacing(2),
+          paddingBottom: theme.spacing(2.2),
         },
       },
     },
@@ -132,10 +132,21 @@ export const components = (theme: Theme): Components => ({
     styleOverrides: {
       root: {
         '& .MuiOutlinedInput-root': {
-          borderRadius: 8,
-          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+          borderRadius: 10,
+          backgroundColor: alpha(theme.palette.background.paper, 0.8),
+          transition: 'border-color 200ms ease, box-shadow 200ms ease',
+          '& fieldset': {
+            borderColor: theme.palette.divider,
+          },
+          '&:hover fieldset': {
+            borderColor: theme.palette.primary.light,
+          },
+          '&.Mui-focused fieldset': {
             borderColor: theme.palette.primary.main,
             borderWidth: 2,
+          },
+          '&.Mui-focused': {
+            boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.12)}`,
           },
         },
         '& .MuiInputLabel-root': {
@@ -150,10 +161,20 @@ export const components = (theme: Theme): Components => ({
   MuiOutlinedInput: {
     styleOverrides: {
       root: {
-        borderRadius: 8,
-        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+        borderRadius: 10,
+        backgroundColor: alpha(theme.palette.background.paper, 0.8),
+        '& fieldset': {
+          borderColor: theme.palette.divider,
+        },
+        '&:hover fieldset': {
+          borderColor: theme.palette.primary.light,
+        },
+        '&.Mui-focused fieldset': {
           borderColor: theme.palette.primary.main,
           borderWidth: 2,
+        },
+        '&.Mui-focused': {
+          boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.12)}`,
         },
       },
     },
@@ -163,9 +184,13 @@ export const components = (theme: Theme): Components => ({
   MuiAppBar: {
     styleOverrides: {
       root: {
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: alpha(theme.palette.background.paper, 0.85),
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
         color: theme.palette.text.primary,
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        boxShadow: theme.palette.mode === 'light'
+          ? '0 1px 3px 0 rgba(15, 23, 42, 0.05)'
+          : '0 2px 10px rgba(0, 0, 0, 0.5)',
         borderBottom: `1px solid ${theme.palette.divider}`,
       },
     },
@@ -175,7 +200,7 @@ export const components = (theme: Theme): Components => ({
   MuiToolbar: {
     styleOverrides: {
       root: {
-        minHeight: '64px !important',
+        minHeight: '68px !important',
         padding: theme.spacing(0, 2),
         [theme.breakpoints.up('sm')]: {
           padding: theme.spacing(0, 3),
@@ -188,10 +213,11 @@ export const components = (theme: Theme): Components => ({
   MuiChip: {
     styleOverrides: {
       root: {
-        borderRadius: 16,
+        borderRadius: 8,
         fontSize: '0.75rem',
-        fontWeight: 500,
+        fontWeight: 600,
         height: 28,
+        transition: 'all 160ms ease',
       },
       filled: {
         '&.MuiChip-colorPrimary': {
@@ -205,10 +231,7 @@ export const components = (theme: Theme): Components => ({
       },
       outlined: {
         borderWidth: 1.5,
-        '&.MuiChip-colorPrimary': {
-          borderColor: theme.palette.primary.main,
-          color: theme.palette.primary.main,
-        },
+        borderColor: theme.palette.divider,
       },
     },
   },
@@ -217,20 +240,26 @@ export const components = (theme: Theme): Components => ({
   MuiPaper: {
     styleOverrides: {
       root: {
-        borderRadius: 8,
-        transition: undefined,
+        borderRadius: 12,
+        backgroundImage: 'none',
       },
       outlined: {
         border: `1px solid ${theme.palette.divider}`,
       },
       elevation1: {
-        boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+        boxShadow: theme.palette.mode === 'light'
+          ? '0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 4px 12px -2px rgba(15, 23, 42, 0.05)'
+          : '0 2px 8px rgba(0, 0, 0, 0.3)',
       },
       elevation2: {
-        boxShadow: '0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)',
+        boxShadow: theme.palette.mode === 'light'
+          ? '0 4px 16px -2px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.04)'
+          : '0 4px 16px rgba(0, 0, 0, 0.4)',
       },
       elevation4: {
-        boxShadow: '0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23)',
+        boxShadow: theme.palette.mode === 'light'
+          ? '0 12px 32px -4px rgba(15, 23, 42, 0.1), 0 4px 8px -2px rgba(15, 23, 42, 0.04)'
+          : '0 8px 24px rgba(0, 0, 0, 0.5)',
       },
     },
   },
@@ -239,7 +268,9 @@ export const components = (theme: Theme): Components => ({
   MuiDialog: {
     styleOverrides: {
       paper: {
-        borderRadius: 12,
+        borderRadius: 16,
+        boxShadow: '0 20px 50px -10px rgba(15, 23, 42, 0.18)',
+        border: `1px solid ${theme.palette.divider}`,
         padding: 0,
       },
     },
@@ -249,7 +280,7 @@ export const components = (theme: Theme): Components => ({
     styleOverrides: {
       root: {
         fontSize: '1.25rem',
-        fontWeight: 600,
+        fontWeight: 700,
         padding: theme.spacing(2.5, 3, 2),
         borderBottom: `1px solid ${theme.palette.divider}`,
       },
@@ -259,7 +290,7 @@ export const components = (theme: Theme): Components => ({
   MuiDialogContent: {
     styleOverrides: {
       root: {
-        padding: theme.spacing(2.5, 3),
+        padding: theme.spacing(3),
       },
     },
   },
@@ -304,16 +335,16 @@ export const components = (theme: Theme): Components => ({
       root: {
         textTransform: 'none',
         fontSize: '0.875rem',
-        fontWeight: 500,
+        fontWeight: 600,
         minHeight: 48,
         color: theme.palette.text.secondary,
+        transition: 'color 180ms ease, background-color 180ms ease',
         '&.Mui-selected': {
           color: theme.palette.primary.main,
-          fontWeight: 600,
         },
         '&:hover': {
           color: theme.palette.primary.main,
-          backgroundColor: `${theme.palette.primary.main}08`,
+          backgroundColor: alpha(theme.palette.primary.main, 0.04),
         },
       },
     },
@@ -326,7 +357,7 @@ export const components = (theme: Theme): Components => ({
         borderRadius: 8,
         margin: theme.spacing(0.25, 0),
         '&:hover': {
-          backgroundColor: `${theme.palette.primary.main}08`,
+          backgroundColor: alpha(theme.palette.primary.main, 0.04),
         },
       },
     },
@@ -336,13 +367,16 @@ export const components = (theme: Theme): Components => ({
     styleOverrides: {
       root: {
         borderRadius: 8,
+        transition: 'background-color 150ms ease',
         '&:hover': {
-          backgroundColor: `${theme.palette.primary.main}08`,
+          backgroundColor: alpha(theme.palette.primary.main, 0.05),
         },
         '&.Mui-selected': {
-          backgroundColor: `${theme.palette.primary.main}12`,
+          backgroundColor: alpha(theme.palette.primary.main, 0.08),
+          color: theme.palette.primary.main,
+          fontWeight: 600,
           '&:hover': {
-            backgroundColor: `${theme.palette.primary.main}16`,
+            backgroundColor: alpha(theme.palette.primary.main, 0.12),
           },
         },
       },
@@ -354,10 +388,11 @@ export const components = (theme: Theme): Components => ({
     styleOverrides: {
       badge: {
         fontSize: '0.75rem',
-        fontWeight: 600,
+        fontWeight: 700,
         minWidth: 20,
         height: 20,
         borderRadius: 10,
+        boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
       },
       colorPrimary: {
         backgroundColor: theme.palette.primary.main,
@@ -378,36 +413,9 @@ export const components = (theme: Theme): Components => ({
   MuiAlert: {
     styleOverrides: {
       root: {
-        borderRadius: 8,
+        borderRadius: 10,
         fontSize: '0.875rem',
-      },
-      standardSuccess: {
-        backgroundColor: `${theme.palette.success.main}12`,
-        color: theme.palette.success.dark,
-        '& .MuiAlert-icon': {
-          color: theme.palette.success.main,
-        },
-      },
-      standardError: {
-        backgroundColor: `${theme.palette.error.main}12`,
-        color: theme.palette.error.dark,
-        '& .MuiAlert-icon': {
-          color: theme.palette.error.main,
-        },
-      },
-      standardWarning: {
-        backgroundColor: `${theme.palette.warning.main}12`,
-        color: theme.palette.warning.dark,
-        '& .MuiAlert-icon': {
-          color: theme.palette.warning.main,
-        },
-      },
-      standardInfo: {
-        backgroundColor: `${theme.palette.info.main}12`,
-        color: theme.palette.info.dark,
-        '& .MuiAlert-icon': {
-          color: theme.palette.info.main,
-        },
+        fontWeight: 500,
       },
     },
   },
@@ -416,14 +424,11 @@ export const components = (theme: Theme): Components => ({
   MuiSkeleton: {
     styleOverrides: {
       root: {
-        borderRadius: 4,
-        backgroundColor: theme.palette.grey[200],
+        borderRadius: 6,
+        backgroundColor: theme.palette.mode === 'light' ? 'rgba(15, 23, 42, 0.06)' : 'rgba(255, 255, 255, 0.08)',
       },
       rectangular: {
-        borderRadius: 8,
-      },
-      rounded: {
-        borderRadius: '50%',
+        borderRadius: 10,
       },
     },
   },

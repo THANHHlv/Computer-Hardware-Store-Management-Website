@@ -27,12 +27,16 @@ import FirstPageIcon from '@mui/icons-material/FirstPage';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
+import { motion } from 'framer-motion';
+
 // Components
 import { ProductCard } from '../ProductCard';
 import type { ProductCardProps } from '../ProductCard';
 
 // Types
 import type { Product } from '../../../types/product.types';
+
+
 
 // ===== COMPONENT PROPS =====
 export interface ProductGridProps {
@@ -62,16 +66,19 @@ const DEFAULT_COLUMNS: Record<'xs' | 'sm' | 'md' | 'lg' | 'xl', string> = {
 };
 
 // ===== SKELETON COMPONENTS =====
-const ProductCardSkeleton: React.FC = () => (
-  <Box sx={{ bgcolor: '#131B2E', p: 1.5, borderRadius: 3, border: '1px solid rgba(255, 255, 255, 0.06)' }}>
-    <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 2, bgcolor: 'rgba(255, 255, 255, 0.04)' }} />
-    <Box sx={{ p: 1.5 }}>
-      <Skeleton variant="text" height={18} width="40%" sx={{ bgcolor: 'rgba(255, 255, 255, 0.06)', mb: 1 }} />
-      <Skeleton variant="text" height={24} width="90%" sx={{ bgcolor: 'rgba(255, 255, 255, 0.08)' }} />
-      <Skeleton variant="text" height={22} width="50%" sx={{ mt: 2, bgcolor: 'rgba(0, 240, 255, 0.1)' }} />
+const ProductCardSkeleton: React.FC = () => {
+  const theme = useTheme();
+  return (
+    <Box sx={{ bgcolor: 'background.paper', p: 1.5, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}>
+      <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 2 }} />
+      <Box sx={{ p: 1.5 }}>
+        <Skeleton variant="text" height={18} width="40%" sx={{ mb: 1 }} />
+        <Skeleton variant="text" height={24} width="90%" />
+        <Skeleton variant="text" height={22} width="50%" sx={{ mt: 2 }} />
+      </Box>
     </Box>
-  </Box>
-);
+  );
+};
 
 const GridSkeleton: React.FC<{ count: number; columns: Partial<Record<'xs' | 'sm' | 'md' | 'lg' | 'xl', string>> }> = ({ count, columns }) => (
   <Box
@@ -170,13 +177,24 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   // ===== RENDER FUNCTIONS =====
   const renderProductGrid = () => (
     <Box sx={combinedGridSx}>
-      {products.map((product) => (
-        <ProductCard
+      {products.map((product, index) => (
+        <motion.div
           key={product.id}
-          product={product}
-          {...(productCardProps ?? {})}
-          onProductClick={onProductClick ?? productCardProps?.onProductClick}
-        />
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.35,
+            delay: Math.min(index * 0.03, 0.3),
+            ease: [0.16, 1, 0.3, 1] as const,
+          }}
+          style={{ display: 'flex', width: '100%', height: '100%' }}
+        >
+          <ProductCard
+            product={product}
+            {...(productCardProps ?? {})}
+            onProductClick={onProductClick ?? productCardProps?.onProductClick}
+          />
+        </motion.div>
       ))}
     </Box>
   );

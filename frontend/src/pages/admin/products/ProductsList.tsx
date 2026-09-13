@@ -273,7 +273,7 @@ const ProductsList: React.FC = () => {
 
         {/* Bulk operations panel intentionally removed per UX request */}
 
-        <Card sx={{ bgcolor: '#131B2E', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 2 }}>
+        <Card sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
           <CardContent>
             {loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
@@ -282,7 +282,7 @@ const ProductsList: React.FC = () => {
             ) : (
               <TableContainer>
                 <Table>
-                  <TableHead sx={{ bgcolor: 'rgba(255, 255, 255, 0.03)' }}>
+                  <TableHead sx={{ bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)' }}>
                     <TableRow>
                     <TableCell padding="checkbox">
                       <Checkbox

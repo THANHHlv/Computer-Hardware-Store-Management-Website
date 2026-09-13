@@ -180,13 +180,14 @@ const BuildPcPage: React.FC = () => {
                     mt: 2,
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    backdropFilter: 'saturate(180%) blur(8px)',
-                    bgcolor: 'rgba(19, 27, 46, 0.9)',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+                    backdropFilter: 'saturate(180%) blur(12px)',
+                    bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(15, 23, 42, 0.85)' : 'rgba(255, 255, 255, 0.88)',
+                    borderTop: '1px solid',
+                    borderColor: 'divider',
                 }} aria-label="Tổng tiền cấu hình">
                     <Box>
                         <Typography variant="caption" color="text.secondary">Tổng ước tính</Typography>
-                        <Typography variant="subtitle1" className="tabular-nums font-mono-numbers" sx={{ fontWeight: 700, color: '#00F0FF' }}>{totals.total.toLocaleString('vi-VN')} ₫</Typography>
+                        <Typography variant="subtitle1" className="tabular-nums font-mono-numbers" sx={{ fontWeight: 700, color: 'primary.main' }}>{totals.total.toLocaleString('vi-VN')} ₫</Typography>
                     </Box>
                     <Button variant="contained" disabled={!hasAnyPart} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Xem chi tiết cấu hình">
                         Xem chi tiết

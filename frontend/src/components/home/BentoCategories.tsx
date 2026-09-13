@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Container, Stack, Chip } from '@mui/material';
+import { Box, Typography, Container, Stack, Chip, useTheme, alpha } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Cpu, Zap, HardDrive, Fan, Layers, Box as BoxIcon, ArrowUpRight, Sparkles } from 'lucide-react';
@@ -24,7 +24,7 @@ const BENTO_ITEMS: BentoItem[] = [
     title: 'Card Đồ Họa VGA',
     subtitle: 'NVIDIA RTX 50 Series & Radeon RX 8000. Đồ họa ray tracing 4K siêu thực & tăng tốc AI.',
     tag: 'SIÊU HOT',
-    accentColor: '#00F0FF',
+    accentColor: '#2563EB',
     icon: Zap,
     gridSpan: { xs: '12', md: '7' },
     categoryQuery: '2',
@@ -34,7 +34,7 @@ const BENTO_ITEMS: BentoItem[] = [
     title: 'Bộ Vi Xử Lý CPU',
     subtitle: 'Intel Core Ultra & AMD Ryzen 9000. Xung nhịp vượt trội cho gaming và render 3D.',
     tag: 'HIỆU NĂNG CAO',
-    accentColor: '#FF4655',
+    accentColor: '#EF4444',
     icon: Cpu,
     gridSpan: { xs: '12', md: '5' },
     categoryQuery: '1',
@@ -44,7 +44,7 @@ const BENTO_ITEMS: BentoItem[] = [
     title: 'RAM DDR5 Gaming',
     subtitle: 'Băng thông siêu tốc lên đến 8400MHz, RGB Sync đa sắc.',
     tag: '8400MHz',
-    accentColor: '#38BDF8',
+    accentColor: '#0EA5E9',
     icon: Layers,
     gridSpan: { xs: '12', md: '4' },
     categoryQuery: '3',
@@ -62,8 +62,8 @@ const BENTO_ITEMS: BentoItem[] = [
   {
     id: 5,
     title: 'Ổ Cứng SSD NVMe',
-    subtitle: 'Tốc độ đọc ghi đến 14.000 MB/s. Load game và dữ liệu trong chớp mắt.',
-    tag: '14.000 MB/s',
+    subtitle: 'Gen 5 tốc độ đọc 14.000 MB/s, load game tức thì.',
+    tag: 'TỐC ĐỘ CAO',
     accentColor: '#10B981',
     icon: HardDrive,
     gridSpan: { xs: '12', md: '4' },
@@ -71,9 +71,9 @@ const BENTO_ITEMS: BentoItem[] = [
   },
   {
     id: 6,
-    title: 'Tản Nhiệt Nước & Khí',
-    subtitle: 'AIO 360mm màn hình LCD tùy biến, giữ dàn máy luôn mát mẻ.',
-    tag: 'ARGB Cooling',
+    title: 'Tản Nhiệt Nước AIO',
+    subtitle: 'Màn hình LCD hiển thị nhiệt độ thực tế, pump êm ái, rad 360mm tản nhiệt tối ưu.',
+    tag: 'LCD DISPLAY',
     accentColor: '#06B6D4',
     icon: Fan,
     gridSpan: { xs: '12', md: '6' },
@@ -84,7 +84,7 @@ const BENTO_ITEMS: BentoItem[] = [
     title: 'Vỏ Case & Nguồn PSU',
     subtitle: 'Case Panoramic mặt kính vô cực & Nguồn ATX 3.1 PCIe 5.0 cấp nguồn ổn định tối đa.',
     tag: 'ATX 3.1 & Kính Vô Cực',
-    accentColor: '#A855F7',
+    accentColor: '#8B5CF6',
     icon: BoxIcon,
     gridSpan: { xs: '12', md: '6' },
     categoryQuery: '7',
@@ -92,6 +92,8 @@ const BENTO_ITEMS: BentoItem[] = [
 ];
 
 export const BentoCategories: React.FC = () => {
+  const theme = useTheme();
+  const isLight = theme.palette.mode === 'light';
   const navigate = useNavigate();
   const shouldReduceMotion = useReducedMotion();
 
@@ -105,12 +107,26 @@ export const BentoCategories: React.FC = () => {
       <Stack direction="row" justifyContent="space-between" alignItems="flex-end" sx={{ mb: 4 }}>
         <Box>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-            <Sparkles size={18} color="#00F0FF" />
-            <Typography variant="overline" sx={{ color: '#00F0FF', fontWeight: 700, letterSpacing: 1.5 }}>
+            <Sparkles size={18} color={theme.palette.primary.main} />
+            <Typography
+              variant="overline"
+              sx={{
+                color: 'primary.main',
+                fontWeight: 700,
+                letterSpacing: 1.5,
+              }}
+            >
               DANH MỤC LINH KIỆN CAO CẤP
             </Typography>
           </Stack>
-          <Typography variant="h3" sx={{ fontWeight: 800, color: '#F8FAFC' }}>
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 800,
+              color: 'text.primary',
+              letterSpacing: '-0.02em',
+            }}
+          >
             Hệ Sinh Thái Phần Cứng Gaming
           </Typography>
         </Box>
@@ -130,8 +146,8 @@ export const BentoCategories: React.FC = () => {
             <Box
               key={`bento-${item.id}`}
               component={shouldReduceMotion ? 'div' : motion.div}
-              whileHover={shouldReduceMotion ? undefined : { y: -4, scale: 1.01 }}
-              transition={{ duration: 0.2 }}
+              whileHover={shouldReduceMotion ? undefined : { y: -5, scale: 1.012 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
               onClick={() => handleCardClick(item.categoryQuery)}
               sx={{
                 gridColumn: {
@@ -139,17 +155,24 @@ export const BentoCategories: React.FC = () => {
                   md: `span ${item.gridSpan.md}`,
                 },
                 position: 'relative',
-                borderRadius: 3,
+                borderRadius: 3.5,
                 p: { xs: 3, md: 3.5 },
                 cursor: 'pointer',
-                bgcolor: '#131B2E',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                background: `linear-gradient(135deg, rgba(19, 27, 46, 0.95) 0%, rgba(10, 14, 23, 0.98) 100%)`,
+                bgcolor: theme.palette.background.paper,
+                border: `1px solid ${theme.palette.divider}`,
+                boxShadow: isLight
+                  ? '0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 6px 18px -4px rgba(15, 23, 42, 0.06)'
+                  : '0 8px 24px rgba(0, 0, 0, 0.4)',
+                background: isLight
+                  ? `linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%)`
+                  : `linear-gradient(135deg, rgba(17, 24, 39, 0.95) 0%, rgba(11, 15, 25, 0.98) 100%)`,
                 overflow: 'hidden',
-                transition: 'border-color 200ms ease, box-shadow 200ms ease',
+                transition: 'border-color 220ms ease, box-shadow 220ms ease',
                 '&:hover': {
-                  borderColor: item.accentColor,
-                  boxShadow: `0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px ${item.accentColor}33`,
+                  borderColor: alpha(item.accentColor, 0.45),
+                  boxShadow: isLight
+                    ? `0 16px 36px -4px rgba(15, 23, 42, 0.1), 0 0 0 1px ${alpha(item.accentColor, 0.2)}`
+                    : `0 14px 34px rgba(0, 0, 0, 0.5), 0 0 20px ${item.accentColor}33`,
                   '& .arrow-icon': {
                     transform: 'translate(3px, -3px)',
                     color: item.accentColor,
@@ -166,7 +189,7 @@ export const BentoCategories: React.FC = () => {
                   width: 140,
                   height: 140,
                   borderRadius: '50%',
-                  background: `radial-gradient(circle, ${item.accentColor}22 0%, transparent 70%)`,
+                  background: `radial-gradient(circle, ${item.accentColor}18 0%, transparent 70%)`,
                   pointerEvents: 'none',
                 }}
               />
@@ -182,8 +205,8 @@ export const BentoCategories: React.FC = () => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        bgcolor: `${item.accentColor}18`,
-                        border: `1px solid ${item.accentColor}44`,
+                        bgcolor: `${item.accentColor}14`,
+                        border: `1px solid ${item.accentColor}33`,
                         color: item.accentColor,
                       }}
                     >
@@ -194,17 +217,17 @@ export const BentoCategories: React.FC = () => {
                         label={item.tag}
                         size="small"
                         sx={{
-                          bgcolor: 'rgba(255, 255, 255, 0.06)',
+                          bgcolor: alpha(item.accentColor, 0.08),
                           color: item.accentColor,
                           fontWeight: 700,
                           fontSize: '0.7rem',
-                          border: `1px solid ${item.accentColor}33`,
+                          border: `1px solid ${alpha(item.accentColor, 0.25)}`,
                         }}
                       />
                       <Box
                         className="arrow-icon"
                         sx={{
-                          color: '#94A3B8',
+                          color: 'text.secondary',
                           transition: 'transform 200ms ease, color 200ms ease',
                           display: 'flex',
                           alignItems: 'center',
@@ -215,11 +238,11 @@ export const BentoCategories: React.FC = () => {
                     </Stack>
                   </Stack>
 
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: '#F8FAFC', mb: 1 }}>
+                  <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary', mb: 1, fontSize: '1.2rem' }}>
                     {item.title}
                   </Typography>
 
-                  <Typography variant="body2" sx={{ color: '#94A3B8', lineHeight: 1.6 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
                     {item.subtitle}
                   </Typography>
                 </Box>
@@ -228,12 +251,13 @@ export const BentoCategories: React.FC = () => {
                   variant="caption"
                   sx={{
                     color: item.accentColor,
-                    fontWeight: 600,
+                    fontWeight: 700,
                     letterSpacing: 0.5,
                     display: 'flex',
                     alignItems: 'center',
                     gap: 0.5,
                     pt: 1,
+                    fontSize: '0.78rem',
                   }}
                 >
                   KHÁM PHÁ NGAY →
@@ -246,5 +270,3 @@ export const BentoCategories: React.FC = () => {
     </Container>
   );
 };
-
-export default BentoCategories;

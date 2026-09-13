@@ -225,7 +225,7 @@ const AdminPanel: React.FC = () => {
   return (
     <MotionPage>
       <Box sx={{ p: 3 }}>
-        <Paper sx={{ p: 3, mb: 3, bgcolor: '#131B2E', border: '1px solid rgba(255,255,255,0.08)' }} elevation={1}>
+        <Paper sx={{ p: 3, mb: 3, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 2 }} elevation={1}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
           <Box>
             <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>Bảng điều khiển quản trị</Typography>

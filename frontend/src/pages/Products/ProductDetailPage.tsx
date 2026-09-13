@@ -20,6 +20,8 @@ import {
   IconButton,
   Stack,
   Skeleton,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -53,6 +55,8 @@ interface ProductDetailPageProps {}
 const ProductDetailPage: React.FC<ProductDetailPageProps> = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isLight = theme.palette.mode === 'light';
   const { addItem } = useCart();
   const { showSuccess, showError } = useSnackbar();
   const auth = useAuth();
@@ -302,18 +306,18 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = () => {
           {/* Left: Images / 3D Viewer */}
           <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             {/* View Mode Toggle */}
-            <Stack direction="row" spacing={1} sx={{ mb: 2, bgcolor: 'rgba(255,255,255,0.05)', p: 0.5, borderRadius: 2, alignSelf: 'flex-start' }}>
+            <Stack direction="row" spacing={1} sx={{ mb: 2, bgcolor: isLight ? 'rgba(15, 23, 42, 0.04)' : 'rgba(255,255,255,0.05)', p: 0.5, borderRadius: 2, border: `1px solid ${theme.palette.divider}`, alignSelf: 'flex-start' }}>
               <Button
                 size="small"
                 startIcon={<CollectionsIcon fontSize="small" />}
                 onClick={() => setDetailViewMode('gallery')}
                 sx={{
-                  bgcolor: detailViewMode === 'gallery' ? '#00F0FF' : 'transparent',
-                  color: detailViewMode === 'gallery' ? '#0A0E17' : '#94A3B8',
+                  bgcolor: detailViewMode === 'gallery' ? theme.palette.primary.main : 'transparent',
+                  color: detailViewMode === 'gallery' ? '#FFFFFF' : 'text.secondary',
                   fontWeight: 600,
                   fontSize: '0.8rem',
                   borderRadius: 1.5,
-                  '&:hover': { bgcolor: detailViewMode === 'gallery' ? '#00F0FF' : 'rgba(255,255,255,0.08)' },
+                  '&:hover': { bgcolor: detailViewMode === 'gallery' ? theme.palette.primary.main : alpha(theme.palette.primary.main, 0.08) },
                 }}
               >
                 Ảnh chi tiết (2D)
@@ -323,12 +327,12 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = () => {
                 startIcon={<ViewInArIcon fontSize="small" />}
                 onClick={() => setDetailViewMode('3d')}
                 sx={{
-                  bgcolor: detailViewMode === '3d' ? '#00F0FF' : 'transparent',
-                  color: detailViewMode === '3d' ? '#0A0E17' : '#94A3B8',
+                  bgcolor: detailViewMode === '3d' ? theme.palette.primary.main : 'transparent',
+                  color: detailViewMode === '3d' ? '#FFFFFF' : 'text.secondary',
                   fontWeight: 600,
                   fontSize: '0.8rem',
                   borderRadius: 1.5,
-                  '&:hover': { bgcolor: detailViewMode === '3d' ? '#00F0FF' : 'rgba(255,255,255,0.08)' },
+                  '&:hover': { bgcolor: detailViewMode === '3d' ? theme.palette.primary.main : alpha(theme.palette.primary.main, 0.08) },
                 }}
               >
                 Xoay 360° (3D)
@@ -472,12 +476,12 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = () => {
           )}
 
           {!!product.specifications && (
-            <Card sx={{ mb: 3, border: '1px solid rgba(255, 255, 255, 0.08)', bgcolor: '#131B2E' }}>
+            <Card sx={{ mb: 3, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', borderRadius: 3 }}>
               <CardContent>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: '#F8FAFC' }}>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 700 }}>
                   Thông số kỹ thuật
                 </Typography>
-                <Divider sx={{ mb: 2, borderColor: 'rgba(255,255,255,0.06)' }} />
+                <Divider sx={{ mb: 2 }} />
                 {Object.entries(product.specifications).map(([key, value], idx) => (
                   <Box
                     key={key}
@@ -486,13 +490,13 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = () => {
                       justifyContent: 'space-between',
                       p: 1.25,
                       borderRadius: 1,
-                      bgcolor: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.03)' : 'transparent',
+                      bgcolor: idx % 2 === 0 ? (theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.025)') : 'transparent',
                     }}
                   >
-                    <Typography variant="body2" sx={{ color: '#94A3B8', fontWeight: 600 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                       {formatSpecLabel(key)}:
                     </Typography>
-                    <Typography variant="body2" className="tabular-nums font-mono-numbers" sx={{ color: '#F8FAFC', fontWeight: 500 }}>
+                    <Typography variant="body2" className="tabular-nums font-mono-numbers" sx={{ color: 'text.primary', fontWeight: 600 }}>
                       {formatSpecValue(value)}
                     </Typography>
                   </Box>
@@ -540,15 +544,13 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = () => {
             disabled={product.quantity === 0 || isRestrictedUser}
             fullWidth
             sx={{
-              py: 1.5,
+              py: 1.6,
               fontWeight: 700,
               fontSize: '1rem',
-              bgcolor: '#00F0FF',
-              color: '#0A0E17',
-              boxShadow: '0 0 20px rgba(0, 240, 255, 0.35)',
+              borderRadius: 2.5,
+              boxShadow: `0 4px 16px ${alpha(theme.palette.primary.main, 0.35)}`,
               '&:hover': {
-                bgcolor: '#38BDF8',
-                boxShadow: '0 0 25px rgba(0, 240, 255, 0.5)',
+                boxShadow: `0 8px 25px ${alpha(theme.palette.primary.main, 0.45)}`,
               },
             }}
           >
