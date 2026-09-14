@@ -576,7 +576,8 @@ const OrderCreatePage: React.FC = () => {
           }
         } catch (vnpayErr: any) {
           console.error('OrderCreatePage: VNPay create payment URL failed', vnpayErr);
-          showError('Đơn hàng đã tạo nhưng không thể kết nối VNPay. Vui lòng thanh toán lại từ trang đơn hàng.');
+          const errorMsg = vnpayErr?.response?.data?.message || vnpayErr?.message || 'Không thể kết nối VNPay';
+          showError(`Đơn hàng đã tạo thành công, nhưng kết nối VNPay thất bại: ${errorMsg}`);
           setCreatedOrder(created);
           setSuccessDialogOpen(true);
         }
