@@ -14,7 +14,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  alpha,
   useTheme,
 } from '@mui/material';
 import {
@@ -307,12 +306,10 @@ export const OrdersList: React.FC = () => {
                         ? 'Đã xác nhận'
                         : status === 'PROCESSING'
                         ? 'Đang chuẩn bị'
-                        : status === 'SHIPPING'
+                        : status === 'SHIPPED'
                         ? 'Đang giao hàng'
                         : status === 'DELIVERED'
                         ? 'Đã giao hàng'
-                        : status === 'COMPLETED'
-                        ? 'Hoàn tất'
                         : status === 'CANCELLED'
                         ? 'Đã hủy'
                         : status}
@@ -396,12 +393,10 @@ export const OrdersList: React.FC = () => {
                       ? 'Đã xác nhận'
                       : status === 'PROCESSING'
                       ? 'Đang chuẩn bị'
-                      : status === 'SHIPPING'
+                      : status === 'SHIPPED'
                       ? 'Đang giao hàng'
                       : status === 'DELIVERED'
                       ? 'Đã giao hàng'
-                      : status === 'COMPLETED'
-                      ? 'Hoàn tất'
                       : status === 'CANCELLED'
                       ? 'Đã hủy'
                       : status}

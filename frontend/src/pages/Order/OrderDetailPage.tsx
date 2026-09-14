@@ -11,8 +11,9 @@ import {
   Alert,
   Button,
   Stack,
-  Container,
-  TextField,
+  FormControl,
+  InputLabel,
+  Select,
   MenuItem,
   ListItemAvatar,
   Avatar,
@@ -649,15 +650,11 @@ export const OrderDetailPage: React.FC = () => {
                           ? 'Đã xác nhận'
                           : status === 'PROCESSING'
                           ? 'Đang chuẩn bị hàng'
-                          : status === 'SHIPPING'
+                          : status === 'SHIPPED'
                           ? 'Đang giao hàng'
                           : status === 'DELIVERED'
-                          ? 'Đã giao hàng'
-                          : status === 'COMPLETED'
-                          ? 'Hoàn tất'
-                          : status === 'CANCELLED'
-                          ? 'Đã hủy'
-                          : status}
+                          ? 'Hoàn tất / Đã giao hàng'
+                          : 'Đã hủy'}
                       </MenuItem>
                     ))}
                   </Select>
