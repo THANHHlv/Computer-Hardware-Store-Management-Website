@@ -10,8 +10,7 @@ import {
   MenuItem,
   Typography,
   Switch,
-  alpha,
-  useTheme,
+  Chip,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -58,7 +57,6 @@ const evaluateTemporalStatus = (promo: any, now = Date.now()) => {
 };
 
 export const PromotionsList: React.FC = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const { showError, showSuccess } = useSnackbar();
 

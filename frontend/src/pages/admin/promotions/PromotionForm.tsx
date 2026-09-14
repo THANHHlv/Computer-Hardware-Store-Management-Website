@@ -12,7 +12,7 @@ import {
   MenuItem,
   FormControlLabel,
   Switch,
-  Grid,
+  Stack,
   Divider,
   Card,
   CardContent,
@@ -246,9 +246,9 @@ export const PromotionForm: React.FC = () => {
         </Box>
 
         <form onSubmit={handleSubmit}>
-          <Grid container spacing={3}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1.4fr) minmax(0, 1fr)' }, gap: 3, alignItems: 'start' }}>
             {/* Left Column: Form Fields */}
-            <Grid item xs={12} md={7}>
+            <Box sx={{ minWidth: 0 }}>
               <Paper sx={{ p: 3, borderRadius: 2, border: `1px solid ${theme.palette.divider}` }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
                   Thông tin thiết lập chương trình
@@ -276,35 +276,31 @@ export const PromotionForm: React.FC = () => {
                     placeholder="Điều kiện và phạm vi áp dụng của mã ưu đãi..."
                   />
 
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <FormControl fullWidth size="small">
-                        <InputLabel>Loại hình giảm giá</InputLabel>
-                        <Select
-                          value={form.discount_type}
-                          onChange={handleChange('discount_type')}
-                          label="Loại hình giảm giá"
-                        >
-                          <MenuItem value="PERCENTAGE">Giảm theo phần trăm (%)</MenuItem>
-                          <MenuItem value="FIXED_AMOUNT">Giảm số tiền cố định (VNĐ)</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Grid>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Loại hình giảm giá</InputLabel>
+                      <Select
+                        value={form.discount_type}
+                        onChange={handleChange('discount_type')}
+                        label="Loại hình giảm giá"
+                      >
+                        <MenuItem value="PERCENTAGE">Giảm theo phần trăm (%)</MenuItem>
+                        <MenuItem value="FIXED_AMOUNT">Giảm số tiền cố định (VNĐ)</MenuItem>
+                      </Select>
+                    </FormControl>
 
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        size="small"
-                        type="number"
-                        label={form.discount_type === 'PERCENTAGE' ? 'Mức giảm (%)' : 'Số tiền giảm (VNĐ)'}
-                        required
-                        value={form.discount_value}
-                        onChange={handleChange('discount_value')}
-                        error={Boolean(errors.discount_value)}
-                        helperText={errors.discount_value}
-                      />
-                    </Grid>
-                  </Grid>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="number"
+                      label={form.discount_type === 'PERCENTAGE' ? 'Mức giảm (%)' : 'Số tiền giảm (VNĐ)'}
+                      required
+                      value={form.discount_value}
+                      onChange={handleChange('discount_value')}
+                      error={Boolean(errors.discount_value)}
+                      helperText={errors.discount_value}
+                    />
+                  </Box>
 
                   <TextField
                     fullWidth
@@ -317,37 +313,33 @@ export const PromotionForm: React.FC = () => {
                     helperText={errors.minimum_order_amount || 'Đặt bằng 0 nếu áp dụng cho mọi đơn hàng'}
                   />
 
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        size="small"
-                        type="datetime-local"
-                        label="Ngày bắt đầu hiệu lực"
-                        required
-                        value={form.start_date ? form.start_date.slice(0, 16) : ''}
-                        onChange={handleChange('start_date')}
-                        InputLabelProps={{ shrink: true }}
-                        error={Boolean(errors.start_date)}
-                        helperText={errors.start_date}
-                      />
-                    </Grid>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="datetime-local"
+                      label="Ngày bắt đầu hiệu lực"
+                      required
+                      value={form.start_date ? form.start_date.slice(0, 16) : ''}
+                      onChange={handleChange('start_date')}
+                      InputLabelProps={{ shrink: true }}
+                      error={Boolean(errors.start_date)}
+                      helperText={errors.start_date}
+                    />
 
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        size="small"
-                        type="datetime-local"
-                        label="Ngày kết thúc hiệu lực"
-                        required
-                        value={form.end_date ? form.end_date.slice(0, 16) : ''}
-                        onChange={handleChange('end_date')}
-                        InputLabelProps={{ shrink: true }}
-                        error={Boolean(errors.end_date)}
-                        helperText={errors.end_date}
-                      />
-                    </Grid>
-                  </Grid>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="datetime-local"
+                      label="Ngày kết thúc hiệu lực"
+                      required
+                      value={form.end_date ? form.end_date.slice(0, 16) : ''}
+                      onChange={handleChange('end_date')}
+                      InputLabelProps={{ shrink: true }}
+                      error={Boolean(errors.end_date)}
+                      helperText={errors.end_date}
+                    />
+                  </Box>
 
                   <FormControlLabel
                     control={
@@ -361,10 +353,10 @@ export const PromotionForm: React.FC = () => {
                   />
                 </Stack>
               </Paper>
-            </Grid>
+            </Box>
 
             {/* Right Column: Live Preview Voucher Card */}
-            <Grid item xs={12} md={5}>
+            <Box sx={{ minWidth: 0 }}>
               <Paper
                 sx={{
                   p: 3,
@@ -465,8 +457,8 @@ export const PromotionForm: React.FC = () => {
                   </Typography>
                 </Box>
               </Paper>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </form>
       </Box>
     </MotionPage>
