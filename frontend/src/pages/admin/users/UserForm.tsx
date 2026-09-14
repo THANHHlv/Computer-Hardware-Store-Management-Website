@@ -5,20 +5,27 @@ import {
   Typography,
   TextField,
   Button,
-  Grid,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   CircularProgress,
-  Divider,
-  Alert
+  Stack,
+  Alert,
+  FormHelperText,
+  useTheme,
 } from '@mui/material';
-import { Save as SaveIcon, ArrowBack as BackIcon } from '@mui/icons-material';
+import {
+  Save as SaveIcon,
+  ArrowBackRounded as BackIcon,
+} from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { userService } from '../../../services/user.service';
 import { useSnackbar } from '../../../hooks/useSnackbar';
+import { useAuth } from '../../../hooks/useAuth';
 import type { UserResponse } from '../../../types/auth.types';
+import { MotionPage } from '../../../components/common/MotionPage';
+import { ConfirmDialog } from '../../../components/admin/ConfirmDialog';
 
 interface UserFormData {
   username: string;
@@ -30,17 +37,18 @@ interface UserFormData {
   role: 'CUSTOMER' | 'STAFF' | 'ADMIN';
 }
 
-const UserForm: React.FC = () => {
+export const UserForm: React.FC = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const { user: currentUser } = useAuth();
   const { showError, showSuccess } = useSnackbar();
-  
+
   const isEdit = Boolean(id);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  // user state is not displayed directly; keep reference only if needed later
-  const [, setUser] = useState<UserResponse | null>(null);
-  
+  const [loadedUser, setLoadedUser] = useState<UserResponse | null>(null);
+
   const [formData, setFormData] = useState<UserFormData>({
     username: '',
     email: '',
@@ -48,43 +56,45 @@ const UserForm: React.FC = () => {
     fullName: '',
     phone: '',
     address: '',
-    role: 'CUSTOMER'
+    role: 'CUSTOMER',
   });
 
   const [errors, setErrors] = useState<Partial<UserFormData>>({});
-  const [serverErrors, setServerErrors] = useState<string[]>([]);
 
-  // Fetch user data for edit mode
+  // Confirm dialog when promoting to ADMIN
+  const [confirmAdminOpen, setConfirmAdminOpen] = useState(false);
+
   useEffect(() => {
     if (isEdit && id) {
-      fetchUser();
+      setLoading(true);
+      (async () => {
+        try {
+          const userData = await userService.getUserById(parseInt(id));
+          setLoadedUser(userData);
+          setFormData({
+            username: userData?.username || '',
+            email: userData?.email || '',
+            password: '',
+            fullName: userData?.full_name || '',
+            phone: userData?.phone || '',
+            address: userData?.address || '',
+            role: (userData?.role as 'CUSTOMER' | 'STAFF' | 'ADMIN') || 'CUSTOMER',
+          });
+        } catch (error: any) {
+          showError('Không thể tải thông tin người dùng: ' + error.message);
+        } finally {
+          setLoading(false);
+        }
+      })();
     }
-  }, [id, isEdit]);
+  }, [id, isEdit, showError]);
 
-  const fetchUser = async () => {
-    setLoading(true);
-    try {
-      const userData = await userService.getUserById(parseInt(id!));
-      // userService returns unwrapped data (either object or wrapper with data)
-      const userInfo = userData; // userService already unwraps data
-      setUser(userInfo);
-
-      setFormData({
-        username: userInfo?.username || '',
-        email: userInfo?.email || '',
-        password: '', // Don't pre-fill password
-        fullName: userInfo?.full_name || '',
-        phone: userInfo?.phone || '',
-        address: userInfo?.address || '',
-        role: (userInfo?.role as 'CUSTOMER' | 'STAFF' | 'ADMIN') || 'CUSTOMER'
-      });
-    } catch (error: any) {
-      console.error('Error fetching user:', error);
-      showError('Không thể tải thông tin người dùng: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const isEditingSelf = Boolean(
+    currentUser &&
+    loadedUser &&
+    ((currentUser.id && loadedUser.id && currentUser.id === loadedUser.id) ||
+      (currentUser.username && loadedUser.username && currentUser.username === loadedUser.username))
+  );
 
   const validateForm = (): boolean => {
     const newErrors: Partial<UserFormData> = {};
@@ -98,7 +108,7 @@ const UserForm: React.FC = () => {
     if (!formData.email.trim()) {
       newErrors.email = 'Email không được để trống';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Email không hợp lệ';
+      newErrors.email = 'Email không đúng định dạng';
     }
 
     if (!formData.fullName.trim()) {
@@ -106,14 +116,11 @@ const UserForm: React.FC = () => {
     }
 
     if (!isEdit && !formData.password.trim()) {
-      newErrors.password = 'Mật khẩu không được để trống';
+      newErrors.password = 'Mật khẩu khởi tạo không được để trống';
     } else if (!isEdit && formData.password.length < 6) {
       newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
-    }
-
-    // If editing and admin provided a new password, validate its length
-    if (isEdit && formData.password && formData.password.length > 0 && formData.password.length < 6) {
-      newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+    } else if (isEdit && formData.password && formData.password.length < 6) {
+      newErrors.password = 'Mật khẩu đổi mới phải có ít nhất 6 ký tự';
     }
 
     if (formData.phone && !/^[0-9+\-\s()]*$/.test(formData.phone)) {
@@ -124,320 +131,217 @@ const UserForm: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
-    // clear previous server errors
-    setServerErrors([]);
+  const executeSave = async () => {
     setSaving(true);
     try {
-      // Debug: show payload before sending (helps diagnosing 400s)
-  if (isEdit) {
-        // Admin can only update: email, full_name, phone, address
-        // Role and password should not be changed by admin
+      if (isEdit && id) {
         const updatePayload: any = {
-          // Match backend DTO field names exactly per API_TESTING_GUIDE.md
-          username: formData.username,
-          email: formData.email,
-          full_name: formData.fullName,
-          phone: formData.phone || '',
-          address: formData.address || '',
-          role: formData.role, // keep existing role
+          full_name: formData.fullName.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          address: formData.address.trim(),
+          role: formData.role,
         };
-        // include password only when admin entered a new one
-        if (formData.password && formData.password.trim() !== '') {
+        if (formData.password) {
           updatePayload.password = formData.password;
         }
-        console.debug('PUT /users/' + id + ' payload:', updatePayload);
-        await userService.updateUser(parseInt(id!), updatePayload);
-        showSuccess('Cập nhật người dùng thành công');
+
+        await userService.updateUser(parseInt(id), updatePayload);
+        showSuccess('Cập nhật người dùng thành công!');
       } else {
-        const createPayload = {
-          username: formData.username,
-          email: formData.email,
-          full_name: formData.fullName, // match CreateUserRequest interface
-          phone: formData.phone,
-          address: formData.address,
+        await userService.createUser({
+          username: formData.username.trim(),
+          email: formData.email.trim(),
+          password: formData.password,
+          full_name: formData.fullName.trim(),
+          phone: formData.phone.trim(),
+          address: formData.address.trim(),
           role: formData.role,
-          password: formData.password
-        };
-        console.debug('POST /users/create payload:', createPayload);
-        await userService.createUser(createPayload);
-        showSuccess('Tạo người dùng thành công');
+        });
+        showSuccess('Tạo tài khoản người dùng mới thành công!');
       }
-      
       navigate('/admin/users');
     } catch (error: any) {
-      console.error('Error saving user:', error);
-      // Debug: log raw server validation errors
-      if (Array.isArray(error?.errors)) {
-        console.debug('Server validation errors array:', error.errors);
-      }
-
-      // If backend returned validation errors via GlobalExceptionHandler, api.ts maps them into error.errors
-      // error.errors is typically an array of strings like "field: message".
-      if (Array.isArray(error?.errors) && error.errors.length > 0) {
-        const newFieldErrors: Partial<UserFormData> = {};
-        const generalMessages: string[] = [];
-        // store raw server errors for UI display
-        try { setServerErrors(error.errors.map((e: any) => String(e))); } catch(_) { setServerErrors([]); }
-        error.errors.forEach((err: any) => {
-          const text = typeof err === 'string' ? err.trim() : String(err || '').trim();
-          if (!text) return;
-
-          // Try to parse patterns like "field: message" or "object.field: message"
-          const m = text.match(/^([\w.\\-]+)\s*:\s*(.+)$/);
-          if (m) {
-            let rawField = m[1];
-            const message = m[2] || 'Trường không hợp lệ';
-
-            // If dotted path like 'request.email' or 'user.email', take last segment
-            if (rawField.includes('.')) {
-              const parts = rawField.split('.');
-              rawField = parts[parts.length - 1];
-            }
-
-            // Normalize field name: snake_case -> camelCase
-            const camel = rawField.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
-
-            // Also handle possible camelCase as-is
-            const candidateKeys = [camel, rawField];
-
-            // Map to form fields if present
-            let mapped = false;
-            for (const key of candidateKeys) {
-              // @ts-ignore
-              if (key in formData) {
-                // @ts-ignore
-                newFieldErrors[key] = message;
-                mapped = true;
-                break;
-              }
-            }
-
-            if (!mapped) {
-              generalMessages.push(text);
-            }
-          } else {
-            // Not parsable as field:message -> treat as general message
-            generalMessages.push(text);
-          }
-        });
-
-        if (Object.keys(newFieldErrors).length > 0) {
-          setErrors(prev => ({ ...prev, ...newFieldErrors }));
-        }
-
-        // Show top general message or first field message in snackbar
-        const topMsg = generalMessages.length > 0 ? generalMessages[0] : (Object.values(newFieldErrors)[0] as string | undefined);
-        showError((error.message || 'Lỗi') + (topMsg ? ': ' + String(topMsg) : ''));
-      } else {
-        setServerErrors([]);
-        showError(`${isEdit ? 'Cập nhật' : 'Tạo'} người dùng thất bại: ` + (error?.message || error));
-      }
+      showError('Lưu người dùng thất bại: ' + (error.message || error));
     } finally {
       setSaving(false);
+      setConfirmAdminOpen(false);
     }
   };
 
-  const handleInputChange = (field: keyof UserFormData) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any
-  ) => {
-    const value = e.target.value;
-    setFormData(prev => ({ ...prev, [field]: value }));
-
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) {
+      showError('Vui lòng kiểm tra lại thông tin có báo lỗi');
+      return;
     }
+
+    // If promoting to ADMIN from non-admin, trigger confirmation modal
+    const originalRole = loadedUser?.role;
+    if (formData.role === 'ADMIN' && originalRole !== 'ADMIN') {
+      setConfirmAdminOpen(true);
+      return;
+    }
+
+    executeSave();
   };
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
         <CircularProgress />
       </Box>
     );
   }
 
   return (
-    <Box>
-      {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <Button
-          startIcon={<BackIcon />}
-          onClick={() => navigate('/admin/users')}
-          sx={{ mr: 2 }}
-        >
-          Quay lại
-        </Button>
-        <Typography variant="h4">
-          {isEdit ? 'Chỉnh sửa người dùng' : 'Tạo người dùng mới'}
-        </Typography>
-      </Box>
+    <MotionPage>
+      <Box sx={{ pb: 6, maxWidth: 960, mx: 'auto' }}>
+        {/* Header toolbar */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<BackIcon />}
+              onClick={() => navigate('/admin/users')}
+              sx={{ borderRadius: 2 }}
+            >
+              Danh sách
+            </Button>
+            <Typography variant="h4" sx={{ fontWeight: 800 }}>
+              {isEdit ? 'Chỉnh sửa tài khoản' : 'Tạo mới tài khoản'}
+            </Typography>
+          </Box>
 
-      <Paper sx={{ p: 3 }}>
+          <Button
+            variant="contained"
+            startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveIcon />}
+            onClick={handleSubmit}
+            disabled={saving}
+            sx={{ fontWeight: 700, px: 3, borderRadius: 2 }}
+          >
+            {saving ? 'Đang lưu...' : isEdit ? 'Cập nhật' : 'Tạo tài khoản'}
+          </Button>
+        </Box>
+
+        {isEditingSelf && (
+          <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
+            Bạn đang chỉnh sửa <strong>tài khoản của chính mình</strong>. Để đảm bảo an toàn hệ thống, bạn không thể tự hạ vai trò quản trị viên của mình.
+          </Alert>
+        )}
+
         <form onSubmit={handleSubmit}>
-          {serverErrors.length > 0 && (
-            <Box sx={{ mb: 2 }}>
-              {serverErrors.map((msg, idx) => (
-                <Alert severity="error" key={idx} sx={{ mb: 1 }}>{msg}</Alert>
-              ))}
-            </Box>
-          )}
-          <Grid container spacing={3}>
-            {/* Basic Information */}
-            <Grid sx={{ width: '100%' }}>
-              <Typography variant="h6" gutterBottom>
-                Thông tin cơ bản
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-            </Grid>
+          <Paper sx={{ p: { xs: 2.5, md: 4 }, borderRadius: 2, border: `1px solid ${theme.palette.divider}` }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
+              Thông tin chi tiết người dùng
+            </Typography>
 
-            <Grid sx={{ width: { xs: '100%', md: '50%' } }}>
-              <TextField
-                fullWidth
-                label="Tên đăng nhập"
-                value={formData.username}
-                onChange={handleInputChange('username')}
-                error={Boolean(errors.username)}
-                helperText={errors.username || (isEdit ? 'Username không thể thay đổi' : '')}
-                disabled={isEdit} // Username cannot be changed in edit mode
-                required
-              />
-            </Grid>
-
-            <Grid sx={{ width: { xs: '100%', md: '50%' } }}>
-              <TextField
-                fullWidth
-                label="Email"
-                type="email"
-                value={formData.email}
-                onChange={handleInputChange('email')}
-                error={Boolean(errors.email)}
-                helperText={errors.email}
-                required
-              />
-            </Grid>
-
-            <Grid sx={{ width: { xs: '100%', md: '50%' } }}>
-              <TextField
-                fullWidth
-                label="Họ tên"
-                value={formData.fullName}
-                onChange={handleInputChange('fullName')}
-                error={Boolean(errors.fullName)}
-                helperText={errors.fullName}
-                required
-              />
-            </Grid>
-
-            <Grid sx={{ width: { xs: '100%', md: '50%' } }}>
-              <FormControl fullWidth required>
-                <InputLabel>Vai trò</InputLabel>
-                <Select
-                  value={formData.role}
-                  onChange={handleInputChange('role')}
-                  label="Vai trò"
-                  disabled={isEdit} // Backend không cho phép thay đổi role
-                >
-                  <MenuItem value="CUSTOMER">Khách hàng</MenuItem>
-                  <MenuItem value="STAFF">Nhân viên</MenuItem>
-                  <MenuItem value="ADMIN">Quản trị viên</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-
-            {/* Password - Only for new users, not editable by admin */}
-            {!isEdit && (
-              <Grid sx={{ width: { xs: '100%', md: '50%' } }}>
+            <Stack spacing={3}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2.5 }}>
                 <TextField
                   fullWidth
-                  label="Mật khẩu"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleInputChange('password')}
-                  error={Boolean(errors.password)}
-                  helperText={errors.password || 'Mật khẩu phải có ít nhất 6 ký tự'}
-                  required={true}
+                  label="Tên đăng nhập (Username)"
+                  required
+                  disabled={isEdit}
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  error={Boolean(errors.username)}
+                  helperText={errors.username || (isEdit ? 'Tên đăng nhập không thể thay đổi sau khi tạo' : undefined)}
                 />
-              </Grid>
-            )}
-            
-            {/* Password (edit mode): optional - admin may set a new password */}
-            {isEdit && (
-              <Grid sx={{ width: { xs: '100%', md: '50%' } }}>
+
                 <TextField
                   fullWidth
-                  label="Mật khẩu mới (để trống nếu không đổi)"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleInputChange('password')}
-                  error={Boolean(errors.password)}
-                  helperText={errors.password || 'Để trống để giữ nguyên mật khẩu hoặc nhập tối thiểu 6 ký tự để đổi'}
+                  label="Họ và tên đầy đủ"
+                  required
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  error={Boolean(errors.fullName)}
+                  helperText={errors.fullName}
+                  placeholder="Ví dụ: Nguyễn Văn A"
                 />
-              </Grid>
-            )}
-
-            {/* Contact Information */}
-            <Grid sx={{ width: '100%' }}>
-              <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-                Thông tin liên hệ
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-            </Grid>
-
-            <Grid sx={{ width: { xs: '100%', md: '50%' } }}>
-              <TextField
-                fullWidth
-                label="Số điện thoại"
-                value={formData.phone}
-                onChange={handleInputChange('phone')}
-                error={Boolean(errors.phone)}
-                helperText={errors.phone}
-              />
-            </Grid>
-
-            <Grid sx={{ width: '100%' }}>
-              <TextField
-                fullWidth
-                label="Địa chỉ"
-                multiline
-                rows={3}
-                value={formData.address}
-                onChange={handleInputChange('address')}
-              />
-            </Grid>
-
-            {/* Submit Buttons */}
-            <Grid sx={{ width: '100%' }}>
-              <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  startIcon={<SaveIcon />}
-                  disabled={saving}
-                >
-                  {saving ? 'Đang lưu...' : (isEdit ? 'Cập nhật' : 'Tạo người dùng')}
-                </Button>
-                
-                <Button
-                  variant="outlined"
-                  onClick={() => navigate('/admin/users')}
-                  disabled={saving}
-                >
-                  Hủy
-                </Button>
               </Box>
-            </Grid>
-          </Grid>
+
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2.5 }}>
+                <TextField
+                  fullWidth
+                  type="email"
+                  label="Địa chỉ Email"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  error={Boolean(errors.email)}
+                  helperText={errors.email}
+                  placeholder="user@example.com"
+                />
+
+                <TextField
+                  fullWidth
+                  label="Số điện thoại"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  error={Boolean(errors.phone)}
+                  helperText={errors.phone}
+                  placeholder="0912345678"
+                />
+              </Box>
+
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2.5 }}>
+                <TextField
+                  fullWidth
+                  type="password"
+                  label={isEdit ? 'Mật khẩu mới (Bỏ trống nếu không đổi)' : 'Mật khẩu khởi tạo'}
+                  required={!isEdit}
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  error={Boolean(errors.password)}
+                  helperText={errors.password || (isEdit ? 'Chỉ nhập nếu bạn muốn đặt lại mật khẩu cho người dùng này' : 'Tối thiểu 6 ký tự')}
+                />
+
+                <FormControl fullWidth required>
+                  <InputLabel>Vai trò hệ thống (RBAC)</InputLabel>
+                  <Select
+                    value={formData.role}
+                    onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
+                    label="Vai trò hệ thống (RBAC)"
+                    disabled={isEditingSelf}
+                  >
+                    <MenuItem value="CUSTOMER">Khách hàng (CUSTOMER)</MenuItem>
+                    <MenuItem value="STAFF">Nhân viên (STAFF)</MenuItem>
+                    <MenuItem value="ADMIN">Quản trị viên cấp cao (ADMIN)</MenuItem>
+                  </Select>
+                  {isEditingSelf && (
+                    <FormHelperText>Bạn không thể tự đổi vai trò của tài khoản đang đăng nhập</FormHelperText>
+                  )}
+                </FormControl>
+              </Box>
+
+              <TextField
+                fullWidth
+                multiline
+                rows={2}
+                label="Địa chỉ liên hệ / Giao hàng"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố..."
+              />
+            </Stack>
+          </Paper>
         </form>
-      </Paper>
-    </Box>
+
+        {/* Promote to ADMIN confirmation dialog */}
+        <ConfirmDialog
+          open={confirmAdminOpen}
+          title="Xác nhận cấp quyền Quản trị viên (ADMIN)"
+          message="Vai trò Quản trị viên (ADMIN) có toàn quyền cao nhất: xóa sản phẩm, can thiệp kho, quản lý tài khoản người dùng khác và xem báo cáo tài chính. Bạn có chắc chắn muốn trao quyền này?"
+          itemName={`@${formData.username} (${formData.fullName})`}
+          confirmText="Xác nhận cấp quyền ADMIN"
+          severity="warning"
+          loading={saving}
+          onConfirm={executeSave}
+          onCancel={() => setConfirmAdminOpen(false)}
+        />
+      </Box>
+    </MotionPage>
   );
 };
 

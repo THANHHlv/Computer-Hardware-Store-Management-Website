@@ -1,10 +1,39 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Paper, TextField, Typography, CircularProgress, FormControl, InputLabel, Select, MenuItem, FormControlLabel, Switch } from '@mui/material';
+import {
+  Box,
+  Button,
+  Paper,
+  TextField,
+  Typography,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormControlLabel,
+  Switch,
+  Stack,
+  Divider,
+  Card,
+  CardContent,
+  Chip,
+  alpha,
+  useTheme,
+} from '@mui/material';
+import {
+  Save as SaveIcon,
+  ArrowBackRounded as BackIcon,
+  LocalOfferRounded as VoucherIcon,
+  CheckCircleOutlineRounded as CheckIcon,
+  AccessTimeRounded as TimeIcon,
+} from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { promotionService } from '../../../services/promotion.service';
 import { useSnackbar } from '../../../hooks/useSnackbar';
+import { MotionPage } from '../../../components/common/MotionPage';
 
-const PromotionForm: React.FC = () => {
+export const PromotionForm: React.FC = () => {
+  const theme = useTheme();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { showError, showSuccess } = useSnackbar();
@@ -12,16 +41,19 @@ const PromotionForm: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+
   const [form, setForm] = useState<any>({
     name: '',
     description: '',
     discount_type: 'PERCENTAGE',
-    discount_value: 0,
+    discount_value: 10,
     minimum_order_amount: 0,
     start_date: '',
     end_date: '',
     is_active: true,
   });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (isEdit && id) {
@@ -29,7 +61,6 @@ const PromotionForm: React.FC = () => {
       (async () => {
         try {
           const data = await promotionService.getPromotionById(Number(id));
-          // Map backend response (snake_case or camelCase) into form state (snake_case keys used in form)
           const mapped = {
             name: data.name ?? (data as any)?.title ?? '',
             description: data.description ?? (data as any)?.desc ?? '',
@@ -41,166 +72,396 @@ const PromotionForm: React.FC = () => {
             is_active: (data as any).is_active ?? (data as any).isActive ?? true,
           };
           setForm(mapped);
-        } catch (e) {
-          // If cannot load by id, fallback to listing (no-op)
+        } catch {
+          showError('Không thể tải thông tin khuyến mãi');
         } finally {
           setLoading(false);
         }
       })();
+    } else {
+      // Default dates: today -> 30 days later
+      const now = new Date();
+      const nextMonth = new Date();
+      nextMonth.setDate(now.getDate() + 30);
+      setForm((prev: any) => ({
+        ...prev,
+        start_date: now.toISOString().slice(0, 16),
+        end_date: nextMonth.toISOString().slice(0, 16),
+      }));
     }
-  }, [id, isEdit]);
+  }, [id, isEdit, showError]);
 
-  const handleChange = (k: string) => (e: any) => setForm((s: any) => ({ ...s, [k]: e.target.value }));
-  const handleBooleanChange = (k: string) => (_: any, checked: boolean) => setForm((s: any) => ({ ...s, [k]: checked }));
+  const handleChange = (key: string) => (e: any) => {
+    setForm((prev: any) => ({ ...prev, [key]: e.target.value }));
+    if (errors[key]) {
+      setErrors((err) => {
+        const next = { ...err };
+        delete next[key];
+        return next;
+      });
+    }
+  };
 
-  const normalizeDateForInput = (v: string) => {
-    if (!v) return '';
-    // Accept forms: YYYY-MM-DD, YYYY-MM-DDTHH:mm, YYYY-MM-DDTHH:mm:ss
-    if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return `${v}T00:00`;
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(v)) return v;
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(v)) return v.slice(0, 16);
-    try {
-      const d = new Date(v);
-      if (!isNaN(d.getTime())) return d.toISOString().slice(0, 16);
-    } catch { }
-    return '';
+  const handleBooleanChange = (key: string) => (_: any, checked: boolean) => {
+    setForm((prev: any) => ({ ...prev, [key]: checked }));
   };
 
   const normalizeDateForBackend = (v: string, isEnd = false) => {
     if (!v) return '';
-    // Accept: YYYY-MM-DD, YYYY-MM-DDTHH:mm, YYYY-MM-DDTHH:mm:ss
     if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return isEnd ? `${v}T23:59:59` : `${v}T00:00:00`;
     if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(v)) return `${v}:00`;
     if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(v)) return v;
     try {
       const d = new Date(v);
       if (!isNaN(d.getTime())) return d.toISOString().replace(/\.\d{3}Z$/, '');
-    } catch { }
+    } catch {
+      // Non-fatal
+    }
     return '';
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!form.name || !form.name.trim()) {
+      newErrors.name = 'Vui lòng nhập tên chương trình khuyến mãi';
+    }
+
+    const val = Number(form.discount_value ?? 0);
+    if (form.discount_type === 'PERCENTAGE') {
+      if (isNaN(val) || val <= 0 || val > 100) {
+        newErrors.discount_value = 'Mức giảm phần trăm phải từ 1% đến 100%';
+      }
+    } else {
+      if (isNaN(val) || val <= 0) {
+        newErrors.discount_value = 'Số tiền giảm cố định phải lớn hơn 0 VNĐ';
+      }
+    }
+
+    if (Number(form.minimum_order_amount ?? 0) < 0) {
+      newErrors.minimum_order_amount = 'Đơn hàng tối thiểu không được âm';
+    }
+
+    if (!form.start_date) {
+      newErrors.start_date = 'Vui lòng chọn ngày bắt đầu';
+    }
+
+    if (!form.end_date) {
+      newErrors.end_date = 'Vui lòng chọn ngày kết thúc';
+    } else if (form.start_date) {
+      const startMs = new Date(form.start_date).getTime();
+      const endMs = new Date(form.end_date).getTime();
+      if (endMs <= startMs) {
+        newErrors.end_date = 'Ngày kết thúc phải sau ngày bắt đầu';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Client-side validation to match backend requirements
-    if (!form.name?.trim()) {
-      showError('Vui lòng nhập tên khuyến mãi');
+    if (!validateForm()) {
+      showError('Vui lòng kiểm tra lại các trường thông tin có viền đỏ.');
       return;
-    }
-    const startForBackend = normalizeDateForBackend(form.start_date, false);
-    const endForBackend = normalizeDateForBackend(form.end_date, true);
-    if (!startForBackend || !endForBackend) {
-      showError('Vui lòng chọn ngày bắt đầu và ngày kết thúc');
-      return;
-    }
-    // Check end > start
-    try {
-      const sd = new Date(startForBackend);
-      const ed = new Date(endForBackend);
-      if (!(ed.getTime() > sd.getTime())) {
-        showError('Ngày kết thúc phải sau ngày bắt đầu');
-        return;
-      }
-    } catch { }
-    // Validate discount value
-    const dv = Number(form.discount_value ?? 0);
-    if (form.discount_type === 'PERCENTAGE') {
-      if (isNaN(dv) || dv <= 0 || dv > 100) {
-        showError('Giá trị phần trăm phải trong khoảng 1-100');
-        return;
-      }
-    } else {
-      if (isNaN(dv) || dv <= 0) {
-        showError('Giá trị giảm cố định phải lớn hơn 0');
-        return;
-      }
     }
 
     setSaving(true);
     try {
-      const minimumOrder = Number(form.minimum_order_amount ?? 0);
-      if (minimumOrder < 0) {
-        showError('Giá trị đơn tối thiểu không được âm');
-        setSaving(false);
-        return;
-      }
-
       const payload = {
         ...form,
-        start_date: startForBackend,
-        end_date: endForBackend,
-        minimum_order_amount: minimumOrder,
+        name: form.name.trim(),
+        description: form.description?.trim() || '',
+        discount_value: Number(form.discount_value),
+        minimum_order_amount: Number(form.minimum_order_amount || 0),
+        start_date: normalizeDateForBackend(form.start_date, false),
+        end_date: normalizeDateForBackend(form.end_date, true),
       };
+
       if (isEdit && id) {
         await promotionService.updatePromotion(Number(id), payload);
-        showSuccess('Cập nhật khuyến mãi thành công');
+        showSuccess('Cập nhật chương trình khuyến mãi thành công!');
       } else {
         await promotionService.createPromotion(payload);
-        showSuccess('Tạo khuyến mãi thành công');
+        showSuccess('Tạo mới chương trình khuyến mãi thành công!');
       }
       navigate('/admin/promotions');
     } catch (err: any) {
-      showError('Lỗi khi lưu khuyến mãi: ' + (err.message || err));
+      showError('Lưu khuyến mãi thất bại: ' + (err.message || err));
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress /></Box>;
+  const currency = (value: number) =>
+    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value);
+
+  const formatDateDisplay = (dateStr?: string) => {
+    if (!dateStr) return '—';
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('vi-VN');
+    } catch {
+      return dateStr;
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
-    <Paper sx={{ p: 3 }}>
-      <Typography variant="h6">{isEdit ? 'Chỉnh sửa khuyến mãi' : 'Tạo khuyến mãi'}</Typography>
-      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
-          <TextField label="Tên" fullWidth value={form.name} onChange={handleChange('name')} required />
-          <FormControl fullWidth>
-            <InputLabel>Loại giảm</InputLabel>
-            <Select value={form.discount_type} label="Loại giảm" onChange={handleChange('discount_type')}>
-              <MenuItem value="PERCENTAGE">Phần trăm</MenuItem>
-              <MenuItem value="FIXED_AMOUNT">Cố định</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField label="Giá trị" type="number" fullWidth value={form.discount_value} onChange={handleChange('discount_value')} />
-          <TextField
-            label="Giá trị đơn tối thiểu (VND)"
-            type="number"
-            fullWidth
-            value={form.minimum_order_amount}
-            onChange={handleChange('minimum_order_amount')}
-          />
-          <TextField
-            label="Ngày bắt đầu"
-            type="datetime-local"
-            fullWidth
-            value={normalizeDateForInput(form.start_date)}
-            onChange={e => setForm((s: any) => ({ ...s, start_date: e.target.value }))}
-            InputLabelProps={{ shrink: true }}
-            required
-          />
-          <TextField
-            label="Ngày kết thúc"
-            type="datetime-local"
-            fullWidth
-            value={normalizeDateForInput(form.end_date)}
-            onChange={e => setForm((s: any) => ({ ...s, end_date: e.target.value }))}
-            InputLabelProps={{ shrink: true }}
-            required
-          />
-          <TextField label="Mô tả" fullWidth multiline rows={3} value={form.description} onChange={handleChange('description')} sx={{ gridColumn: '1 / -1' }} />
+    <MotionPage>
+      <Box sx={{ pb: 6 }}>
+        {/* Top header bar */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<BackIcon />}
+              onClick={() => navigate('/admin/promotions')}
+              sx={{ borderRadius: 2 }}
+            >
+              Danh sách
+            </Button>
+            <Typography variant="h4" sx={{ fontWeight: 800 }}>
+              {isEdit ? 'Chỉnh sửa khuyến mãi' : 'Tạo mới khuyến mãi'}
+            </Typography>
+          </Box>
+
+          <Button
+            variant="contained"
+            startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveIcon />}
+            onClick={handleSubmit}
+            disabled={saving}
+            sx={{ fontWeight: 700, px: 3, borderRadius: 2 }}
+          >
+            {saving ? 'Đang lưu...' : isEdit ? 'Cập nhật khuyến mãi' : 'Lưu khuyến mãi'}
+          </Button>
         </Box>
 
-        <FormControlLabel
-          control={<Switch color="primary" checked={Boolean(form.is_active)} onChange={handleBooleanChange('is_active')} />}
-          label="Khuyến mãi đang hoạt động"
-          sx={{ mt: 1 }}
-        />
+        <form onSubmit={handleSubmit}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1.4fr) minmax(0, 1fr)' }, gap: 3, alignItems: 'start' }}>
+            {/* Left Column: Form Fields */}
+            <Box sx={{ minWidth: 0 }}>
+              <Paper sx={{ p: 3, borderRadius: 2, border: `1px solid ${theme.palette.divider}` }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+                  Thông tin thiết lập chương trình
+                </Typography>
 
-        <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
-          <Button type="submit" variant="contained" disabled={saving}>{saving ? 'Đang lưu...' : 'Lưu'}</Button>
-          <Button variant="outlined" onClick={() => navigate('/admin/promotions')}>Hủy</Button>
-        </Box>
+                <Stack spacing={2.5}>
+                  <TextField
+                    fullWidth
+                    label="Tên chương trình khuyến mãi"
+                    required
+                    value={form.name}
+                    onChange={handleChange('name')}
+                    error={Boolean(errors.name)}
+                    helperText={errors.name}
+                    placeholder="Ví dụ: Giảm giá mùa tựu trường, Flash Sale linh kiện"
+                  />
+
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={3}
+                    label="Mô tả chi tiết"
+                    value={form.description}
+                    onChange={handleChange('description')}
+                    placeholder="Điều kiện và phạm vi áp dụng của mã ưu đãi..."
+                  />
+
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Loại hình giảm giá</InputLabel>
+                      <Select
+                        value={form.discount_type}
+                        onChange={handleChange('discount_type')}
+                        label="Loại hình giảm giá"
+                      >
+                        <MenuItem value="PERCENTAGE">Giảm theo phần trăm (%)</MenuItem>
+                        <MenuItem value="FIXED_AMOUNT">Giảm số tiền cố định (VNĐ)</MenuItem>
+                      </Select>
+                    </FormControl>
+
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="number"
+                      label={form.discount_type === 'PERCENTAGE' ? 'Mức giảm (%)' : 'Số tiền giảm (VNĐ)'}
+                      required
+                      value={form.discount_value}
+                      onChange={handleChange('discount_value')}
+                      error={Boolean(errors.discount_value)}
+                      helperText={errors.discount_value}
+                    />
+                  </Box>
+
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="number"
+                    label="Giá trị đơn hàng tối thiểu (VNĐ)"
+                    value={form.minimum_order_amount}
+                    onChange={handleChange('minimum_order_amount')}
+                    error={Boolean(errors.minimum_order_amount)}
+                    helperText={errors.minimum_order_amount || 'Đặt bằng 0 nếu áp dụng cho mọi đơn hàng'}
+                  />
+
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="datetime-local"
+                      label="Ngày bắt đầu hiệu lực"
+                      required
+                      value={form.start_date ? form.start_date.slice(0, 16) : ''}
+                      onChange={handleChange('start_date')}
+                      InputLabelProps={{ shrink: true }}
+                      error={Boolean(errors.start_date)}
+                      helperText={errors.start_date}
+                    />
+
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="datetime-local"
+                      label="Ngày kết thúc hiệu lực"
+                      required
+                      value={form.end_date ? form.end_date.slice(0, 16) : ''}
+                      onChange={handleChange('end_date')}
+                      InputLabelProps={{ shrink: true }}
+                      error={Boolean(errors.end_date)}
+                      helperText={errors.end_date}
+                    />
+                  </Box>
+
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={Boolean(form.is_active)}
+                        onChange={handleBooleanChange('is_active')}
+                        color="success"
+                      />
+                    }
+                    label="Kích hoạt áp dụng chương trình ngay"
+                  />
+                </Stack>
+              </Paper>
+            </Box>
+
+            {/* Right Column: Live Preview Voucher Card */}
+            <Box sx={{ minWidth: 0 }}>
+              <Paper
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  border: `1px solid ${theme.palette.divider}`,
+                  position: 'sticky',
+                  top: 88,
+                }}
+              >
+                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+                  Xem trước phiếu ưu đãi (Live Preview)
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2.5 }}>
+                  Giao diện hiển thị thực tế khi khách hàng nhìn thấy ưu đãi này
+                </Typography>
+
+                {/* Ticket / Voucher Card */}
+                <Card
+                  elevation={3}
+                  sx={{
+                    borderRadius: 2.5,
+                    border: '1px dashed #10B981',
+                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(0, 240, 255, 0.05) 100%)',
+                    overflow: 'hidden',
+                    mb: 2.5,
+                  }}
+                >
+                  <CardContent sx={{ p: 2.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                      <Chip
+                        icon={<VoucherIcon />}
+                        label="ƯU ĐÃI ĐẶC BIỆT"
+                        color="success"
+                        size="small"
+                        sx={{ fontWeight: 800, fontSize: '0.7rem' }}
+                      />
+                      <Chip
+                        label={form.is_active ? 'ĐANG BẬT' : 'TẠM TẮT'}
+                        size="small"
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: '0.675rem',
+                          bgcolor: form.is_active ? alpha('#10B981', 0.2) : alpha('#94A3B8', 0.2),
+                          color: form.is_active ? '#10B981' : 'text.secondary',
+                        }}
+                      />
+                    </Box>
+
+                    <Typography variant="h4" sx={{ fontWeight: 900, color: '#10B981', fontFamily: 'JetBrains Mono, monospace', mb: 0.5 }}>
+                      {form.discount_type === 'PERCENTAGE'
+                        ? `-${form.discount_value || 0}%`
+                        : `-${currency(Number(form.discount_value || 0))}`}
+                    </Typography>
+
+                    <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.3, mb: 1 }}>
+                      {form.name || 'Tên chương trình ưu đãi'}
+                    </Typography>
+
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2, minHeight: 36 }}>
+                      {form.description || 'Chưa có thông tin mô tả chi tiết cho khuyến mãi này.'}
+                    </Typography>
+
+                    <Divider sx={{ my: 1.5, borderStyle: 'dashed' }} />
+
+                    <Stack spacing={0.75}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <CheckIcon sx={{ fontSize: 16, color: '#10B981' }} />
+                        <Typography variant="caption" color="text.secondary">
+                          Đơn tối thiểu:{' '}
+                          <strong style={{ color: theme.palette.text.primary }}>
+                            {Number(form.minimum_order_amount) > 0
+                              ? currency(Number(form.minimum_order_amount))
+                              : 'Mọi đơn hàng'}
+                          </strong>
+                        </Typography>
+                      </Box>
+
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <TimeIcon sx={{ fontSize: 16, color: theme.palette.primary.main }} />
+                        <Typography variant="caption" color="text.secondary">
+                          Hiệu lực: {formatDateDisplay(form.start_date)} → {formatDateDisplay(form.end_date)}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+
+                <Box
+                  sx={{
+                    p: 1.5,
+                    borderRadius: 1.5,
+                    bgcolor: alpha(theme.palette.info.main, 0.06),
+                    border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                  }}
+                >
+                  <Typography variant="caption" color="text.secondary">
+                    💡 Khách hàng khi thỏa mãn điều kiện đơn hàng tối thiểu sẽ tự động được gợi ý áp dụng voucher này khi thanh toán.
+                  </Typography>
+                </Box>
+              </Paper>
+            </Box>
+          </Box>
+        </form>
       </Box>
-    </Paper>
+    </MotionPage>
   );
 };
 
