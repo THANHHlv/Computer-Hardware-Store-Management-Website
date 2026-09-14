@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Box,
   Button,
@@ -18,14 +18,11 @@ import {
   Stack,
   CircularProgress,
   Avatar,
-  Tooltip,
-  IconButton,
   alpha,
   useTheme,
 } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import {
-  Refresh as RefreshIcon,
   Inventory2Outlined as InventoryAdjustIcon,
   Warehouse as WarehouseIcon,
   History as HistoryIcon,
@@ -237,10 +234,11 @@ export const InventoryList: React.FC = () => {
 
     setSubmittingAdjust(true);
     try {
-      await inventoryService.adjustStock(selectedProduct.id, {
+      await inventoryService.adjustInventory(selectedProduct.id, {
         quantity: adjustQuantity,
         change_type: changeType,
         reason: adjustReason.trim(),
+        performed_by_id: user?.id ? Number(user.id) : 1,
       });
       showSuccess(`Đã ${changeType === 'IN' ? 'nhập thêm' : 'xuất'} ${adjustQuantity} sản phẩm thành công!`);
       setAdjustDialogOpen(false);
