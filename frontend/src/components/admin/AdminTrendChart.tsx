@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Box, Card, CardContent, Typography, Stack, Button, useTheme, ButtonGroup } from '@mui/material';
-import { TrendingUp, DollarSign, ShoppingCart, Calendar } from 'lucide-react';
+import { TrendingUp, DollarSign, ShoppingCart } from 'lucide-react';
 import { useReducedMotion } from 'framer-motion';
 
 export interface AdminTrendChartProps {

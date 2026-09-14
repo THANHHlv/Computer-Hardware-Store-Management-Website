@@ -31,7 +31,6 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import HourglassEmptyRoundedIcon from '@mui/icons-material/HourglassEmptyRounded';
-import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
