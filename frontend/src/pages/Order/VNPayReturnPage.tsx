@@ -87,7 +87,16 @@ const VNPayReturnPage: React.FC = () => {
 
     let cancelled = false;
     const fetchOrder = async () => {
-      // Retry vài lần vì IPN có thể chưa xử lý xong
+      // 1. Gọi backend return endpoint để xác thực chữ ký và cập nhật đơn hàng (fallback nếu IPN chưa tới)
+      try {
+        await api.get(`/payments/vnpay/return?${searchParams.toString()}`);
+      } catch (err) {
+        console.warn('VNPay return verification call error:', err);
+      }
+
+      if (cancelled) return;
+
+      // 2. Fetch trạng thái đơn hàng mới nhất từ database
       let retries = 3;
       let lastError: string | null = null;
 
@@ -104,8 +113,7 @@ const VNPayReturnPage: React.FC = () => {
           lastError = e?.response?.data?.message || e?.message || 'Không thể tải thông tin đơn hàng';
           retries--;
           if (retries > 0 && !cancelled) {
-            // Đợi 2 giây trước khi retry (chờ IPN xử lý)
-            await new Promise((r) => setTimeout(r, 2000));
+            await new Promise((r) => setTimeout(r, 1500));
           }
         }
       }

@@ -95,7 +95,7 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**").permitAll()
 
                         // VNPay Payment — IPN và Return phải public (VNPay gọi trực tiếp)
-                        .requestMatchers(HttpMethod.POST, "/api/payments/vnpay/ipn", "/api/v1/payments/vnpay/ipn").permitAll()
+                        .requestMatchers("/api/payments/vnpay/ipn", "/api/v1/payments/vnpay/ipn").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/payments/vnpay/return", "/api/v1/payments/vnpay/return").permitAll()
                         // VNPay create payment URL — yêu cầu đăng nhập
                         .requestMatchers(HttpMethod.POST, "/api/payments/vnpay/create/**", "/api/v1/payments/vnpay/create/**").hasAnyRole("CUSTOMER", "ADMIN", "STAFF")

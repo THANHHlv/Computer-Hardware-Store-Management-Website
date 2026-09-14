@@ -13,6 +13,8 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -54,9 +56,12 @@ public class VNPayService {
         String vnpTxnRef = order.getOrderCode();
         String vnpOrderInfo = "Thanh toan don hang " + order.getOrderCode();
         String ipAddress = getClientIpAddress(request);
-        LocalDateTime now = LocalDateTime.now();
+        
+        // VNPay bắt buộc sử dụng múi giờ GMT+7 (Asia/Ho_Chi_Minh)
+        ZoneId vnZone = ZoneId.of("Asia/Ho_Chi_Minh");
+        ZonedDateTime now = ZonedDateTime.now(vnZone);
         String createDate = now.format(VN_DATE_FORMAT);
-        String expireDate = now.plusMinutes(15).format(VN_DATE_FORMAT);
+        String expireDate = now.plusMinutes(20).format(VN_DATE_FORMAT);
 
         // Build tham số theo chuẩn VNPay
         Map<String, String> params = new TreeMap<>();
@@ -74,28 +79,27 @@ public class VNPayService {
         params.put("vnp_CreateDate", createDate);
         params.put("vnp_ExpireDate", expireDate);
 
-        // Build query string (đã sort theo alphabet nhờ TreeMap)
+        // Build query string và hash data (đã sort theo alphabet nhờ TreeMap)
         StringBuilder queryBuilder = new StringBuilder();
         StringBuilder hashData = new StringBuilder();
-        Iterator<Map.Entry<String, String>> iterator = params.entrySet().iterator();
+        boolean first = true;
 
-        while (iterator.hasNext()) {
-            Map.Entry<String, String> entry = iterator.next();
+        for (Map.Entry<String, String> entry : params.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
 
             if (value != null && !value.isEmpty()) {
-                // Build hash data (không URL-encode)
-                hashData.append(key).append('=').append(value);
-                // Build query string (có URL-encode)
-                queryBuilder.append(URLEncoder.encode(key, StandardCharsets.US_ASCII))
-                        .append('=')
-                        .append(URLEncoder.encode(value, StandardCharsets.US_ASCII));
-
-                if (iterator.hasNext()) {
+                if (!first) {
                     hashData.append('&');
                     queryBuilder.append('&');
                 }
+                first = false;
+
+                String encodedKey = URLEncoder.encode(key, StandardCharsets.US_ASCII.toString());
+                String encodedValue = URLEncoder.encode(value, StandardCharsets.US_ASCII.toString());
+
+                hashData.append(encodedKey).append('=').append(encodedValue);
+                queryBuilder.append(encodedKey).append('=').append(encodedValue);
             }
         }
 
@@ -132,18 +136,22 @@ public class VNPayService {
 
         // Build hash data (sort theo alphabet, nhờ TreeMap)
         StringBuilder hashData = new StringBuilder();
-        Iterator<Map.Entry<String, String>> iterator = sortedParams.entrySet().iterator();
+        boolean first = true;
 
-        while (iterator.hasNext()) {
-            Map.Entry<String, String> entry = iterator.next();
+        for (Map.Entry<String, String> entry : sortedParams.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
 
             if (value != null && !value.isEmpty()) {
-                hashData.append(key).append('=').append(value);
-                if (iterator.hasNext()) {
+                if (!first) {
                     hashData.append('&');
                 }
+                first = false;
+
+                String encodedKey = URLEncoder.encode(key, StandardCharsets.US_ASCII.toString());
+                String encodedValue = URLEncoder.encode(value, StandardCharsets.US_ASCII.toString());
+
+                hashData.append(encodedKey).append('=').append(encodedValue);
             }
         }
 

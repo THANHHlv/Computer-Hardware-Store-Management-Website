@@ -92,10 +92,33 @@ public class PaymentController {
         response.put("vnp_OrderInfo", params.getOrDefault("vnp_OrderInfo", ""));
         response.put("signatureValid", String.valueOf(isValidSignature));
 
+        String txnRef = params.getOrDefault("vnp_TxnRef", "");
+        String transactionNo = params.getOrDefault("vnp_TransactionNo", "");
+
         if (isValidSignature && "00".equals(params.get("vnp_ResponseCode"))) {
+            // Cập nhật đơn hàng (phòng ngừa trường hợp IPN chưa đến hoặc chạy localhost)
+            orderRepository.findByOrderCode(txnRef).ifPresent(order -> {
+                if (order.getPaymentStatus() != Order.PaymentStatus.PAID) {
+                    order.setPaymentStatus(Order.PaymentStatus.PAID);
+                    order.setStatus(Order.OrderStatus.CONFIRMED);
+                    order.setVnpayTransactionNo(transactionNo);
+                    orderRepository.save(order);
+                    log.info("VNPay return: Cập nhật thành công đơn hàng {} sang PAID/CONFIRMED", txnRef);
+                }
+            });
             response.put("status", "SUCCESS");
             response.put("message", "Thanh toán thành công");
         } else {
+            if (isValidSignature) {
+                orderRepository.findByOrderCode(txnRef).ifPresent(order -> {
+                    if (order.getPaymentStatus() != Order.PaymentStatus.PAID) {
+                        order.setPaymentStatus(Order.PaymentStatus.FAILED);
+                        order.setVnpayTransactionNo(transactionNo);
+                        orderRepository.save(order);
+                        log.info("VNPay return: Cập nhật đơn hàng {} sang FAILED", txnRef);
+                    }
+                });
+            }
             response.put("status", "FAILED");
             response.put("message", isValidSignature
                     ? "Thanh toán không thành công (mã: " + params.getOrDefault("vnp_ResponseCode", "unknown") + ")"
@@ -107,12 +130,12 @@ public class PaymentController {
 
     /**
      * IPN (Instant Payment Notification) — VNPay gọi trực tiếp từ server.
-     * Đây là nguồn xác nhận đáng tin cậy DUY NHẤT.
+     * Hỗ trợ cả GET và POST tùy cấu hình gateway.
      * 
      * Phải trả về đúng format JSON: {"RspCode":"00","Message":"Confirm Success"}
      * Phải idempotent — xử lý IPN gọi trùng lặp không được trừ kho 2 lần.
      */
-    @PostMapping("/ipn")
+    @RequestMapping(value = "/ipn", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<Map<String, String>> vnpayIpn(HttpServletRequest request) {
         Map<String, String> params = extractVnPayParams(request);
         String txnRef = params.getOrDefault("vnp_TxnRef", "");
