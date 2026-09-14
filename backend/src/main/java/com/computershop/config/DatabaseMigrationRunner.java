@@ -94,6 +94,34 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
             System.out.println("[OK] 4. Đã tạo các index idx_orders_vnpay_txn và idx_orders_payment_status");
 
             System.out.println("=== MIGRATION THÀNH CÔNG! ===");
+            try (java.sql.ResultSet rs = stmt.executeQuery("SELECT id, order_code, payment_method, status, created_at FROM orders ORDER BY id DESC LIMIT 5")) {
+                while (rs.next()) {
+                    System.out.println("ORDER: id=" + rs.getLong("id")
+                            + ", code=" + rs.getString("order_code")
+                            + ", method=" + rs.getString("payment_method")
+                            + ", status=" + rs.getString("status")
+                            + ", created_at=" + rs.getTimestamp("created_at"));
+                }
+            }
+
+            com.computershop.config.VNPayConfig cfg = new com.computershop.config.VNPayConfig();
+            cfg.setTmnCode("D66TTI4G");
+            cfg.setHashSecret("PHZDECBXGRERDUMSMFRUUCWZNVKUVCYT");
+            cfg.setPayUrl("https://sandbox.vnpayment.vn/paymentv2/vpcpay.html");
+            cfg.setReturnUrl("http://localhost:5173/order/vnpay-return");
+            cfg.setVersion("2.1.0");
+            cfg.setCommand("pay");
+            cfg.setCurrCode("VND");
+            cfg.setLocale("vn");
+
+            com.computershop.service.VNPayService vnPayService = new com.computershop.service.VNPayService(cfg);
+            com.computershop.entity.Order testOrder = new com.computershop.entity.Order();
+            testOrder.setId(9L);
+            testOrder.setOrderCode("ORD-20260914090933-360A2C");
+            testOrder.setFinalAmount(new java.math.BigDecimal("50000.00"));
+
+            String testUrl = vnPayService.createPaymentUrl(testOrder, null);
+            System.out.println(">>> GENERATED VNPAY URL: " + testUrl);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
