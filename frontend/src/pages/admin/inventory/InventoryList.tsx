@@ -68,6 +68,19 @@ const CHANGE_OPTIONS: Array<{ value: StockAdjustmentRequest['change_type']; labe
   { value: 'OUT', label: 'Xuất kho / Giảm (- OUT)', direction: 'OUT' },
 ];
 
+const INVENTORY_STOCK_TABS: Array<{ key: 'all' | 'in_stock' | 'low_stock' | 'out_of_stock'; label: string }> = [
+  { key: 'all', label: 'Tất cả sản phẩm' },
+  { key: 'in_stock', label: 'Còn hàng' },
+  { key: 'low_stock', label: 'Cảnh báo tồn ít' },
+  { key: 'out_of_stock', label: 'Đã hết hàng' },
+];
+
+const INVENTORY_LOG_TABS: Array<{ key: '' | 'IN' | 'OUT'; label: string }> = [
+  { key: '', label: 'Tất cả nhật ký' },
+  { key: 'IN', label: 'Nhập kho (+ IN)' },
+  { key: 'OUT', label: 'Xuất kho (- OUT)' },
+];
+
 export const InventoryList: React.FC = () => {
   const theme = useTheme();
   const { user } = useAuth();
@@ -464,7 +477,14 @@ export const InventoryList: React.FC = () => {
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => handleOpenAdjust()}
-            sx={{ fontWeight: 700, borderRadius: 2, px: 2.5 }}
+            sx={{
+              fontWeight: 700,
+              borderRadius: 2,
+              px: 2.5,
+              bgcolor: '#EE4D2D',
+              '&:hover': { bgcolor: '#D73211' },
+              boxShadow: '0 2px 8px rgba(238, 77, 45, 0.25)',
+            }}
           >
             + Điều chỉnh tồn kho
           </Button>
@@ -481,6 +501,15 @@ export const InventoryList: React.FC = () => {
                 fontSize: '0.925rem',
                 textTransform: 'none',
                 minHeight: 48,
+                color: 'text.secondary',
+                '&.Mui-selected': {
+                  color: '#EE4D2D',
+                },
+              },
+              '& .MuiTabs-indicator': {
+                backgroundColor: '#EE4D2D',
+                height: 3,
+                borderRadius: '3px 3px 0 0',
               },
             }}
           >
@@ -513,6 +542,38 @@ export const InventoryList: React.FC = () => {
             searchValue={productSearch}
             onSearchChange={setProductSearch}
             searchPlaceholder="Tìm kiếm theo tên sản phẩm..."
+            tabs={
+              <Tabs
+                value={stockFilter}
+                onChange={(_e, v) => {
+                  setStockFilter(v);
+                  setStockPage(0);
+                }}
+                variant="scrollable"
+                scrollButtons="auto"
+                sx={{
+                  minHeight: 44,
+                  '& .MuiTab-root': {
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.875rem',
+                    minHeight: 44,
+                    px: 2.5,
+                    color: 'text.secondary',
+                    '&.Mui-selected': { color: '#EE4D2D' },
+                  },
+                  '& .MuiTabs-indicator': {
+                    backgroundColor: '#EE4D2D',
+                    height: 3,
+                    borderRadius: '3px 3px 0 0',
+                  },
+                }}
+              >
+                {INVENTORY_STOCK_TABS.map((tab) => (
+                  <Tab key={tab.key} value={tab.key} label={tab.label} />
+                ))}
+              </Tabs>
+            }
             filters={
               <>
                 <FormControl size="small" sx={{ minWidth: 160 }}>
@@ -570,6 +631,38 @@ export const InventoryList: React.FC = () => {
             searchValue={logSearch}
             onSearchChange={setLogSearch}
             searchPlaceholder="Tìm theo sản phẩm, lý do..."
+            tabs={
+              <Tabs
+                value={changeTypeFilter}
+                onChange={(_e, v) => {
+                  setChangeTypeFilter(v);
+                  setLogsPage(0);
+                }}
+                variant="scrollable"
+                scrollButtons="auto"
+                sx={{
+                  minHeight: 44,
+                  '& .MuiTab-root': {
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.875rem',
+                    minHeight: 44,
+                    px: 2.5,
+                    color: 'text.secondary',
+                    '&.Mui-selected': { color: '#EE4D2D' },
+                  },
+                  '& .MuiTabs-indicator': {
+                    backgroundColor: '#EE4D2D',
+                    height: 3,
+                    borderRadius: '3px 3px 0 0',
+                  },
+                }}
+              >
+                {INVENTORY_LOG_TABS.map((tab) => (
+                  <Tab key={tab.key} value={tab.key} label={tab.label} />
+                ))}
+              </Tabs>
+            }
             filters={
               <>
                 <FormControl size="small" sx={{ minWidth: 160 }}>
