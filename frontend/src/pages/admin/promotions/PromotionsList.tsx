@@ -1,11 +1,30 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useDebounce } from '../../../hooks/useDebounce';
-import { Box, Button, Card, CardContent, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, IconButton, Tooltip, FormControl, InputLabel, Select, MenuItem, Chip, Switch } from '@mui/material';
-import { Add as AddIcon, Edit as EditIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import {
+  Box,
+  Button,
+  IconButton,
+  Tooltip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Typography,
+  Switch,
+  alpha,
+  useTheme,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  FilterListOff as FilterOffIcon,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { promotionService } from '../../../services/promotion.service';
 import { useSnackbar } from '../../../hooks/useSnackbar';
-import AdminFiltersBar from '../../../components/common/AdminFiltersBar';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { MotionPage } from '../../../components/common/MotionPage';
+import { DataTable, type Column } from '../../../components/admin/DataTable';
+import { StatusBadge } from '../../../components/admin/StatusBadge';
 
 const PAGE_SIZE = 10;
 
@@ -15,208 +34,292 @@ const parseDate = (value?: string | Date | null) => {
   return Number.isNaN(parsed.getTime()) ? undefined : parsed;
 };
 
-const evaluatePromotionTemporalStatus = (promotion: any, referenceTime = Date.now()) => {
-  const startDate = parseDate(promotion.start_date ?? promotion.startDate);
-  const endDate = parseDate(promotion.end_date ?? promotion.endDate);
-  const backendActive = Boolean(promotion.is_active ?? promotion.isActive);
-  const hasStarted = !startDate || startDate.getTime() <= referenceTime;
-  const isExpired = endDate ? endDate.getTime() < referenceTime : false;
-  const isActive = backendActive && hasStarted && !isExpired;
+const evaluateTemporalStatus = (promo: any, now = Date.now()) => {
+  const startDate = parseDate(promo.start_date ?? promo.startDate);
+  const endDate = parseDate(promo.end_date ?? promo.endDate);
+  const backendActive = Boolean(promo.is_active ?? promo.isActive ?? true);
 
-  return { startDate, endDate, isExpired, isActive };
+  const hasStarted = !startDate || startDate.getTime() <= now;
+  const isExpired = endDate ? endDate.getTime() < now : false;
+
+  let statusKey: 'ACTIVE' | 'UPCOMING' | 'EXPIRED' | 'INACTIVE' = 'ACTIVE';
+
+  if (!backendActive) {
+    statusKey = 'INACTIVE';
+  } else if (isExpired) {
+    statusKey = 'EXPIRED';
+  } else if (!hasStarted) {
+    statusKey = 'UPCOMING';
+  } else {
+    statusKey = 'ACTIVE';
+  }
+
+  return { startDate, endDate, isExpired, hasStarted, statusKey };
 };
 
-const PromotionsList: React.FC = () => {
+export const PromotionsList: React.FC = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const { showError, showSuccess } = useSnackbar();
+
   const [loading, setLoading] = useState(false);
   const [promotions, setPromotions] = useState<any[]>([]);
-  // pagination state kept for future extension
-  const [page] = useState(0);
-  const [filters, setFilters] = useState({ status: '', discountType: '', search: '' });
-  const [rawSearch, setRawSearch] = useState('');
-  const debouncedSearch = useDebounce(rawSearch, 400);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(PAGE_SIZE);
+  const [total, setTotal] = useState(0);
+
+  const [statusFilter, setStatusFilter] = useState('');
+  const [discountTypeFilter, setDiscountTypeFilter] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const debouncedSearch = useDebounce(searchKeyword, 400);
 
   const fetchPromotions = async () => {
     setLoading(true);
     try {
-      // Map UI filter values to backend-friendly params
-      const opts: any = { page, size: PAGE_SIZE };
-      if (filters.search) opts.search = filters.search;
-      if (filters.discountType) opts.discountType = filters.discountType;
+      const opts: any = { page, size: rowsPerPage };
+      if (debouncedSearch.trim()) opts.search = debouncedSearch.trim();
+      if (discountTypeFilter) opts.discountType = discountTypeFilter;
 
-      // UI uses 'active'/'inactive' strings. Some backends accept boolean is_active, others expect status enum.
-      // Send both to maximize compatibility: status=ACTIVE|INACTIVE and is_active=true|false
-      if (filters.status === 'active') {
+      if (statusFilter === 'active') {
         opts.isActive = true;
-        opts.status = 'ACTIVE';
-      } else if (filters.status === 'inactive') {
+      } else if (statusFilter === 'inactive') {
         opts.isActive = false;
-        opts.status = 'INACTIVE';
       }
 
-      // Log final opts to help debug why filters may not apply on backend
-      try { console.debug('🔎 PromotionsList: fetching with opts =', JSON.stringify(opts)); } catch { }
-
       const resp = await promotionService.getPromotions(opts);
-      setPromotions(resp.content || []);
+      const raw = resp.content || [];
+      setPromotions(raw);
+      setTotal(resp.totalElements || raw.length);
     } catch (err: any) {
-      showError('Không tải được khuyến mãi: ' + (err.message || err));
-    } finally { setLoading(false); }
+      showError('Không tải được danh sách khuyến mãi: ' + (err.message || err));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { fetchPromotions(); }, [page, filters]);
-
-  // Sync debounced search into filters so fetchPromotions triggers only after typing stops
   useEffect(() => {
-    setFilters(prev => ({ ...prev, search: debouncedSearch }));
-  }, [debouncedSearch]);
+    fetchPromotions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, rowsPerPage, statusFilter, discountTypeFilter, debouncedSearch]);
 
-  // delete action intentionally removed by UX decision (frontend-only change)
-
-  const handleToggle = async (id: number, activate: boolean) => {
+  const handleToggleStatus = async (promoId: number, activate: boolean) => {
     try {
-      await promotionService.togglePromotionStatus(id, activate);
-      showSuccess('Cập nhật trạng thái thành công');
+      await promotionService.togglePromotionStatus(promoId, activate);
+      showSuccess(`Đã ${activate ? 'kích hoạt' : 'tạm dừng'} khuyến mãi thành công`);
       fetchPromotions();
     } catch (e: any) {
-      showError('Cập nhật thất bại: ' + (e.message || e));
+      showError('Cập nhật trạng thái thất bại: ' + (e.message || e));
     }
   };
 
-  const formatDate = (value?: Date | string | null) => {
-    const date = parseDate(value ?? undefined);
-    return date ? date.toLocaleDateString('vi-VN') : '-';
+  const clearFilters = () => {
+    setStatusFilter('');
+    setDiscountTypeFilter('');
+    setSearchKeyword('');
+    setPage(0);
   };
 
-  const enrichedPromotions = useMemo(() => {
-    const referenceTime = Date.now();
-    return promotions.map(item => ({ item, status: evaluatePromotionTemporalStatus(item, referenceTime) }));
+  const formatDate = (d?: Date) => {
+    if (!d) return '—';
+    return d.toLocaleDateString('vi-VN');
+  };
+
+  const currency = (value: number) =>
+    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value);
+
+  const enrichedData = useMemo(() => {
+    const now = Date.now();
+    return promotions.map((p) => {
+      const temporal = evaluateTemporalStatus(p, now);
+      return {
+        ...p,
+        _temporal: temporal,
+      };
+    });
   }, [promotions]);
 
-  // Client-side fallback filtering to ensure UX works even if backend ignores params
-  const filteredPromotions = useMemo(() => {
-    let data = [...enrichedPromotions];
-    // filter by status
-    if (filters.status === 'active') {
-      data = data.filter(({ status }) => status.isActive);
-    } else if (filters.status === 'inactive') {
-      data = data.filter(({ status }) => !status.isActive);
-    }
-    // filter by type
-    if (filters.discountType) {
-      data = data.filter(({ item }) => String(item.discount_type ?? item.discountType) === filters.discountType);
-    }
-    // filter by search (name/description)
-    if (filters.search) {
-      const q = filters.search.toLowerCase();
-      data = data.filter(({ item }) =>
-        String(item.name ?? '').toLowerCase().includes(q) ||
-        String(item.description ?? '').toLowerCase().includes(q)
-      );
-    }
-    return data;
-  }, [enrichedPromotions, filters]);
+  const columns: Column<any>[] = [
+    {
+      key: 'name',
+      label: 'TÊN KHUYẾN MÃI',
+      render: (p) => (
+        <Box sx={{ minWidth: 200 }}>
+          <Typography variant="body2" sx={{ fontWeight: 700 }}>
+            {p.name}
+          </Typography>
+          {p.description && (
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25 }}>
+              {p.description}
+            </Typography>
+          )}
+          {p.code && (
+            <Chip
+              label={`Mã: ${p.code}`}
+              size="small"
+              variant="outlined"
+              sx={{ mt: 0.5, height: 20, fontSize: '0.7rem', fontWeight: 700 }}
+            />
+          )}
+        </Box>
+      ),
+    },
+    {
+      key: 'discount',
+      label: 'MỨC GIẢM GIÁ',
+      align: 'center',
+      render: (p) => {
+        const type = p.discount_type || p.discountType || 'PERCENTAGE';
+        const val = Number(p.discount_value ?? p.discountValue ?? 0);
+        return (
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography
+              variant="subtitle2"
+              sx={{ fontWeight: 800, color: '#10B981', fontFamily: 'JetBrains Mono, monospace' }}
+            >
+              {type === 'PERCENTAGE' ? `GIẢM ${val}%` : `GIẢM ${currency(val)}`}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {type === 'PERCENTAGE' ? 'Phần trăm giá trị' : 'Số tiền cố định'}
+            </Typography>
+          </Box>
+        );
+      },
+    },
+    {
+      key: 'dates',
+      label: 'THỜI GIAN ÁP DỤNG',
+      align: 'center',
+      render: (p) => (
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.8125rem' }}>
+            {formatDate(p._temporal.startDate)} → {formatDate(p._temporal.endDate)}
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      key: 'status',
+      label: 'TRẠNG THÁI HIỆU LỰC',
+      align: 'center',
+      render: (p) => (
+        <StatusBadge status={p._temporal.statusKey} category="promotion" size="small" />
+      ),
+    },
+    {
+      key: 'toggle',
+      label: 'BẬT / TẮT',
+      align: 'center',
+      render: (p) => {
+        const isExp = p._temporal.isExpired;
+        const isActive = Boolean(p.is_active ?? p.isActive ?? true);
+        return (
+          <Tooltip title={isExp ? 'Khuyến mãi đã hết hạn' : isActive ? 'Tạm ngưng' : 'Kích hoạt ngay'}>
+            <span>
+              <Switch
+                size="small"
+                color="success"
+                checked={isActive}
+                disabled={isExp}
+                onChange={(_e, checked) => handleToggleStatus(p.id, checked)}
+              />
+            </span>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      key: 'actions',
+      label: 'THAO TÁC',
+      align: 'right',
+      render: (p) => (
+        <Tooltip title="Chỉnh sửa khuyến mãi">
+          <IconButton size="small" color="primary" onClick={() => navigate(`/admin/promotions/${p.id}/edit`)}>
+            <EditIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      ),
+    },
+  ];
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">Quản lý khuyến mãi</Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/admin/promotions/create')}>Tạo khuyến mãi</Button>
-          <Button variant="outlined" startIcon={<RefreshIcon />} onClick={fetchPromotions} disabled={loading}>Làm mới</Button>
-        </Box>
+    <MotionPage>
+      <Box sx={{ pb: 4 }}>
+        <DataTable
+          title="Quản lý khuyến mãi & Voucher"
+          subtitle={`Tổng số ${total} chương trình khuyến mãi`}
+          columns={columns}
+          data={enrichedData}
+          loading={loading}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          totalRows={total}
+          onPageChange={setPage}
+          onRowsPerPageChange={setRowsPerPage}
+          searchValue={searchKeyword}
+          onSearchChange={setSearchKeyword}
+          searchPlaceholder="Tìm theo tên khuyến mãi, mô tả..."
+          actions={
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => navigate('/admin/promotions/create')}
+              sx={{ fontWeight: 700, borderRadius: 2 }}
+            >
+              Tạo khuyến mãi
+            </Button>
+          }
+          filters={
+            <>
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel>Loại giảm giá</InputLabel>
+                <Select
+                  value={discountTypeFilter}
+                  onChange={(e) => {
+                    setDiscountTypeFilter(e.target.value);
+                    setPage(0);
+                  }}
+                  label="Loại giảm giá"
+                >
+                  <MenuItem value="">Tất cả loại</MenuItem>
+                  <MenuItem value="PERCENTAGE">Giảm theo %</MenuItem>
+                  <MenuItem value="FIXED_AMOUNT">Giảm số tiền cố định</MenuItem>
+                </Select>
+              </FormControl>
+
+              <FormControl size="small" sx={{ minWidth: 160 }}>
+                <InputLabel>Trạng thái</InputLabel>
+                <Select
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                    setPage(0);
+                  }}
+                  label="Trạng thái"
+                >
+                  <MenuItem value="">Tất cả trạng thái</MenuItem>
+                  <MenuItem value="active">Đang bật</MenuItem>
+                  <MenuItem value="inactive">Đang tắt</MenuItem>
+                </Select>
+              </FormControl>
+
+              {(searchKeyword || statusFilter || discountTypeFilter) && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<FilterOffIcon />}
+                  onClick={clearFilters}
+                  sx={{ borderRadius: 2 }}
+                >
+                  Xóa lọc
+                </Button>
+              )}
+            </>
+          }
+          emptyMessage="Chưa có chương trình khuyến mãi nào"
+          emptyDescription="Không tìm thấy khuyến mãi nào phù hợp với bộ lọc tìm kiếm."
+        />
       </Box>
-
-      {/* informational alert removed per UX request */}
-
-      <AdminFiltersBar
-        searchValue={rawSearch}
-        onSearchChange={(v) => setRawSearch(v)}
-        onRefresh={fetchPromotions}
-        actions={<Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/admin/promotions/create')}>Tạo khuyến mãi</Button>}
-      >
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <FormControl size="small" sx={{ minWidth: 160 }}>
-            <InputLabel>Trạng thái</InputLabel>
-            <Select value={filters.status} label="Trạng thái" onChange={(e) => setFilters({ ...filters, status: e.target.value })}>
-              <MenuItem value="">Tất cả</MenuItem>
-              <MenuItem value="active">Đang hoạt động</MenuItem>
-              <MenuItem value="inactive">Không hoạt động</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl size="small" sx={{ minWidth: 160 }}>
-            <InputLabel>Loại</InputLabel>
-            <Select value={filters.discountType} label="Loại" onChange={(e) => setFilters({ ...filters, discountType: e.target.value })}>
-              <MenuItem value="">Tất cả</MenuItem>
-              <MenuItem value="PERCENTAGE">Phần trăm</MenuItem>
-              <MenuItem value="FIXED_AMOUNT">Cố định</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-      </AdminFiltersBar>
-
-      {/* debounced search synchronized via top-level useEffect */}
-
-      <Card>
-        <CardContent>
-          {loading ? (<Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress /></Box>) : (
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Tên</TableCell>
-                    <TableCell>Loại</TableCell>
-                    <TableCell>Giá trị</TableCell>
-                    <TableCell>Thời gian</TableCell>
-                    <TableCell>Trạng thái</TableCell>
-                    <TableCell align="right">Hành động</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredPromotions.map(({ item: p, status }) => (
-                    <TableRow key={p.id} hover>
-                      <TableCell>
-                        <Typography variant="body2" fontWeight="medium">{p.name}</Typography>
-                        <Typography variant="caption" color="text.secondary">{p.description}</Typography>
-                      </TableCell>
-                      <TableCell>{(p.discount_type ?? p.discountType) || '-'}</TableCell>
-                      <TableCell>{(p.discount_type ?? p.discountType) === 'PERCENTAGE' ? `${(p.discount_value ?? p.discountValue) ?? 0}%` : `${(p.discount_value ?? p.discountValue) ?? 0} VND`}</TableCell>
-                      <TableCell>{formatDate(status.startDate)} - {formatDate(status.endDate)}</TableCell>
-                      <TableCell>
-                        {status.isActive ? (
-                          <Chip label="Hoạt động" color="success" size="small" />
-                        ) : status.isExpired ? (
-                          <Chip label="Hết hạn" size="small" sx={{ bgcolor: 'error.main', color: 'common.white' }} />
-                        ) : (
-                          <Chip label="Không hoạt động" size="small" />
-                        )}
-                      </TableCell>
-                      <TableCell align="right">
-                        <Tooltip title="Chỉnh sửa"><IconButton size="small" onClick={() => navigate(`/admin/promotions/${p.id}/edit`)}><EditIcon /></IconButton></Tooltip>
-                        {/* Toggle switch (colored) - removed delete button per request */}
-                        <Tooltip title={status.isExpired ? 'Khuyến mãi đã hết hạn, vui lòng gia hạn thời gian nếu muốn kích hoạt lại' : 'Kích hoạt/ Vô hiệu hóa khuyến mãi'}>
-                          <span>
-                            <Switch
-                              color="success"
-                              checked={status.isActive}
-                              disabled={status.isExpired}
-                              onChange={(_, checked) => handleToggle(p.id, checked)}
-                              inputProps={{ 'aria-label': 'Kích hoạt/ Vô hiệu hóa' }}
-                            />
-                          </span>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </CardContent>
-      </Card>
-    </Box>
+    </MotionPage>
   );
 };
 
