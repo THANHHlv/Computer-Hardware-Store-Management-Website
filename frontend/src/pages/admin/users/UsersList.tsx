@@ -340,19 +340,19 @@ export const UsersList: React.FC = () => {
           filters={
             <>
               <FormControl size="small" sx={{ minWidth: 170 }}>
-                <InputLabel>Vai trò (Role)</InputLabel>
+                <InputLabel>Vai trò</InputLabel>
                 <Select
                   value={roleFilter}
                   onChange={(e) => {
                     setRoleFilter(e.target.value);
                     setPage(0);
                   }}
-                  label="Vai trò (Role)"
+                  label="Vai trò"
                 >
                   <MenuItem value="">Tất cả vai trò</MenuItem>
-                  <MenuItem value="ADMIN">Quản trị viên (ADMIN)</MenuItem>
-                  <MenuItem value="STAFF">Nhân viên (STAFF)</MenuItem>
-                  <MenuItem value="CUSTOMER">Khách hàng (CUSTOMER)</MenuItem>
+                  <MenuItem value="ADMIN">Quản trị viên</MenuItem>
+                  <MenuItem value="STAFF">Nhân viên</MenuItem>
+                  <MenuItem value="CUSTOMER">Khách hàng</MenuItem>
                 </Select>
               </FormControl>
 

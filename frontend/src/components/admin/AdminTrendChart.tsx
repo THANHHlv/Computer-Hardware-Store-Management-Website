@@ -147,7 +147,7 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
   };
 
   return (
-    <Card sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 2, mb: 3 }}>
+    <Card sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: isDark ? 'divider' : '#E5E7EB', borderRadius: 2.5, boxShadow: isDark ? 'none' : '0 1px 3px rgba(0,0,0,0.04)', mb: 3 }}>
       <CardContent sx={{ p: { xs: 2, md: 3 } }}>
         <Stack
           direction={{ xs: 'column', md: 'row' }}
@@ -181,7 +181,7 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
                   fontWeight: 600,
                   fontSize: '0.75rem',
                   bgcolor: timeRange === '7d' ? theme.palette.primary.main : 'transparent',
-                  color: timeRange === '7d' ? '#0A0E17' : 'text.secondary',
+                  color: timeRange === '7d' ? '#FFFFFF' : 'text.secondary',
                 }}
               >
                 7 ngày
@@ -193,7 +193,7 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
                   fontWeight: 600,
                   fontSize: '0.75rem',
                   bgcolor: timeRange === '30d' ? theme.palette.primary.main : 'transparent',
-                  color: timeRange === '30d' ? '#0A0E17' : 'text.secondary',
+                  color: timeRange === '30d' ? '#FFFFFF' : 'text.secondary',
                 }}
               >
                 30 ngày
@@ -205,7 +205,7 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
                   fontWeight: 600,
                   fontSize: '0.75rem',
                   bgcolor: timeRange === '6m' ? theme.palette.primary.main : 'transparent',
-                  color: timeRange === '6m' ? '#0A0E17' : 'text.secondary',
+                  color: timeRange === '6m' ? '#FFFFFF' : 'text.secondary',
                 }}
               >
                 6 tháng
@@ -213,7 +213,7 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
             </ButtonGroup>
 
             {/* Metric switch */}
-            <Stack direction="row" spacing={0.5} sx={{ bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', p: 0.5, borderRadius: 2 }}>
+            <Stack direction="row" spacing={0.5} sx={{ bgcolor: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9', p: 0.5, borderRadius: 2 }}>
               <Button
                 size="small"
                 startIcon={<DollarSign size={15} />}
@@ -223,7 +223,7 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
                   fontWeight: 600,
                   borderRadius: 1.5,
                   bgcolor: isRevenue ? theme.palette.primary.main : 'transparent',
-                  color: isRevenue ? '#0A0E17' : 'text.secondary',
+                  color: isRevenue ? '#FFFFFF' : 'text.secondary',
                   '&:hover': { bgcolor: isRevenue ? theme.palette.primary.main : 'action.hover' },
                 }}
               >
@@ -318,7 +318,7 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
                     textAnchor="middle"
                     fill={isDark ? '#94A3B8' : '#64748B'}
                     fontSize={11}
-                    fontFamily="Space Grotesk, sans-serif"
+                    fontFamily="'Be Vietnam Pro', 'Inter', sans-serif"
                     fontWeight={600}
                   >
                     {labels[idx] || `${idx + 1}`}

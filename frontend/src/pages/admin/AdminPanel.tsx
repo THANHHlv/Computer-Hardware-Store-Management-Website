@@ -21,7 +21,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  alpha,
   useTheme,
   Skeleton,
 } from '@mui/material';
@@ -192,15 +191,16 @@ export const AdminPanel: React.FC = () => {
   return (
     <MotionPage>
       <Box sx={{ pb: 4 }}>
-        {/* Top Header Card */}
+        {/* Shopee-style Greeting & Action Banner */}
         <Paper
-          elevation={1}
+          elevation={0}
           sx={{
             p: { xs: 2.5, md: 3 },
             mb: 3,
             bgcolor: 'background.paper',
             border: `1px solid ${theme.palette.divider}`,
-            borderRadius: 2,
+            borderRadius: 2.5,
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
             display: 'flex',
             flexDirection: { xs: 'column', sm: 'row' },
             justifyContent: 'space-between',
@@ -209,11 +209,24 @@ export const AdminPanel: React.FC = () => {
           }}
         >
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: '-0.02em', mb: 0.5 }}>
-              Tổng quan quản trị
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: '-0.02em', color: 'text.primary' }}>
+                👋 Xin chào, {user?.full_name || 'Quản trị viên'}!
+              </Typography>
+              <Chip
+                label="Hôm nay"
+                size="small"
+                sx={{
+                  bgcolor: '#FFF5F1',
+                  color: '#EE4D2D',
+                  fontWeight: 700,
+                  fontSize: '0.7rem',
+                  border: '1px solid #FCD4C9',
+                }}
+              />
+            </Box>
             <Typography variant="body2" color="text.secondary">
-              Xin chào, <strong>{user?.full_name || 'Admin'}</strong> — số liệu kinh doanh và vận hành hệ thống tính đến hôm nay.
+              Chúc bạn ngày mới kinh doanh phát đạt. Dưới đây là tổng quan vận hành và kinh doanh tính đến hôm nay.
             </Typography>
           </Box>
 
@@ -224,6 +237,8 @@ export const AdminPanel: React.FC = () => {
                 sx={{
                   border: `1px solid ${theme.palette.divider}`,
                   borderRadius: 2,
+                  bgcolor: 'background.paper',
+                  '&:hover': { bgcolor: '#F8FAFC' },
                 }}
               >
                 <RefreshIcon />
@@ -233,7 +248,14 @@ export const AdminPanel: React.FC = () => {
               variant="contained"
               component={RouterLink}
               to="/admin/products/create"
-              sx={{ fontWeight: 700, borderRadius: 2, px: 2.5 }}
+              sx={{
+                fontWeight: 700,
+                borderRadius: 2,
+                px: 2.5,
+                bgcolor: '#EE4D2D',
+                '&:hover': { bgcolor: '#D73211' },
+                boxShadow: '0 2px 8px rgba(238, 77, 45, 0.25)',
+              }}
             >
               + Thêm sản phẩm
             </Button>
@@ -241,14 +263,194 @@ export const AdminPanel: React.FC = () => {
               variant="outlined"
               component={RouterLink}
               to="/admin/orders"
-              sx={{ fontWeight: 600, borderRadius: 2, px: 2 }}
+              sx={{
+                fontWeight: 600,
+                borderRadius: 2,
+                px: 2,
+                borderColor: '#D1D5DB',
+                color: 'text.primary',
+                '&:hover': { borderColor: '#9CA3AF', bgcolor: '#F9FAFB' },
+              }}
             >
               Xem đơn hàng
             </Button>
           </Box>
         </Paper>
 
-        {/* 4 Quick Stat Cards */}
+        {/* Shopee Signature: 'Việc Cần Làm' (To-Do List / Urgent Actions) Widget */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2.5,
+            mb: 3,
+            bgcolor: 'background.paper',
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: 2.5,
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ width: 4, height: 18, bgcolor: '#EE4D2D', borderRadius: 1 }} />
+              <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'text.primary' }}>
+                Việc cần làm
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                (Những việc bạn cần xử lý ngay)
+              </Typography>
+            </Box>
+            <Button
+              component={RouterLink}
+              to="/admin/orders"
+              size="small"
+              sx={{ color: '#2563EB', fontWeight: 600, fontSize: '0.8125rem' }}
+            >
+              Quản lý toàn bộ đơn →
+            </Button>
+          </Box>
+
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+              gap: 2,
+            }}
+          >
+            {/* Task 1: Chờ xác nhận */}
+            <Box
+              onClick={() => navigate('/admin/orders')}
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                bgcolor: stats.pendingOrders > 0 ? '#FFF5F1' : '#F9FAFB',
+                border: `1px solid ${stats.pendingOrders > 0 ? '#FCD4C9' : '#E5E7EB'}`,
+                cursor: 'pointer',
+                textAlign: 'center',
+                transition: 'all 150ms ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                  borderColor: '#EE4D2D',
+                },
+              }}
+            >
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 800,
+                  fontFamily: 'JetBrains Mono, monospace',
+                  color: stats.pendingOrders > 0 ? '#EE4D2D' : 'text.primary',
+                }}
+              >
+                {loading ? <Skeleton width={40} sx={{ mx: 'auto' }} /> : stats.pendingOrders}
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary', mt: 0.5 }}>
+                Chờ xác nhận
+              </Typography>
+            </Box>
+
+            {/* Task 2: Chờ giao hàng */}
+            <Box
+              onClick={() => navigate('/admin/orders')}
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                bgcolor: '#F9FAFB',
+                border: '1px solid #E5E7EB',
+                cursor: 'pointer',
+                textAlign: 'center',
+                transition: 'all 150ms ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                  borderColor: '#2563EB',
+                },
+              }}
+            >
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 800,
+                  fontFamily: 'JetBrains Mono, monospace',
+                  color: '#2563EB',
+                }}
+              >
+                {loading ? <Skeleton width={40} sx={{ mx: 'auto' }} /> : Math.max(0, stats.totalOrders - stats.pendingOrders)}
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary', mt: 0.5 }}>
+                Đang xử lý / Giao hàng
+              </Typography>
+            </Box>
+
+            {/* Task 3: Sắp / Đã hết hàng */}
+            <Box
+              onClick={() => navigate('/admin/inventory')}
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                bgcolor: stats.lowStockProducts > 0 ? '#FFFBEB' : '#F9FAFB',
+                border: `1px solid ${stats.lowStockProducts > 0 ? '#FDE68A' : '#E5E7EB'}`,
+                cursor: 'pointer',
+                textAlign: 'center',
+                transition: 'all 150ms ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                  borderColor: '#D97706',
+                },
+              }}
+            >
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 800,
+                  fontFamily: 'JetBrains Mono, monospace',
+                  color: stats.lowStockProducts > 0 ? '#D97706' : 'text.primary',
+                }}
+              >
+                {loading ? <Skeleton width={40} sx={{ mx: 'auto' }} /> : stats.lowStockProducts}
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary', mt: 0.5 }}>
+                Cảnh báo hết hàng
+              </Typography>
+            </Box>
+
+            {/* Task 4: Đơn phát sinh hôm nay */}
+            <Box
+              onClick={() => navigate('/admin/orders')}
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                bgcolor: '#F9FAFB',
+                border: '1px solid #E5E7EB',
+                cursor: 'pointer',
+                textAlign: 'center',
+                transition: 'all 150ms ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                  borderColor: '#10B981',
+                },
+              }}
+            >
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 800,
+                  fontFamily: 'JetBrains Mono, monospace',
+                  color: '#059669',
+                }}
+              >
+                {loading ? <Skeleton width={40} sx={{ mx: 'auto' }} /> : todayOrdersCount}
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary', mt: 0.5 }}>
+                Đơn mới hôm nay
+              </Typography>
+            </Box>
+          </Box>
+        </Paper>
+
+        {/* 4 Quick Stat Cards (Bright, Human-Centric Ecommerce) */}
         <Box
           sx={{
             display: 'grid',
@@ -257,20 +459,20 @@ export const AdminPanel: React.FC = () => {
             mb: 3,
           }}
         >
-          {/* Card 1: Đơn hôm nay */}
+          {/* Card 1: Đơn hàng hôm nay */}
           <Card
-            elevation={1}
+            elevation={0}
             sx={{
               p: 2.5,
-              borderRadius: 2,
+              borderRadius: 2.5,
               border: `1px solid ${theme.palette.divider}`,
               bgcolor: 'background.paper',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              position: 'relative',
-              overflow: 'hidden',
-              '&:hover': { boxShadow: theme.shadows[4] },
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              transition: 'all 150ms ease',
+              '&:hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.08)' },
             }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
@@ -278,11 +480,11 @@ export const AdminPanel: React.FC = () => {
                 <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.5 }}>
                   Đơn hàng hôm nay
                 </Typography>
-                <Typography variant="h4" sx={{ fontWeight: 800, mt: 0.5, color: '#00F0FF' }}>
+                <Typography variant="h4" sx={{ fontWeight: 800, mt: 0.5, color: '#2563EB', fontFamily: 'JetBrains Mono, monospace' }}>
                   {loading ? <Skeleton width={60} /> : <CountUp end={todayOrdersCount} />}
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: alpha('#00F0FF', 0.12), color: '#00F0FF', width: 44, height: 44, borderRadius: 2 }}>
+              <Avatar sx={{ bgcolor: '#EFF6FF', color: '#2563EB', width: 46, height: 46, borderRadius: 2 }}>
                 <ShoppingCartIcon />
               </Avatar>
             </Box>
@@ -293,16 +495,18 @@ export const AdminPanel: React.FC = () => {
 
           {/* Card 2: Doanh thu hôm nay & tháng này */}
           <Card
-            elevation={1}
+            elevation={0}
             sx={{
               p: 2.5,
-              borderRadius: 2,
+              borderRadius: 2.5,
               border: `1px solid ${theme.palette.divider}`,
               bgcolor: 'background.paper',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              '&:hover': { boxShadow: theme.shadows[4] },
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+              transition: 'all 150ms ease',
+              '&:hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.08)' },
             }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
@@ -310,11 +514,11 @@ export const AdminPanel: React.FC = () => {
                 <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.5 }}>
                   Doanh thu hôm nay
                 </Typography>
-                <Typography variant="h5" sx={{ fontWeight: 800, mt: 0.5, color: '#10B981' }}>
+                <Typography variant="h5" sx={{ fontWeight: 800, mt: 0.5, color: '#059669', fontFamily: 'JetBrains Mono, monospace' }}>
                   {loading ? <Skeleton width={120} /> : <CountUp end={todayRevenue} formatter={currency} />}
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: alpha('#10B981', 0.12), color: '#10B981', width: 44, height: 44, borderRadius: 2 }}>
+              <Avatar sx={{ bgcolor: '#ECFDF5', color: '#059669', width: 46, height: 46, borderRadius: 2 }}>
                 <AttachMoneyIcon />
               </Avatar>
             </Box>
@@ -325,21 +529,22 @@ export const AdminPanel: React.FC = () => {
 
           {/* Card 3: Sản phẩm sắp hết hàng */}
           <Card
-            elevation={1}
+            elevation={0}
             onClick={() => navigate('/admin/inventory')}
             sx={{
               p: 2.5,
-              borderRadius: 2,
-              border: `1px solid ${stats.lowStockProducts > 0 ? alpha(theme.palette.warning.main, 0.4) : theme.palette.divider}`,
-              bgcolor: stats.lowStockProducts > 0 ? alpha(theme.palette.warning.main, 0.03) : 'background.paper',
+              borderRadius: 2.5,
+              border: `1px solid ${stats.lowStockProducts > 0 ? '#FDE68A' : theme.palette.divider}`,
+              bgcolor: stats.lowStockProducts > 0 ? '#FFFDF5' : 'background.paper',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
               cursor: 'pointer',
-              transition: 'all 200ms ease',
+              transition: 'all 150ms ease',
               '&:hover': {
-                boxShadow: theme.shadows[4],
-                borderColor: theme.palette.warning.main,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                borderColor: '#D97706',
               },
             }}
           >
@@ -348,16 +553,16 @@ export const AdminPanel: React.FC = () => {
                 <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.5 }}>
                   Sản phẩm sắp hết hàng
                 </Typography>
-                <Typography variant="h4" sx={{ fontWeight: 800, mt: 0.5, color: theme.palette.warning.main }}>
+                <Typography variant="h4" sx={{ fontWeight: 800, mt: 0.5, color: '#D97706', fontFamily: 'JetBrains Mono, monospace' }}>
                   {loading ? <Skeleton width={60} /> : <CountUp end={stats.lowStockProducts} />}
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: alpha(theme.palette.warning.main, 0.12), color: theme.palette.warning.main, width: 44, height: 44, borderRadius: 2 }}>
+              <Avatar sx={{ bgcolor: '#FFFBEB', color: '#D97706', width: 46, height: 46, borderRadius: 2 }}>
                 <WarningAmberRoundedIcon />
               </Avatar>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Typography variant="caption" color="warning.main" sx={{ fontWeight: 600 }}>
+              <Typography variant="caption" sx={{ color: '#D97706', fontWeight: 700 }}>
                 {stats.lowStockProducts > 0 ? 'Cần kiểm tra kho nhập hàng' : 'Tồn kho đang ổn định'}
               </Typography>
               <ArrowForwardRoundedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
@@ -366,21 +571,22 @@ export const AdminPanel: React.FC = () => {
 
           {/* Card 4: Đơn đang chờ xử lý */}
           <Card
-            elevation={1}
+            elevation={0}
             onClick={() => navigate('/admin/orders')}
             sx={{
               p: 2.5,
-              borderRadius: 2,
-              border: `1px solid ${stats.pendingOrders > 0 ? alpha(theme.palette.info.main, 0.4) : theme.palette.divider}`,
-              bgcolor: stats.pendingOrders > 0 ? alpha(theme.palette.info.main, 0.03) : 'background.paper',
+              borderRadius: 2.5,
+              border: `1px solid ${stats.pendingOrders > 0 ? '#FCD4C9' : theme.palette.divider}`,
+              bgcolor: stats.pendingOrders > 0 ? '#FFFDFD' : 'background.paper',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
               cursor: 'pointer',
-              transition: 'all 200ms ease',
+              transition: 'all 150ms ease',
               '&:hover': {
-                boxShadow: theme.shadows[4],
-                borderColor: theme.palette.info.main,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                borderColor: '#EE4D2D',
               },
             }}
           >
@@ -389,16 +595,16 @@ export const AdminPanel: React.FC = () => {
                 <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.5 }}>
                   Đơn chờ xử lý
                 </Typography>
-                <Typography variant="h4" sx={{ fontWeight: 800, mt: 0.5, color: theme.palette.info.main }}>
+                <Typography variant="h4" sx={{ fontWeight: 800, mt: 0.5, color: '#EE4D2D', fontFamily: 'JetBrains Mono, monospace' }}>
                   {loading ? <Skeleton width={60} /> : <CountUp end={stats.pendingOrders} />}
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: alpha(theme.palette.info.main, 0.12), color: theme.palette.info.main, width: 44, height: 44, borderRadius: 2 }}>
+              <Avatar sx={{ bgcolor: '#FFF5F1', color: '#EE4D2D', width: 46, height: 46, borderRadius: 2 }}>
                 <HourglassEmptyRoundedIcon />
               </Avatar>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Typography variant="caption" color="info.main" sx={{ fontWeight: 600 }}>
+              <Typography variant="caption" sx={{ color: '#EE4D2D', fontWeight: 700 }}>
                 {stats.pendingOrders > 0 ? 'Cần xác nhận ngay' : 'Đã xử lý toàn bộ'}
               </Typography>
               <ArrowForwardRoundedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
@@ -416,17 +622,18 @@ export const AdminPanel: React.FC = () => {
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1.2fr 1fr' }, gap: 3, mb: 3 }}>
           {/* Latest Orders Needing Attention */}
           <Card
-            elevation={1}
+            elevation={0}
             sx={{
-              borderRadius: 2,
+              borderRadius: 2.5,
               border: `1px solid ${theme.palette.divider}`,
               bgcolor: 'background.paper',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
             }}
           >
             <CardContent sx={{ p: 2.5 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 800 }}>
                     Đơn hàng mới nhất cần xử lý
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
@@ -438,7 +645,7 @@ export const AdminPanel: React.FC = () => {
                   to="/admin/orders"
                   size="small"
                   endIcon={<ArrowForwardRoundedIcon />}
-                  sx={{ fontWeight: 600 }}
+                  sx={{ fontWeight: 600, color: '#2563EB' }}
                 >
                   Tất cả đơn
                 </Button>
@@ -447,12 +654,12 @@ export const AdminPanel: React.FC = () => {
               <TableContainer>
                 <Table size="small">
                   <TableHead>
-                    <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.04) }}>
-                      <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', py: 1.25 }}>MÃ ĐƠN</TableCell>
-                      <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', py: 1.25 }}>KHÁCH HÀNG</TableCell>
-                      <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', py: 1.25 }}>TỔNG TIỀN</TableCell>
-                      <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', py: 1.25 }}>TRẠNG THÁI</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.75rem', py: 1.25 }}>CHI TIẾT</TableCell>
+                    <TableRow sx={{ bgcolor: '#F8FAFC' }}>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', py: 1.25, color: 'text.secondary' }}>MÃ ĐƠN</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', py: 1.25, color: 'text.secondary' }}>KHÁCH HÀNG</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', py: 1.25, color: 'text.secondary' }}>TỔNG TIỀN</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem', py: 1.25, color: 'text.secondary' }}>TRẠNG THÁI</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.75rem', py: 1.25, color: 'text.secondary' }}>CHI TIẾT</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -468,14 +675,21 @@ export const AdminPanel: React.FC = () => {
                       ))
                     ) : recentOrders.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} align="center" sx={{ py: 3, color: 'text.secondary' }}>
+                        <TableCell colSpan={5} align="center" sx={{ py: 4, color: 'text.secondary' }}>
                           Chưa có đơn hàng nào
                         </TableCell>
                       </TableRow>
                     ) : (
                       recentOrders.map((order) => (
-                        <TableRow key={order.id} hover sx={{ '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.03) } }}>
-                          <TableCell sx={{ fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>
+                        <TableRow
+                          key={order.id}
+                          hover
+                          sx={{
+                            '&:hover': { bgcolor: '#F8FAFC' },
+                            transition: 'background-color 150ms ease',
+                          }}
+                        >
+                          <TableCell sx={{ fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: '#2563EB' }}>
                             #{order.order_code || order.orderCode || order.id}
                           </TableCell>
                           <TableCell>
@@ -486,7 +700,7 @@ export const AdminPanel: React.FC = () => {
                               {formatDate(order.created_at || order.createdAt)}
                             </Typography>
                           </TableCell>
-                          <TableCell sx={{ fontWeight: 700, color: '#10B981', fontFamily: 'JetBrains Mono, monospace' }}>
+                          <TableCell sx={{ fontWeight: 700, color: '#059669', fontFamily: 'JetBrains Mono, monospace' }}>
                             {currency(Number(order.final_amount ?? order.finalAmount ?? order.total_amount ?? 0))}
                           </TableCell>
                           <TableCell>
@@ -498,7 +712,7 @@ export const AdminPanel: React.FC = () => {
                                 size="small"
                                 component={RouterLink}
                                 to={`/admin/orders/${order.id}`}
-                                sx={{ color: theme.palette.primary.main }}
+                                sx={{ color: '#2563EB', '&:hover': { bgcolor: '#EFF6FF' } }}
                               >
                                 <OpenInNewRoundedIcon fontSize="small" />
                               </IconButton>
@@ -515,17 +729,18 @@ export const AdminPanel: React.FC = () => {
 
           {/* Top Selling Products List */}
           <Card
-            elevation={1}
+            elevation={0}
             sx={{
-              borderRadius: 2,
+              borderRadius: 2.5,
               border: `1px solid ${theme.palette.divider}`,
               bgcolor: 'background.paper',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
             }}
           >
             <CardContent sx={{ p: 2.5 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 800 }}>
                     Top sản phẩm nổi bật
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
@@ -537,7 +752,7 @@ export const AdminPanel: React.FC = () => {
                   to="/admin/products"
                   size="small"
                   endIcon={<ArrowForwardRoundedIcon />}
-                  sx={{ fontWeight: 600 }}
+                  sx={{ fontWeight: 600, color: '#2563EB' }}
                 >
                   Kho sản phẩm
                 </Button>
@@ -557,7 +772,7 @@ export const AdminPanel: React.FC = () => {
                     </ListItem>
                   ))
                 ) : topProducts.length === 0 ? (
-                  <Typography variant="body2" color="text.secondary" sx={{ py: 3, textAlign: 'center' }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
                     Chưa có sản phẩm nào
                   </Typography>
                 ) : (
@@ -572,7 +787,8 @@ export const AdminPanel: React.FC = () => {
                             px: 1,
                             py: 1.25,
                             borderRadius: 1.5,
-                            '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.04) },
+                            '&:hover': { bgcolor: '#F8FAFC' },
+                            transition: 'background-color 150ms ease',
                           }}
                         >
                           <ListItemAvatar>
@@ -582,22 +798,22 @@ export const AdminPanel: React.FC = () => {
                               sx={{
                                 width: 44,
                                 height: 44,
-                                bgcolor: alpha(theme.palette.primary.main, 0.08),
-                                border: `1px solid ${theme.palette.divider}`,
+                                bgcolor: '#F1F5F9',
+                                border: '1px solid #E2E8F0',
                               }}
                             >
-                              <Inventory2Icon fontSize="small" sx={{ color: theme.palette.primary.main }} />
+                              <Inventory2Icon fontSize="small" sx={{ color: '#64748B' }} />
                             </Avatar>
                           </ListItemAvatar>
                           <ListItemText
                             primary={
-                              <Typography variant="body2" sx={{ fontWeight: 700, lineHeight: 1.3 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 700, lineHeight: 1.3, color: 'text.primary' }}>
                                 {p.name}
                               </Typography>
                             }
                             secondary={
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                                <Typography variant="caption" sx={{ color: '#10B981', fontWeight: 700 }}>
+                                <Typography variant="caption" sx={{ color: '#EE4D2D', fontWeight: 700 }}>
                                   {currency(p.price)}
                                 </Typography>
                                 <Typography variant="caption" color="text.secondary">
@@ -625,13 +841,26 @@ export const AdminPanel: React.FC = () => {
         {/* Footer info: Activities & System status */}
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
           {/* Recent activities */}
-          <Card elevation={1} sx={{ borderRadius: 2, border: `1px solid ${theme.palette.divider}` }}>
+          <Card
+            elevation={0}
+            sx={{
+              borderRadius: 2.5,
+              border: `1px solid ${theme.palette.divider}`,
+              bgcolor: 'background.paper',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            }}
+          >
             <CardContent sx={{ p: 2.5 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
                   Nhật ký hoạt động gần đây
                 </Typography>
-                <Chip icon={<NotificationsActiveIcon />} label={`${recentActivities.length} sự kiện`} size="small" />
+                <Chip
+                  icon={<NotificationsActiveIcon sx={{ fontSize: '1rem !important' }} />}
+                  label={`${recentActivities.length} sự kiện`}
+                  size="small"
+                  sx={{ bgcolor: '#EFF6FF', color: '#2563EB', fontWeight: 700 }}
+                />
               </Box>
               <Divider sx={{ mb: 1 }} />
               <List dense>
@@ -643,7 +872,7 @@ export const AdminPanel: React.FC = () => {
                   recentActivities.map((a: any, i) => (
                     <ListItem key={a.id || i} sx={{ px: 0.5 }}>
                       <ListItemAvatar>
-                        <Avatar sx={{ width: 32, height: 32, bgcolor: alpha(theme.palette.primary.main, 0.1), color: theme.palette.primary.main }}>
+                        <Avatar sx={{ width: 32, height: 32, bgcolor: '#ECFDF5', color: '#059669' }}>
                           <CheckCircleOutlineRoundedIcon sx={{ fontSize: 18 }} />
                         </Avatar>
                       </ListItemAvatar>
@@ -661,16 +890,29 @@ export const AdminPanel: React.FC = () => {
           </Card>
 
           {/* System Health */}
-          <Card elevation={1} sx={{ borderRadius: 2, border: `1px solid ${theme.palette.divider}` }}>
+          <Card
+            elevation={0}
+            sx={{
+              borderRadius: 2.5,
+              border: `1px solid ${theme.palette.divider}`,
+              bgcolor: 'background.paper',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            }}
+          >
             <CardContent sx={{ p: 2.5 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
                   Trạng thái vận hành & Uptime
                 </Typography>
                 <Chip
                   label={systemHealth?.status ? systemHealth.status.toUpperCase() : 'HOẠT ĐỘNG TỐT'}
-                  color="success"
                   size="small"
+                  sx={{
+                    bgcolor: '#ECFDF5',
+                    color: '#059669',
+                    border: '1px solid #A7F3D0',
+                    fontWeight: 700,
+                  }}
                 />
               </Box>
               <Divider sx={{ mb: 2 }} />
@@ -679,10 +921,10 @@ export const AdminPanel: React.FC = () => {
                   Thời gian hoạt động máy chủ: <strong>{systemHealth?.uptime || '99.98%'}</strong>
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Cổng thanh toán VNPay: <strong style={{ color: '#10B981' }}>Đang kết nối bình thường</strong>
+                  Cổng thanh toán VNPay: <strong style={{ color: '#059669' }}>Đang kết nối bình thường</strong>
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Cơ sở dữ liệu & Bộ nhớ đệm: <strong style={{ color: '#10B981' }}>Hoạt động ổn định</strong>
+                  Cơ sở dữ liệu & Bộ nhớ đệm: <strong style={{ color: '#059669' }}>Hoạt động ổn định</strong>
                 </Typography>
               </Box>
             </CardContent>

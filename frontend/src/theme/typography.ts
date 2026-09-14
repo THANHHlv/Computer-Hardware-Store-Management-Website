@@ -5,10 +5,10 @@
  */
 
 export const typography = {
-  // ===== FONT FAMILY =====
+  // ===== FONT FAMILY (Chuẩn tiếng Việt với Be Vietnam Pro & Inter) =====
   fontFamily: [
+    '"Be Vietnam Pro"',
     'Inter',
-    'Space Grotesk',
     '-apple-system',
     'BlinkMacSystemFont',
     '"Segoe UI"',
@@ -18,7 +18,7 @@ export const typography = {
   
   // ===== HEADLINES =====
   h1: {
-    fontFamily: '"Space Grotesk", "Inter", sans-serif',
+    fontFamily: '"Be Vietnam Pro", "Inter", sans-serif',
     fontSize: '2.5rem',
     fontWeight: 700,
     lineHeight: 1.2,
@@ -29,7 +29,7 @@ export const typography = {
   },
   
   h2: {
-    fontFamily: '"Space Grotesk", "Inter", sans-serif',
+    fontFamily: '"Be Vietnam Pro", "Inter", sans-serif',
     fontSize: '2rem',
     fontWeight: 600,
     lineHeight: 1.25,
@@ -40,7 +40,7 @@ export const typography = {
   },
   
   h3: {
-    fontFamily: '"Space Grotesk", "Inter", sans-serif',
+    fontFamily: '"Be Vietnam Pro", "Inter", sans-serif',
     fontSize: '1.5rem',
     fontWeight: 600,
     lineHeight: 1.3,
@@ -51,7 +51,7 @@ export const typography = {
   },
   
   h4: {
-    fontFamily: '"Space Grotesk", "Inter", sans-serif',
+    fontFamily: '"Be Vietnam Pro", "Inter", sans-serif',
     fontSize: '1.25rem',
     fontWeight: 600,
     lineHeight: 1.35,
@@ -116,7 +116,7 @@ export const typography = {
   },
   
   overline: {
-    fontFamily: '"Space Grotesk", sans-serif',
+    fontFamily: '"Be Vietnam Pro", sans-serif',
     fontSize: '0.75rem',
     fontWeight: 700,
     lineHeight: 2.66,
@@ -175,7 +175,7 @@ export const shopTypography = {
       color: '#94A3B8',
     },
     category: {
-      fontFamily: '"Space Grotesk", sans-serif',
+      fontFamily: '"Be Vietnam Pro", sans-serif',
       fontSize: '0.75rem',
       fontWeight: 700,
       lineHeight: 1.2,

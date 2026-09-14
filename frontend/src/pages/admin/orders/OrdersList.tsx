@@ -14,6 +14,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Tabs,
+  Tab,
   useTheme,
 } from '@mui/material';
 import {
@@ -35,11 +37,22 @@ import { isCancelableStatus } from '../../../utils/orderStatus';
 
 const PAGE_SIZE = 10;
 
+const ORDER_TABS = [
+  { key: '', label: 'Tất cả' },
+  { key: 'PENDING', label: 'Chờ xử lý' },
+  { key: 'CONFIRMED', label: 'Đã xác nhận' },
+  { key: 'PROCESSING', label: 'Đang chuẩn bị' },
+  { key: 'SHIPPED', label: 'Đang giao' },
+  { key: 'DELIVERED', label: 'Đã giao' },
+  { key: 'CANCELLED', label: 'Đã hủy' },
+];
+
 export const OrdersList: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const userIdParam = searchParams.get('userId');
+  const statusParam = searchParams.get('status');
   const parsedUserId = userIdParam ? Number(userIdParam) : NaN;
   const hasUserScope = Number.isFinite(parsedUserId);
   const userIdFilter = hasUserScope ? parsedUserId : undefined;
@@ -53,7 +66,7 @@ export const OrdersList: React.FC = () => {
   const [total, setTotal] = useState(0);
 
   // Filters
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState(statusParam ? statusParam.toUpperCase() : '');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -285,6 +298,40 @@ export const OrdersList: React.FC = () => {
           onSearchChange={setSearchKeyword}
           searchPlaceholder="Tìm theo mã đơn, tên người nhận, SĐT..."
           onRowClick={(item) => navigate(`/admin/orders/${item.id}`)}
+          tabs={
+            <Tabs
+              value={statusFilter}
+              onChange={(_e, v) => {
+                setStatusFilter(v);
+                setPage(0);
+              }}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{
+                minHeight: 44,
+                '& .MuiTab-root': {
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  fontSize: '0.875rem',
+                  minHeight: 44,
+                  px: 2.5,
+                  color: 'text.secondary',
+                  '&.Mui-selected': {
+                    color: '#EE4D2D',
+                  },
+                },
+                '& .MuiTabs-indicator': {
+                  backgroundColor: '#EE4D2D',
+                  height: 3,
+                  borderRadius: '3px 3px 0 0',
+                },
+              }}
+            >
+              {ORDER_TABS.map((tab) => (
+                <Tab key={tab.key} value={tab.key} label={tab.label} />
+              ))}
+            </Tabs>
+          }
           filters={
             <>
               <FormControl size="small" sx={{ minWidth: 160 }}>

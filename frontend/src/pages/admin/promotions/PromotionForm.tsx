@@ -239,7 +239,14 @@ export const PromotionForm: React.FC = () => {
             startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveIcon />}
             onClick={handleSubmit}
             disabled={saving}
-            sx={{ fontWeight: 700, px: 3, borderRadius: 2 }}
+            sx={{
+              fontWeight: 700,
+              px: 3,
+              borderRadius: 2,
+              bgcolor: '#EE4D2D',
+              '&:hover': { bgcolor: '#D73211' },
+              boxShadow: '0 2px 8px rgba(238, 77, 45, 0.25)',
+            }}
           >
             {saving ? 'Đang lưu...' : isEdit ? 'Cập nhật khuyến mãi' : 'Lưu khuyến mãi'}
           </Button>
@@ -249,8 +256,8 @@ export const PromotionForm: React.FC = () => {
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1.4fr) minmax(0, 1fr)' }, gap: 3, alignItems: 'start' }}>
             {/* Left Column: Form Fields */}
             <Box sx={{ minWidth: 0 }}>
-              <Paper sx={{ p: 3, borderRadius: 2, border: `1px solid ${theme.palette.divider}` }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+              <Paper sx={{ p: 3, borderRadius: 2.5, border: `1px solid ${theme.palette.divider}`, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>
                   Thông tin thiết lập chương trình
                 </Typography>
 
@@ -278,14 +285,14 @@ export const PromotionForm: React.FC = () => {
 
                   <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
                     <FormControl fullWidth size="small">
-                      <InputLabel>Loại hình giảm giá</InputLabel>
+                      <InputLabel>Hình thức giảm giá</InputLabel>
                       <Select
                         value={form.discount_type}
                         onChange={handleChange('discount_type')}
-                        label="Loại hình giảm giá"
+                        label="Hình thức giảm giá"
                       >
-                        <MenuItem value="PERCENTAGE">Giảm theo phần trăm (%)</MenuItem>
-                        <MenuItem value="FIXED_AMOUNT">Giảm số tiền cố định (VNĐ)</MenuItem>
+                        <MenuItem value="PERCENTAGE">Theo phần trăm (%)</MenuItem>
+                        <MenuItem value="FIXED_AMOUNT">Số tiền cố định (VNĐ)</MenuItem>
                       </Select>
                     </FormControl>
 
@@ -360,38 +367,45 @@ export const PromotionForm: React.FC = () => {
               <Paper
                 sx={{
                   p: 3,
-                  borderRadius: 2,
+                  borderRadius: 2.5,
                   border: `1px solid ${theme.palette.divider}`,
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                   position: 'sticky',
                   top: 88,
                 }}
               >
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                  Xem trước phiếu ưu đãi (Live Preview)
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>
+                  Xem trước Voucher (Live Preview)
                 </Typography>
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2.5 }}>
-                  Giao diện hiển thị thực tế khi khách hàng nhìn thấy ưu đãi này
+                  Giao diện hiển thị thực tế khi khách hàng nhìn thấy ưu đãi này trên website
                 </Typography>
 
-                {/* Ticket / Voucher Card */}
+                {/* Shopee-style Ticket / Voucher Card */}
                 <Card
-                  elevation={3}
+                  elevation={0}
                   sx={{
                     borderRadius: 2.5,
-                    border: '1px dashed #10B981',
-                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(0, 240, 255, 0.05) 100%)',
+                    border: '1.5px dashed #EE4D2D',
+                    bgcolor: '#FFF8F6',
                     overflow: 'hidden',
                     mb: 2.5,
+                    boxShadow: '0 2px 10px rgba(238, 77, 45, 0.08)',
                   }}
                 >
                   <CardContent sx={{ p: 2.5 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
                       <Chip
-                        icon={<VoucherIcon />}
-                        label="ƯU ĐÃI ĐẶC BIỆT"
-                        color="success"
+                        icon={<VoucherIcon sx={{ color: '#EE4D2D !important' }} />}
+                        label="VOUCHER SHOP"
                         size="small"
-                        sx={{ fontWeight: 800, fontSize: '0.7rem' }}
+                        sx={{
+                          fontWeight: 800,
+                          fontSize: '0.7rem',
+                          bgcolor: '#FFF5F1',
+                          color: '#EE4D2D',
+                          border: '1px solid #FCD4C9',
+                        }}
                       />
                       <Chip
                         label={form.is_active ? 'ĐANG BẬT' : 'TẠM TẮT'}
@@ -399,19 +413,20 @@ export const PromotionForm: React.FC = () => {
                         sx={{
                           fontWeight: 700,
                           fontSize: '0.675rem',
-                          bgcolor: form.is_active ? alpha('#10B981', 0.2) : alpha('#94A3B8', 0.2),
-                          color: form.is_active ? '#10B981' : 'text.secondary',
+                          bgcolor: form.is_active ? '#ECFDF5' : '#F1F5F9',
+                          color: form.is_active ? '#059669' : '#64748B',
+                          border: `1px solid ${form.is_active ? '#A7F3D0' : '#CBD5E1'}`,
                         }}
                       />
                     </Box>
 
-                    <Typography variant="h4" sx={{ fontWeight: 900, color: '#10B981', fontFamily: 'JetBrains Mono, monospace', mb: 0.5 }}>
+                    <Typography variant="h4" sx={{ fontWeight: 900, color: '#EE4D2D', fontFamily: 'JetBrains Mono, monospace', mb: 0.5 }}>
                       {form.discount_type === 'PERCENTAGE'
                         ? `-${form.discount_value || 0}%`
                         : `-${currency(Number(form.discount_value || 0))}`}
                     </Typography>
 
-                    <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.3, mb: 1 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.3, mb: 1, color: 'text.primary' }}>
                       {form.name || 'Tên chương trình ưu đãi'}
                     </Typography>
 
@@ -419,11 +434,11 @@ export const PromotionForm: React.FC = () => {
                       {form.description || 'Chưa có thông tin mô tả chi tiết cho khuyến mãi này.'}
                     </Typography>
 
-                    <Divider sx={{ my: 1.5, borderStyle: 'dashed' }} />
+                    <Divider sx={{ my: 1.5, borderStyle: 'dashed', borderColor: '#FCD4C9' }} />
 
                     <Stack spacing={0.75}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <CheckIcon sx={{ fontSize: 16, color: '#10B981' }} />
+                        <CheckIcon sx={{ fontSize: 16, color: '#059669' }} />
                         <Typography variant="caption" color="text.secondary">
                           Đơn tối thiểu:{' '}
                           <strong style={{ color: theme.palette.text.primary }}>
@@ -435,7 +450,7 @@ export const PromotionForm: React.FC = () => {
                       </Box>
 
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <TimeIcon sx={{ fontSize: 16, color: theme.palette.primary.main }} />
+                        <TimeIcon sx={{ fontSize: 16, color: '#2563EB' }} />
                         <Typography variant="caption" color="text.secondary">
                           Hiệu lực: {formatDateDisplay(form.start_date)} → {formatDateDisplay(form.end_date)}
                         </Typography>

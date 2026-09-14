@@ -29,17 +29,17 @@ type InputTypeOption = {
 };
 
 const DATA_TYPE_OPTIONS = [
-  { label: 'Chuỗi ký tự', value: 'string' },
-  { label: 'Số', value: 'number' },
-  { label: 'Boolean', value: 'boolean' },
-  { label: 'Enum (danh sách cố định)', value: 'enum' },
+  { label: 'Chuỗi ký tự (Văn bản)', value: 'string' },
+  { label: 'Số học', value: 'number' },
+  { label: 'Đúng / Sai (Logic)', value: 'boolean' },
+  { label: 'Danh mục lựa chọn (Cố định)', value: 'enum' },
 ];
 
 const INPUT_TYPE_OPTIONS: InputTypeOption[] = [
-  { label: 'Select (chọn 1)', value: 'select', supportedDataTypes: ['string', 'number', 'enum', 'boolean'] },
-  { label: 'Multi Select (chọn nhiều)', value: 'multi_select', supportedDataTypes: ['string', 'enum'] },
-  { label: 'Range (khoảng số)', value: 'range', supportedDataTypes: ['number'] },
-  { label: 'Checkbox', value: 'checkbox', supportedDataTypes: ['boolean'] },
+  { label: 'Chọn một giá trị (Thả xuống)', value: 'select', supportedDataTypes: ['string', 'number', 'enum', 'boolean'] },
+  { label: 'Chọn nhiều giá trị', value: 'multi_select', supportedDataTypes: ['string', 'enum'] },
+  { label: 'Khoảng số (Từ - Đến)', value: 'range', supportedDataTypes: ['number'] },
+  { label: 'Hộp kiểm (Bật / Tắt)', value: 'checkbox', supportedDataTypes: ['boolean'] },
 ];
 
 const DEFAULT_PAYLOAD: AttributeDefinitionPayload = {

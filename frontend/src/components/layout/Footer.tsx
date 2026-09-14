@@ -49,7 +49,7 @@ export const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
             }}
           >
             <Typography variant="body2" color="text.secondary">
-              © {currentYear} Computer Shop. Bảo lưu mọi quyền.
+              © {currentYear} PC Shop. Bảo lưu mọi quyền.
             </Typography>
             <Box sx={{ display: 'flex', gap: 2 }}>
               <Link href="/privacy" color="text.secondary" variant="body2" underline="hover">
@@ -109,7 +109,7 @@ export const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
                 mb: 1.5,
               }}
             >
-              Computer Shop
+              PC Shop
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
               Hệ thống bán lẻ linh kiện máy tính và giải pháp công nghệ cao cấp chính hãng. 

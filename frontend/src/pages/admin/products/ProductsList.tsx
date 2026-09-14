@@ -10,6 +10,8 @@ import {
   MenuItem,
   Typography,
   Avatar,
+  Tabs,
+  Tab,
   alpha,
   useTheme,
 } from '@mui/material';
@@ -35,11 +37,21 @@ import { ConfirmDialog } from '../../../components/admin/ConfirmDialog';
 
 const PAGE_SIZE = 10;
 
+const PRODUCT_TABS: Array<{ key: 'all' | 'in_stock' | 'low_stock' | 'out_of_stock'; label: string }> = [
+  { key: 'all', label: 'Tất cả' },
+  { key: 'in_stock', label: 'Đang mở bán' },
+  { key: 'low_stock', label: 'Cảnh báo tồn thấp' },
+  { key: 'out_of_stock', label: 'Đã hết hàng' },
+];
+
 export const ProductsList: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const { showError, showSuccess } = useSnackbar();
+
+  const searchParams = new URLSearchParams(location.search);
+  const initialStock = (searchParams.get('stockStatus') as any) || 'all';
 
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
@@ -51,7 +63,7 @@ export const ProductsList: React.FC = () => {
   // Search and filter states
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<number | ''>('');
-  const [stockFilter, setStockFilter] = useState<'all' | 'in_stock' | 'low_stock' | 'out_of_stock'>('all');
+  const [stockFilter, setStockFilter] = useState<'all' | 'in_stock' | 'low_stock' | 'out_of_stock'>(initialStock);
 
   // Confirm dialog state for delete
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
@@ -323,14 +335,55 @@ export const ProductsList: React.FC = () => {
               variant="contained"
               startIcon={<AddIcon />}
               onClick={() => navigate('/admin/products/create')}
-              sx={{ fontWeight: 700, borderRadius: 2 }}
+              sx={{
+                fontWeight: 700,
+                borderRadius: 2,
+                px: 2.5,
+                bgcolor: '#EE4D2D',
+                '&:hover': { bgcolor: '#D73211' },
+                boxShadow: '0 2px 8px rgba(238, 77, 45, 0.25)',
+              }}
             >
-              Tạo sản phẩm
+              + Tạo sản phẩm
             </Button>
+          }
+          tabs={
+            <Tabs
+              value={stockFilter}
+              onChange={(_e, v) => {
+                setStockFilter(v);
+                setPage(0);
+              }}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{
+                minHeight: 44,
+                '& .MuiTab-root': {
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  fontSize: '0.875rem',
+                  minHeight: 44,
+                  px: 2.5,
+                  color: 'text.secondary',
+                  '&.Mui-selected': {
+                    color: '#EE4D2D',
+                  },
+                },
+                '& .MuiTabs-indicator': {
+                  backgroundColor: '#EE4D2D',
+                  height: 3,
+                  borderRadius: '3px 3px 0 0',
+                },
+              }}
+            >
+              {PRODUCT_TABS.map((tab) => (
+                <Tab key={tab.key} value={tab.key} label={tab.label} />
+              ))}
+            </Tabs>
           }
           filters={
             <>
-              <FormControl size="small" sx={{ minWidth: 180 }}>
+              <FormControl size="small" sx={{ minWidth: 200 }}>
                 <InputLabel>Danh mục</InputLabel>
                 <Select
                   value={selectedCategory}
@@ -346,23 +399,6 @@ export const ProductsList: React.FC = () => {
                       {c.name}
                     </MenuItem>
                   ))}
-                </Select>
-              </FormControl>
-
-              <FormControl size="small" sx={{ minWidth: 150 }}>
-                <InputLabel>Tồn kho</InputLabel>
-                <Select
-                  value={stockFilter}
-                  onChange={(e) => {
-                    setStockFilter(e.target.value as any);
-                    setPage(0);
-                  }}
-                  label="Tồn kho"
-                >
-                  <MenuItem value="all">Tất cả tồn kho</MenuItem>
-                  <MenuItem value="in_stock">Còn hàng</MenuItem>
-                  <MenuItem value="low_stock">Sắp hết hàng</MenuItem>
-                  <MenuItem value="out_of_stock">Hết hàng</MenuItem>
                 </Select>
               </FormControl>
 

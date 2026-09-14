@@ -96,9 +96,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           sx: {
             borderRadius: 3,
             p: 1,
-            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
-            border: `1px solid ${theme.palette.divider}`,
-            backdropFilter: 'blur(8px)',
+            boxShadow: theme.palette.mode === 'dark' ? '0 20px 40px rgba(0, 0, 0, 0.4)' : '0 12px 28px rgba(15, 23, 42, 0.12)',
+            border: '1px solid',
+            borderColor: theme.palette.mode === 'dark' ? 'divider' : '#E5E7EB',
           },
         },
       }}

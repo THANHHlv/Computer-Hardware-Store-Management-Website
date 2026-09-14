@@ -52,6 +52,7 @@ export interface DataTableProps<T> {
   searchValue?: string;
   onSearchChange?: (val: string) => void;
   searchPlaceholder?: string;
+  tabs?: React.ReactNode;
   filters?: React.ReactNode;
   actions?: React.ReactNode;
   emptyMessage?: string;
@@ -84,6 +85,7 @@ export function DataTable<T extends Record<string, any>>({
   searchValue,
   onSearchChange,
   searchPlaceholder = 'Tìm kiếm...',
+  tabs,
   filters,
   actions,
   emptyMessage = 'Không có dữ liệu',
@@ -113,23 +115,34 @@ export function DataTable<T extends Record<string, any>>({
 
   return (
     <Card
-      elevation={1}
+      elevation={0}
       sx={{
         bgcolor: 'background.paper',
-        border: `1px solid ${theme.palette.divider}`,
-        borderRadius: 2,
+        border: '1px solid',
+        borderColor: theme.palette.mode === 'dark' ? 'divider' : '#E5E7EB',
+        borderRadius: 2.5,
         overflow: 'hidden',
-        transition: 'box-shadow 200ms ease',
-        '&:hover': {
-          boxShadow: theme.palette.mode === 'dark'
-            ? '0 8px 24px rgba(0, 0, 0, 0.4)'
-            : '0 8px 24px rgba(15, 23, 42, 0.08)',
-        },
+        boxShadow: theme.palette.mode === 'dark' ? 'none' : '0 1px 3px rgba(0, 0, 0, 0.04)',
       }}
     >
+      {/* Shopee-Style Quick Status Tabs */}
+      {tabs && (
+        <Box
+          sx={{
+            px: 2.5,
+            pt: 1,
+            borderBottom: '1px solid',
+            borderColor: theme.palette.mode === 'dark' ? 'divider' : '#F1F5F9',
+            bgcolor: theme.palette.mode === 'dark' ? 'transparent' : '#FAFAFA',
+          }}
+        >
+          {tabs}
+        </Box>
+      )}
+
       {/* Header toolbar: Title, Search, Filters, Actions */}
       {(title || onSearchChange || filters || actions) && (
-        <CardContent sx={{ p: 2.5, pb: filters ? 2 : 2.5, borderBottom: `1px solid ${theme.palette.divider}` }}>
+        <CardContent sx={{ p: 2.5, pb: filters ? 2 : 2.5, borderBottom: '1px solid', borderColor: theme.palette.mode === 'dark' ? 'divider' : '#F1F5F9' }}>
           <Box
             sx={{
               display: 'flex',
@@ -209,12 +222,12 @@ export function DataTable<T extends Record<string, any>>({
         <Table sx={{ minWidth: 650 }}>
           <TableHead
             sx={{
-              bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(15, 23, 42, 0.03)',
+              bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : '#F8FAFC',
             }}
           >
             <TableRow>
               {selectable && (
-                <TableCell padding="checkbox" sx={{ width: 48 }}>
+                <TableCell padding="checkbox" sx={{ width: 48, borderBottom: '1px solid', borderColor: theme.palette.mode === 'dark' ? 'divider' : '#E5E7EB' }}>
                   <Checkbox
                     checked={isAllSelected}
                     indeterminate={isIndeterminate}
@@ -231,12 +244,13 @@ export function DataTable<T extends Record<string, any>>({
                     width: col.width,
                     minWidth: col.minWidth,
                     fontWeight: 700,
-                    fontSize: '0.8125rem',
+                    fontSize: '0.75rem',
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
-                    color: 'text.secondary',
-                    py: 1.75,
-                    borderBottom: `1px solid ${theme.palette.divider}`,
+                    color: theme.palette.mode === 'dark' ? 'text.secondary' : '#475569',
+                    py: 1.5,
+                    borderBottom: '1px solid',
+                    borderColor: theme.palette.mode === 'dark' ? 'divider' : '#E5E7EB',
                   }}
                 >
                   {col.sortable && onSort ? (
@@ -323,12 +337,12 @@ export function DataTable<T extends Record<string, any>>({
                       cursor: onRowClick ? 'pointer' : 'default',
                       transition: 'background-color 150ms ease',
                       '&:hover': {
-                        bgcolor: alpha(theme.palette.primary.main, 0.04),
+                        bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.04)' : '#F8FAFC',
                       },
                     }}
                   >
                     {selectable && (
-                      <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()}>
+                      <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()} sx={{ borderBottom: '1px solid', borderColor: theme.palette.mode === 'dark' ? 'divider' : '#F1F5F9' }}>
                         <Checkbox
                           checked={isSelected}
                           onChange={(e) => onSelectRow?.(item, e.target.checked)}
@@ -340,9 +354,10 @@ export function DataTable<T extends Record<string, any>>({
                         key={col.key}
                         align={col.align || 'left'}
                         sx={{
-                          py: 1.75,
+                          py: 1.5,
                           fontSize: '0.875rem',
-                          borderBottom: `1px solid ${theme.palette.divider}`,
+                          borderBottom: '1px solid',
+                          borderColor: theme.palette.mode === 'dark' ? 'divider' : '#F1F5F9',
                         }}
                       >
                         {col.render ? col.render(item, rIdx) : item[col.key] ?? '—'}

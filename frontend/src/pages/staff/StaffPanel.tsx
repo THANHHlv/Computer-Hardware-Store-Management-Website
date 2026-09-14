@@ -361,13 +361,13 @@ const StaffPanel: React.FC = () => {
               sx={{ mb: 1 }}
             >
               <WorkIcon color="secondary" />
-              <Typography variant="overline">Staff dashboard</Typography>
+              <Typography variant="overline">Bàn làm việc Nhân viên</Typography>
             </Stack>
             <Typography
               variant="h4"
               sx={{ fontWeight: 800, letterSpacing: "-0.02em" }}
             >
-              Xin chào, {user?.full_name || user?.username || "Staff"}
+              Xin chào, {user?.full_name || user?.username || "Nhân viên"}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
               Tổng quan nhanh cho nhân viên vận hành: kho hàng, đơn hàng và bình
@@ -375,14 +375,14 @@ const StaffPanel: React.FC = () => {
             </Typography>
             <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mt: 2 }}>
               <Chip
-                label="STAFF"
+                label="Nhân viên"
                 size="small"
                 color="secondary"
                 variant="outlined"
               />
-              <Chip label="Inventory" size="small" variant="outlined" />
-              <Chip label="Orders" size="small" variant="outlined" />
-              <Chip label="Comments" size="small" variant="outlined" />
+              <Chip label="Kho hàng" size="small" variant="outlined" />
+              <Chip label="Đơn hàng" size="small" variant="outlined" />
+              <Chip label="Bình luận" size="small" variant="outlined" />
             </Stack>
           </Box>
           <Stack

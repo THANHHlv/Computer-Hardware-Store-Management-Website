@@ -167,12 +167,12 @@ const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
   },
   [`&.${stepConnectorClasses.active}`]: {
     [`& .${stepConnectorClasses.line}`]: {
-      backgroundImage: 'linear-gradient(95deg, #00F0FF 0%, #10B981 100%)',
+      backgroundImage: 'linear-gradient(95deg, #2563EB 0%, #10B981 100%)',
     },
   },
   [`&.${stepConnectorClasses.completed}`]: {
     [`& .${stepConnectorClasses.line}`]: {
-      backgroundImage: 'linear-gradient(95deg, #00F0FF 0%, #10B981 100%)',
+      backgroundImage: 'linear-gradient(95deg, #2563EB 0%, #10B981 100%)',
     },
   },
   [`& .${stepConnectorClasses.line}`]: {
@@ -407,9 +407,9 @@ export const OrderDetailPage: React.FC = () => {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          bgcolor: isStepCompleted ? theme.palette.primary.main : alpha(theme.palette.divider, 0.5),
-                          color: isStepCompleted ? '#0A0E17' : 'text.disabled',
-                          boxShadow: isStepCompleted ? `0 0 12px ${alpha(theme.palette.primary.main, 0.5)}` : 'none',
+                          bgcolor: isStepCompleted ? '#2563EB' : '#E2E8F0',
+                          color: isStepCompleted ? '#FFFFFF' : '#94A3B8',
+                          boxShadow: isStepCompleted ? '0 2px 8px rgba(37, 99, 235, 0.25)' : 'none',
                           transition: 'all 300ms ease',
                         }}
                       >
@@ -421,7 +421,7 @@ export const OrderDetailPage: React.FC = () => {
                       variant="body2"
                       sx={{
                         fontWeight: activeStep === index ? 800 : isStepCompleted ? 600 : 400,
-                        color: activeStep === index ? theme.palette.primary.main : 'text.primary',
+                        color: activeStep === index ? '#2563EB' : 'text.primary',
                       }}
                     >
                       {step.label}

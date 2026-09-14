@@ -117,7 +117,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           roles: ['ADMIN', 'STAFF'],
         },
         {
-          text: 'Tồn kho & Log kho',
+          text: 'Quản lý tồn kho',
           icon: <WarehouseRoundedIcon />,
           path: '/admin/inventory',
           roles: ['ADMIN', 'STAFF'],
@@ -187,38 +187,52 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Sidebar Header Brand */}
       <Box
         sx={{
-          p: 2.5,
+          p: 2,
           minHeight: 64,
           display: 'flex',
           alignItems: 'center',
           gap: 1.5,
-          borderBottom: `1px solid ${theme.palette.divider}`,
+          borderBottom: '1px solid',
+          borderColor: theme.palette.mode === 'dark' ? 'divider' : '#E5E7EB',
         }}
       >
         <Box
           sx={{
-            width: 36,
-            height: 36,
+            width: 38,
+            height: 38,
             borderRadius: 2,
-            bgcolor: alpha(theme.palette.primary.main, 0.12),
-            border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+            bgcolor: '#EE4D2D',
+            color: '#FFFFFF',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: theme.palette.primary.main,
             fontWeight: 900,
-            fontSize: '1.1rem',
+            fontSize: '1rem',
+            boxShadow: '0 2px 8px rgba(238, 77, 45, 0.25)',
+            flexShrink: 0,
           }}
         >
           PC
         </Box>
-        <Box>
-          <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2, letterSpacing: '-0.02em' }}>
-            Computer Shop
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="subtitle1" noWrap sx={{ fontWeight: 800, lineHeight: 1.2, color: 'text.primary' }}>
+            PC Shop
           </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
-            Quản trị hệ thống
-          </Typography>
+          <Chip
+            label="Kênh Quản Trị"
+            size="small"
+            sx={{
+              height: 18,
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              bgcolor: theme.palette.mode === 'dark' ? 'rgba(238, 77, 45, 0.2)' : '#FFF5F1',
+              color: '#EE4D2D',
+              border: '1px solid',
+              borderColor: theme.palette.mode === 'dark' ? 'rgba(238, 77, 45, 0.4)' : '#FCD4C9',
+              mt: 0.3,
+              '& .MuiChip-label': { px: 0.75 },
+            }}
+          />
         </Box>
       </Box>
 
@@ -258,30 +272,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         onClick={() => handleItemClick(item.path)}
                         selected={active}
                         sx={{
-                          borderRadius: 2,
-                          py: 1,
+                          borderRadius: '0 8px 8px 0',
+                          py: 1.1,
                           px: 1.5,
-                          transition: 'all 200ms ease',
+                          transition: 'all 150ms ease',
                           '&.Mui-selected': {
-                            bgcolor: alpha(theme.palette.primary.main, 0.12),
-                            color: theme.palette.primary.main,
+                            bgcolor: theme.palette.mode === 'dark' ? 'rgba(238, 77, 45, 0.15)' : '#FFF5F1',
+                            color: '#EE4D2D',
+                            borderLeft: '4px solid #EE4D2D',
+                            fontWeight: 700,
                             '& .MuiListItemIcon-root': {
-                              color: theme.palette.primary.main,
+                              color: '#EE4D2D',
                             },
                             '&:hover': {
-                              bgcolor: alpha(theme.palette.primary.main, 0.18),
+                              bgcolor: theme.palette.mode === 'dark' ? 'rgba(238, 77, 45, 0.22)' : '#FFEAE4',
                             },
                           },
                           '&:hover': {
-                            bgcolor: theme.palette.action.hover,
+                            bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : '#F9FAFB',
                           },
                         }}
                       >
                         <ListItemIcon
                           sx={{
                             minWidth: 36,
-                            color: active ? theme.palette.primary.main : 'text.secondary',
-                            transition: 'color 200ms ease',
+                            color: active ? '#EE4D2D' : 'text.secondary',
+                            transition: 'color 150ms ease',
                           }}
                         >
                           {item.icon}
@@ -306,15 +322,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <Divider />
 
       {/* User Info & Logout Card at bottom */}
-      <Box sx={{ p: 2, bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.02)' }}>
+      <Box sx={{ p: 2, bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.02)' : '#F9FAFB' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
             <Avatar
               sx={{
                 width: 38,
                 height: 38,
-                bgcolor: userRole === 'ADMIN' ? '#00F0FF' : '#10B981',
-                color: '#0A0E17',
+                bgcolor: userRole === 'ADMIN' ? '#EE4D2D' : '#2563EB',
+                color: '#FFFFFF',
                 fontWeight: 800,
                 fontSize: '0.9rem',
               }}
@@ -332,9 +348,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   height: 18,
                   fontSize: '0.65rem',
                   fontWeight: 700,
-                  bgcolor: userRole === 'ADMIN' ? alpha('#00F0FF', 0.15) : alpha('#10B981', 0.15),
-                  color: userRole === 'ADMIN' ? '#00F0FF' : '#10B981',
+                  bgcolor: userRole === 'ADMIN' ? '#FFF7ED' : '#EFF6FF',
+                  color: userRole === 'ADMIN' ? '#C2410C' : '#1E40AF',
+                  border: '1px solid',
+                  borderColor: userRole === 'ADMIN' ? '#FFEDD5' : '#DBEAFE',
                   mt: 0.25,
+                  '& .MuiChip-label': { px: 0.75 },
                 }}
               />
             </Box>

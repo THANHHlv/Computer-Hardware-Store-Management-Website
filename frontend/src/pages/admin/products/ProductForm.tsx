@@ -22,7 +22,6 @@ import {
   Slider,
   FormHelperText,
   Tooltip,
-  alpha,
   useTheme,
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material/Select';
@@ -634,7 +633,14 @@ export const ProductForm: React.FC = () => {
             startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveIcon />}
             onClick={handleSubmit}
             disabled={saving}
-            sx={{ fontWeight: 700, px: 3, borderRadius: 2 }}
+            sx={{
+              fontWeight: 700,
+              px: 3.5,
+              borderRadius: 2,
+              bgcolor: '#EE4D2D',
+              '&:hover': { bgcolor: '#D73211' },
+              boxShadow: '0 2px 8px rgba(238, 77, 45, 0.25)',
+            }}
           >
             {saving ? 'Đang lưu...' : isEdit ? 'Cập nhật sản phẩm' : 'Lưu sản phẩm'}
           </Button>
@@ -828,12 +834,12 @@ export const ProductForm: React.FC = () => {
 
             {/* Right Column: Image Management & Ordering */}
             <Box sx={{ minWidth: 0 }}>
-              <Paper sx={{ p: 3, borderRadius: 2, border: `1px solid ${theme.palette.divider}`, position: 'sticky', top: 88 }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+              <Paper sx={{ p: 3, borderRadius: 2.5, border: `1px solid ${theme.palette.divider}`, position: 'sticky', top: 88, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>
                   Hình ảnh sản phẩm
                 </Typography>
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-                  Kéo-thả hoặc dùng nút mũi tên để đổi thứ tự ảnh. Ảnh đầu tiên có gắn sao là ảnh đại diện.
+                  Kéo-thả hoặc dùng nút mũi tên để đổi thứ tự ảnh. Ảnh đầu tiên có nhãn <strong>Ảnh bìa</strong> sẽ hiển thị chính trên trang bán hàng.
                 </Typography>
 
                 {/* Mode switcher */}
@@ -845,10 +851,10 @@ export const ProductForm: React.FC = () => {
                   fullWidth
                   sx={{ mb: 2 }}
                 >
-                  <ToggleButton value="upload" sx={{ display: 'flex', gap: 1 }}>
+                  <ToggleButton value="upload" sx={{ display: 'flex', gap: 1, textTransform: 'none', fontWeight: 600 }}>
                     <UploadIcon fontSize="small" /> Tải từ máy
                   </ToggleButton>
-                  <ToggleButton value="url" sx={{ display: 'flex', gap: 1 }}>
+                  <ToggleButton value="url" sx={{ display: 'flex', gap: 1, textTransform: 'none', fontWeight: 600 }}>
                     <LinkIcon fontSize="small" /> Nhập URL
                   </ToggleButton>
                 </ToggleButtonGroup>
@@ -859,13 +865,21 @@ export const ProductForm: React.FC = () => {
                     variant="outlined"
                     component="label"
                     fullWidth
-                    startIcon={<UploadIcon />}
+                    startIcon={<UploadIcon sx={{ color: '#EE4D2D' }} />}
                     sx={{
-                      p: 2,
+                      p: 2.5,
                       borderRadius: 2,
                       borderStyle: 'dashed',
                       borderWidth: 2,
+                      borderColor: '#D1D5DB',
+                      bgcolor: '#F9FAFB',
+                      color: 'text.primary',
+                      fontWeight: 600,
                       mb: 2,
+                      '&:hover': {
+                        borderColor: '#EE4D2D',
+                        bgcolor: '#FFF5F1',
+                      },
                     }}
                   >
                     Chọn file ảnh (nhiều ảnh)
@@ -881,7 +895,7 @@ export const ProductForm: React.FC = () => {
                       onChange={(e) => setImageUrlInput(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddImageUrl())}
                     />
-                    <Button variant="contained" size="small" onClick={handleAddImageUrl} sx={{ px: 2 }}>
+                    <Button variant="contained" size="small" onClick={handleAddImageUrl} sx={{ px: 2, bgcolor: '#EE4D2D', '&:hover': { bgcolor: '#D73211' } }}>
                       Thêm
                     </Button>
                   </Box>
@@ -905,14 +919,14 @@ export const ProductForm: React.FC = () => {
                       sx={{
                         display: 'flex',
                         alignItems: 'center',
-                        p: 1,
+                        p: 1.25,
                         borderRadius: 2,
-                        border: `1px solid ${img.is_primary ? theme.palette.primary.main : theme.palette.divider}`,
-                        bgcolor: img.is_primary ? alpha(theme.palette.primary.main, 0.04) : 'background.paper',
+                        border: `1px solid ${img.is_primary ? '#EE4D2D' : theme.palette.divider}`,
+                        bgcolor: img.is_primary ? '#FFF5F1' : 'background.paper',
                         cursor: 'grab',
                         transition: 'all 150ms ease',
                         '&:hover': {
-                          boxShadow: theme.shadows[2],
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                         },
                       }}
                     >
@@ -920,7 +934,7 @@ export const ProductForm: React.FC = () => {
                         component="img"
                         image={img.file_path}
                         alt={`Ảnh ${index + 1}`}
-                        sx={{ width: 64, height: 64, borderRadius: 1.5, objectFit: 'contain', bgcolor: 'grey.100', flexShrink: 0 }}
+                        sx={{ width: 64, height: 64, borderRadius: 1.5, objectFit: 'contain', bgcolor: '#F8FAFC', border: '1px solid #E2E8F0', flexShrink: 0 }}
                       />
 
                       <Box sx={{ flexGrow: 1, ml: 1.5, minWidth: 0 }}>
@@ -928,10 +942,16 @@ export const ProductForm: React.FC = () => {
                           {img.is_primary ? (
                             <Chip
                               size="small"
-                              label="Ảnh đại diện"
-                              color="primary"
-                              icon={<CheckIcon />}
-                              sx={{ height: 20, fontSize: '0.675rem', fontWeight: 700 }}
+                              label="Ảnh bìa"
+                              icon={<CheckIcon sx={{ fontSize: '14px !important', color: '#EE4D2D !important' }} />}
+                              sx={{
+                                height: 22,
+                                fontSize: '0.7rem',
+                                fontWeight: 700,
+                                bgcolor: '#FFFFFF',
+                                color: '#EE4D2D',
+                                border: '1px solid #FCD4C9',
+                              }}
                             />
                           ) : (
                             <Typography variant="caption" color="text.secondary">
