@@ -12,7 +12,6 @@ import {
   Chip,
   Avatar,
   alpha,
-  useTheme,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -43,7 +42,6 @@ const ROLE_LABEL: Record<string, { label: string; color: string }> = {
 };
 
 export const UsersList: React.FC = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const { showError, showSuccess } = useSnackbar();

@@ -5,7 +5,6 @@ import {
   Typography,
   TextField,
   Button,
-  Grid,
   FormControl,
   InputLabel,
   Select,
@@ -19,7 +18,6 @@ import {
 import {
   Save as SaveIcon,
   ArrowBackRounded as BackIcon,
-  ShieldRounded as AdminShieldIcon,
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { userService } from '../../../services/user.service';
@@ -239,95 +237,83 @@ export const UserForm: React.FC = () => {
             </Typography>
 
             <Stack spacing={3}>
-              <Grid container spacing={2.5}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Tên đăng nhập (Username)"
-                    required
-                    disabled={isEdit}
-                    value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    error={Boolean(errors.username)}
-                    helperText={errors.username || (isEdit ? 'Tên đăng nhập không thể thay đổi sau khi tạo' : undefined)}
-                  />
-                </Grid>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2.5 }}>
+                <TextField
+                  fullWidth
+                  label="Tên đăng nhập (Username)"
+                  required
+                  disabled={isEdit}
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  error={Boolean(errors.username)}
+                  helperText={errors.username || (isEdit ? 'Tên đăng nhập không thể thay đổi sau khi tạo' : undefined)}
+                />
 
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Họ và tên đầy đủ"
-                    required
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    error={Boolean(errors.fullName)}
-                    helperText={errors.fullName}
-                    placeholder="Ví dụ: Nguyễn Văn A"
-                  />
-                </Grid>
-              </Grid>
+                <TextField
+                  fullWidth
+                  label="Họ và tên đầy đủ"
+                  required
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  error={Boolean(errors.fullName)}
+                  helperText={errors.fullName}
+                  placeholder="Ví dụ: Nguyễn Văn A"
+                />
+              </Box>
 
-              <Grid container spacing={2.5}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    type="email"
-                    label="Địa chỉ Email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    error={Boolean(errors.email)}
-                    helperText={errors.email}
-                    placeholder="user@example.com"
-                  />
-                </Grid>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2.5 }}>
+                <TextField
+                  fullWidth
+                  type="email"
+                  label="Địa chỉ Email"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  error={Boolean(errors.email)}
+                  helperText={errors.email}
+                  placeholder="user@example.com"
+                />
 
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Số điện thoại"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    error={Boolean(errors.phone)}
-                    helperText={errors.phone}
-                    placeholder="0912345678"
-                  />
-                </Grid>
-              </Grid>
+                <TextField
+                  fullWidth
+                  label="Số điện thoại"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  error={Boolean(errors.phone)}
+                  helperText={errors.phone}
+                  placeholder="0912345678"
+                />
+              </Box>
 
-              <Grid container spacing={2.5}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    type="password"
-                    label={isEdit ? 'Mật khẩu mới (Bỏ trống nếu không đổi)' : 'Mật khẩu khởi tạo'}
-                    required={!isEdit}
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    error={Boolean(errors.password)}
-                    helperText={errors.password || (isEdit ? 'Chỉ nhập nếu bạn muốn đặt lại mật khẩu cho người dùng này' : 'Tối thiểu 6 ký tự')}
-                  />
-                </Grid>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2.5 }}>
+                <TextField
+                  fullWidth
+                  type="password"
+                  label={isEdit ? 'Mật khẩu mới (Bỏ trống nếu không đổi)' : 'Mật khẩu khởi tạo'}
+                  required={!isEdit}
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  error={Boolean(errors.password)}
+                  helperText={errors.password || (isEdit ? 'Chỉ nhập nếu bạn muốn đặt lại mật khẩu cho người dùng này' : 'Tối thiểu 6 ký tự')}
+                />
 
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth required>
-                    <InputLabel>Vai trò hệ thống (RBAC)</InputLabel>
-                    <Select
-                      value={formData.role}
-                      onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
-                      label="Vai trò hệ thống (RBAC)"
-                      disabled={isEditingSelf}
-                    >
-                      <MenuItem value="CUSTOMER">Khách hàng (CUSTOMER)</MenuItem>
-                      <MenuItem value="STAFF">Nhân viên (STAFF)</MenuItem>
-                      <MenuItem value="ADMIN">Quản trị viên cấp cao (ADMIN)</MenuItem>
-                    </Select>
-                    {isEditingSelf && (
-                      <FormHelperText>Bạn không thể tự đổi vai trò của tài khoản đang đăng nhập</FormHelperText>
-                    )}
-                  </FormControl>
-                </Grid>
-              </Grid>
+                <FormControl fullWidth required>
+                  <InputLabel>Vai trò hệ thống (RBAC)</InputLabel>
+                  <Select
+                    value={formData.role}
+                    onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
+                    label="Vai trò hệ thống (RBAC)"
+                    disabled={isEditingSelf}
+                  >
+                    <MenuItem value="CUSTOMER">Khách hàng (CUSTOMER)</MenuItem>
+                    <MenuItem value="STAFF">Nhân viên (STAFF)</MenuItem>
+                    <MenuItem value="ADMIN">Quản trị viên cấp cao (ADMIN)</MenuItem>
+                  </Select>
+                  {isEditingSelf && (
+                    <FormHelperText>Bạn không thể tự đổi vai trò của tài khoản đang đăng nhập</FormHelperText>
+                  )}
+                </FormControl>
+              </Box>
 
               <TextField
                 fullWidth
