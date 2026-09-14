@@ -1,6 +1,7 @@
 package com.computershop.exception;
 
 import com.computershop.dto.response.ApiResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     // Xử lý lỗi validation
@@ -47,7 +49,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiResponse<String>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        String message = "Dữ liệu vi phạm ràng buộc. Có thể trùng lặp các trường unique (ví dụ: email/username/phone)";
+        log.error("DataIntegrityViolationException: {}", ex.getMessage(), ex);
+        String causeMsg = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : "";
+        String message = "Dữ liệu vi phạm ràng buộc cơ sở dữ liệu";
+        if (causeMsg != null && !causeMsg.isBlank()) {
+            message += ": " + causeMsg;
+        }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.<String>builder()
                         .statusCode(HttpStatus.BAD_REQUEST.value())
