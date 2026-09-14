@@ -318,7 +318,7 @@ export const AdminTrendChart: React.FC<AdminTrendChartProps> = ({
                     textAnchor="middle"
                     fill={isDark ? '#94A3B8' : '#64748B'}
                     fontSize={11}
-                    fontFamily="Space Grotesk, sans-serif"
+                    fontFamily="'Be Vietnam Pro', 'Inter', sans-serif"
                     fontWeight={600}
                   >
                     {labels[idx] || `${idx + 1}`}

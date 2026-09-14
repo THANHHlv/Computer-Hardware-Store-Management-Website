@@ -557,7 +557,7 @@ export const AppBar: React.FC<AppBarProps> = ({ onMenuToggle, showMenuButton = f
             transition: 'opacity 0.2s ease',
           }}
         >
-          Computer Shop
+          PC Shop
         </Typography>
 
         {/* Link điều hướng (desktop) */}

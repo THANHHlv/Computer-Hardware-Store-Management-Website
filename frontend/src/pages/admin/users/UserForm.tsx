@@ -240,7 +240,7 @@ export const UserForm: React.FC = () => {
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2.5 }}>
                 <TextField
                   fullWidth
-                  label="Tên đăng nhập (Username)"
+                  label="Tên đăng nhập"
                   required
                   disabled={isEdit}
                   value={formData.username}
@@ -298,16 +298,16 @@ export const UserForm: React.FC = () => {
                 />
 
                 <FormControl fullWidth required>
-                  <InputLabel>Vai trò hệ thống (RBAC)</InputLabel>
+                  <InputLabel>Vai trò hệ thống</InputLabel>
                   <Select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
-                    label="Vai trò hệ thống (RBAC)"
+                    label="Vai trò hệ thống"
                     disabled={isEditingSelf}
                   >
-                    <MenuItem value="CUSTOMER">Khách hàng (CUSTOMER)</MenuItem>
-                    <MenuItem value="STAFF">Nhân viên (STAFF)</MenuItem>
-                    <MenuItem value="ADMIN">Quản trị viên cấp cao (ADMIN)</MenuItem>
+                    <MenuItem value="CUSTOMER">Khách hàng</MenuItem>
+                    <MenuItem value="STAFF">Nhân viên</MenuItem>
+                    <MenuItem value="ADMIN">Quản trị viên cấp cao</MenuItem>
                   </Select>
                   {isEditingSelf && (
                     <FormHelperText>Bạn không thể tự đổi vai trò của tài khoản đang đăng nhập</FormHelperText>

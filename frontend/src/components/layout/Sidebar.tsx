@@ -117,7 +117,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           roles: ['ADMIN', 'STAFF'],
         },
         {
-          text: 'Tồn kho & Log kho',
+          text: 'Quản lý tồn kho',
           icon: <WarehouseRoundedIcon />,
           path: '/admin/inventory',
           roles: ['ADMIN', 'STAFF'],
@@ -216,7 +216,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </Box>
         <Box sx={{ minWidth: 0 }}>
           <Typography variant="subtitle1" noWrap sx={{ fontWeight: 800, lineHeight: 1.2, color: 'text.primary' }}>
-            Computer Shop
+            PC Shop
           </Typography>
           <Chip
             label="Kênh Quản Trị"

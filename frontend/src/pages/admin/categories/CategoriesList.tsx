@@ -93,7 +93,7 @@ export const CategoriesList: React.FC = () => {
     },
     {
       key: 'slug',
-      label: 'ĐƯỜNG DẪN (SLUG)',
+      label: 'ĐƯỜNG DẪN TĨNH',
       render: (c) => (
         <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'JetBrains Mono, monospace' }}>
           /{c.slug}

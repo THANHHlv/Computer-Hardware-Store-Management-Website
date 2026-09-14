@@ -31,13 +31,13 @@ interface AttributeDefinitionsTableProps {
 const getInputTypeLabel = (inputType: string) => {
   switch (inputType) {
     case 'select':
-      return 'Chọn 1';
+      return 'Chọn một';
     case 'multi_select':
       return 'Chọn nhiều';
     case 'range':
-      return 'Khoảng';
+      return 'Khoảng giá trị';
     case 'checkbox':
-      return 'Checkbox';
+      return 'Hộp kiểm';
     default:
       return inputType;
   }
@@ -46,13 +46,13 @@ const getInputTypeLabel = (inputType: string) => {
 const getDataTypeLabel = (dataType: string) => {
   switch (dataType) {
     case 'string':
-      return 'Chuỗi';
+      return 'Văn bản (Chuỗi)';
     case 'number':
-      return 'Số';
+      return 'Số học';
     case 'boolean':
-      return 'Boolean';
+      return 'Đúng / Sai';
     case 'enum':
-      return 'Enum';
+      return 'Danh mục lựa chọn';
     default:
       return dataType;
   }
