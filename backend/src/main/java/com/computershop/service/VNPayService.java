@@ -95,8 +95,8 @@ public class VNPayService {
                 }
                 first = false;
 
-                String encodedKey = URLEncoder.encode(key, StandardCharsets.US_ASCII.toString());
-                String encodedValue = URLEncoder.encode(value, StandardCharsets.US_ASCII.toString());
+                String encodedKey = URLEncoder.encode(key, StandardCharsets.US_ASCII);
+                String encodedValue = URLEncoder.encode(value, StandardCharsets.US_ASCII);
 
                 hashData.append(encodedKey).append('=').append(encodedValue);
                 queryBuilder.append(encodedKey).append('=').append(encodedValue);
@@ -148,8 +148,8 @@ public class VNPayService {
                 }
                 first = false;
 
-                String encodedKey = URLEncoder.encode(key, StandardCharsets.US_ASCII.toString());
-                String encodedValue = URLEncoder.encode(value, StandardCharsets.US_ASCII.toString());
+                String encodedKey = URLEncoder.encode(key, StandardCharsets.US_ASCII);
+                String encodedValue = URLEncoder.encode(value, StandardCharsets.US_ASCII);
 
                 hashData.append(encodedKey).append('=').append(encodedValue);
             }
