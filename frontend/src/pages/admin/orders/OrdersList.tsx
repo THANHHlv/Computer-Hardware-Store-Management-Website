@@ -2,103 +2,110 @@ import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
-  Card,
-  CardContent,
-  CircularProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
   IconButton,
-  Chip,
   Tooltip,
-  Menu,
+  FormControl,
+  InputLabel,
+  Select,
   MenuItem,
+  Typography,
+  TextField,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
-  Stack
+  alpha,
+  useTheme,
 } from '@mui/material';
-import { Visibility as ViewIcon, MoreVert as MoreVertIcon, Refresh as RefreshIcon, Edit as EditIcon, Cancel as CancelIcon } from '@mui/icons-material';
+import {
+  Visibility as ViewIcon,
+  FilterListOff as FilterOffIcon,
+  EditNote as EditNoteIcon,
+  CancelOutlined as CancelIcon,
+} from '@mui/icons-material';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { orderService } from '../../../services/order.service';
 import { useSnackbar } from '../../../hooks/useSnackbar';
 import { useDebounce } from '../../../hooks/useDebounce';
-import AdminFiltersBar from '../../../components/common/AdminFiltersBar';
+import { MotionPage } from '../../../components/common/MotionPage';
+import { DataTable, type Column } from '../../../components/admin/DataTable';
+import { StatusBadge } from '../../../components/admin/StatusBadge';
+import { ConfirmDialog } from '../../../components/admin/ConfirmDialog';
 import { ORDER_STATUSES } from '../../../types/order.types';
-import { getOrderStatusColor, getOrderStatusLabel, isCancelableStatus } from '../../../utils/orderStatus';
+import { isCancelableStatus } from '../../../utils/orderStatus';
 
 const PAGE_SIZE = 10;
 
-const OrdersList: React.FC = () => {
+export const OrdersList: React.FC = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const userIdParam = searchParams.get('userId');
   const parsedUserId = userIdParam ? Number(userIdParam) : NaN;
   const hasUserScope = Number.isFinite(parsedUserId);
   const userIdFilter = hasUserScope ? parsedUserId : undefined;
+
   const { showError, showSuccess } = useSnackbar();
+
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState<any[]>([]);
   const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(PAGE_SIZE);
   const [total, setTotal] = useState(0);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
-  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
-  const [newStatus, setNewStatus] = useState('');
-  const [filters, setFilters] = useState({ status: '' });
+
+  // Filters
+  const [statusFilter, setStatusFilter] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
-  const debouncedSearchKeyword = useDebounce(searchKeyword, 500);
-  const title = userIdFilter !== undefined ? 'Lịch sử đơn hàng' : 'Quản lý đơn hàng';
-  const subtitle = userIdFilter !== undefined ? `Người dùng #${userIdFilter}` : '';
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  // Dialogs
+  const [statusDialogOrder, setStatusDialogOrder] = useState<any | null>(null);
+  const [nextStatus, setNextStatus] = useState('');
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+
+  const [cancelOrderTarget, setCancelOrderTarget] = useState<any | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+
+  const debouncedSearch = useDebounce(searchKeyword, 400);
 
   const fetchOrders = async () => {
     setLoading(true);
     try {
       let response: any;
-      if (userIdFilter !== undefined) {
-        const userOpts: any = { page, size: PAGE_SIZE };
-        if (filters.status) userOpts.status = filters.status;
-        if (debouncedSearchKeyword && debouncedSearchKeyword.trim()) {
-          userOpts.search = debouncedSearchKeyword.trim();
-        }
-        response = await orderService.getUserOrders(userIdFilter, userOpts);
-      } else {
-        const opts: any = { page, size: PAGE_SIZE, sort: 'createdAt,desc' };
-        if (filters.status) opts.status = filters.status;
-        if (debouncedSearchKeyword && debouncedSearchKeyword.trim()) {
-          opts.search = debouncedSearchKeyword.trim();
-        }
+      const opts: any = { page, size: rowsPerPage, sort: 'createdAt,desc' };
+      if (statusFilter) opts.status = statusFilter;
+      if (debouncedSearch.trim()) opts.search = debouncedSearch.trim();
 
-        // Ưu tiên gọi endpoint theo trạng thái nếu có chọn status để đảm bảo backend thực sự lọc
-        if (filters.status) {
-          try {
-            response = await orderService.getOrdersByStatus(filters.status, { page, size: PAGE_SIZE, sort: 'createdAt,desc' });
-          } catch (_) {
-            // Fallback về endpoint chung (một số backend chỉ hỗ trợ /orders?status=...)
-            response = await orderService.getOrders(opts);
-          }
-        } else {
-          // Không có status -> gọi endpoint chung
+      if (userIdFilter !== undefined) {
+        response = await orderService.getUserOrders(userIdFilter, opts);
+      } else if (statusFilter) {
+        try {
+          response = await orderService.getOrdersByStatus(statusFilter, opts);
+        } catch {
           response = await orderService.getOrders(opts);
         }
+      } else {
+        response = await orderService.getOrders(opts);
       }
 
-      // Chuẩn hóa dữ liệu và fallback lọc client-side nếu backend bỏ qua tham số status
-      const rawItems = response.content || [];
-      const items = filters.status
-        ? rawItems.filter((o: any) => ((o?.status || '') as string).toUpperCase() === filters.status)
+      const rawItems = response?.content || [];
+      let items = statusFilter
+        ? rawItems.filter((o: any) => String(o?.status || '').toUpperCase() === statusFilter)
         : rawItems;
+
+      // Filter by date range if specified on client side
+      if (startDate) {
+        const fromTime = new Date(startDate).getTime();
+        items = items.filter((o: any) => new Date(o.created_at || o.createdAt).getTime() >= fromTime);
+      }
+      if (endDate) {
+        const toTime = new Date(`${endDate}T23:59:59`).getTime();
+        items = items.filter((o: any) => new Date(o.created_at || o.createdAt).getTime() <= toTime);
+      }
+
       setOrders(items);
-      // Nếu dùng fallback client-side, total sẽ phản ánh số phần tử trang hiện tại; còn nếu backend trả đúng thì total từ server
-      const serverTotal = response.totalElements || response.total_elements;
+      const serverTotal = response?.totalElements || response?.total_elements;
       setTotal(typeof serverTotal === 'number' && !Number.isNaN(serverTotal) ? serverTotal : items.length);
     } catch (err: any) {
       showError('Không tải được danh sách đơn hàng: ' + (err.message || err));
@@ -107,220 +114,331 @@ const OrdersList: React.FC = () => {
     }
   };
 
-  // Fetch when page, status or debounced search changes
-  useEffect(() => { fetchOrders(); }, [page, filters.status, debouncedSearchKeyword, userIdFilter]);
-
   useEffect(() => {
-    setPage(0);
-  }, [userIdFilter]);
+    fetchOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, rowsPerPage, statusFilter, debouncedSearch, startDate, endDate, userIdFilter]);
 
-  useEffect(() => {
+  const clearFilters = () => {
+    setStatusFilter('');
     setSearchKeyword('');
-  }, [userIdFilter]);
-
-  const handleMenuClick = (event: React.MouseEvent<HTMLElement>, order: any) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedOrder(order);
-  };
-  const handleMenuClose = () => { setAnchorEl(null); };
-  const handleViewOrder = (order: any) => { navigate(`/admin/orders/${order.id}`); handleMenuClose(); setSelectedOrder(null); };
-  const handleUpdateStatus = (order: any) => {
-    setSelectedOrder(order);
-    setNewStatus((order.status || 'PENDING').toUpperCase());
-    setStatusDialogOpen(true);
-    setAnchorEl(null); // close only the menu, keep selectedOrder for dialog
+    setStartDate('');
+    setEndDate('');
+    setPage(0);
   };
 
-  const handleCancelOrder = async (order: any) => {
+  const handleOpenStatusDialog = (order: any) => {
+    setStatusDialogOrder(order);
+    setNextStatus(String(order.status || 'PENDING').toUpperCase());
+  };
+
+  const handleConfirmStatusUpdate = async () => {
+    if (!statusDialogOrder?.id) return;
+    setUpdatingStatus(true);
     try {
-      if (!order) return;
-      if ((order.status || '').toUpperCase() !== 'PENDING') {
-        showError('Chỉ có thể hủy đơn ở trạng thái CHỜ XỬ LÝ');
-        return;
-      }
-      const confirmed = window.confirm(`Bạn có chắc muốn hủy đơn #${order.order_code ?? order.orderCode ?? order.id}?`);
-      if (!confirmed) return;
-      await orderService.cancelOrder(order.id);
-      showSuccess('Hủy đơn hàng thành công');
-      await fetchOrders();
-    } catch (err: any) {
-      showError('Hủy đơn thất bại: ' + (err?.message || err));
-    } finally {
-      handleMenuClose();
-      setSelectedOrder(null);
-    }
-  };
-
-  const handleStatusUpdate = async () => {
-    if (!selectedOrder) return;
-    try {
-      const statusToSend = (newStatus || 'PENDING').toUpperCase();
-      await orderService.updateOrderStatus(selectedOrder.id, statusToSend);
-      showSuccess('Cập nhật trạng thái đơn hàng thành công');
-      setStatusDialogOpen(false);
-      setSelectedOrder(null);
+      await orderService.updateOrderStatus(statusDialogOrder.id, nextStatus);
+      showSuccess(`Đã cập nhật trạng thái đơn #${statusDialogOrder.order_code || statusDialogOrder.id} sang ${nextStatus}`);
+      setStatusDialogOrder(null);
       fetchOrders();
     } catch (err: any) {
       showError('Cập nhật trạng thái thất bại: ' + (err.message || err));
+    } finally {
+      setUpdatingStatus(false);
     }
   };
 
-  const getStatusColor = (status: string) => getOrderStatusColor(status);
-  const getStatusLabel = (status: string) => getOrderStatusLabel(status);
+  const handleConfirmCancelOrder = async () => {
+    if (!cancelOrderTarget?.id) return;
+    setCancelling(true);
+    try {
+      await orderService.cancelOrder(cancelOrderTarget.id);
+      showSuccess(`Đã hủy đơn hàng #${cancelOrderTarget.order_code || cancelOrderTarget.id}`);
+      setCancelOrderTarget(null);
+      fetchOrders();
+    } catch (err: any) {
+      showError('Hủy đơn hàng thất bại: ' + (err.message || err));
+    } finally {
+      setCancelling(false);
+    }
+  };
 
-  const formatCurrency = (amount: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount || 0);
-  const formatDate = (dateString: string) => dateString ? new Date(dateString).toLocaleString('vi-VN') : '-';
+  const currency = (value: number) =>
+    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value);
+
+  const formatDate = (iso?: string) => {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleString('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  };
+
+  const columns: Column<any>[] = [
+    {
+      key: 'order_code',
+      label: 'MÃ ĐƠN HÀNG',
+      render: (o) => (
+        <Box>
+          <Typography variant="body2" sx={{ fontWeight: 800, fontFamily: 'JetBrains Mono, monospace', color: theme.palette.primary.main }}>
+            #{o.order_code || o.orderCode || o.id}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {formatDate(o.created_at || o.createdAt)}
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      key: 'customer',
+      label: 'KHÁCH HÀNG',
+      render: (o) => (
+        <Box>
+          <Typography variant="body2" sx={{ fontWeight: 700 }}>
+            {o.customer_name || o.customerName || 'Khách vãng lai'}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+            {o.shipping_phone || o.customer_email || '—'}
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      key: 'amount',
+      label: 'TỔNG TIỀN',
+      align: 'right',
+      render: (o) => (
+        <Typography variant="body2" sx={{ fontWeight: 800, color: '#10B981', fontFamily: 'JetBrains Mono, monospace' }}>
+          {currency(Number(o.final_amount ?? o.finalAmount ?? o.total_amount ?? o.total ?? 0))}
+        </Typography>
+      ),
+    },
+    {
+      key: 'payment',
+      label: 'THANH TOÁN',
+      align: 'center',
+      render: (o) => {
+        const method = o.payment_method || o.paymentMethod || 'COD';
+        const pStatus = o.payment_status || o.paymentStatus || 'UNPAID';
+        return (
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+            <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: 0.5 }}>
+              {method}
+            </Typography>
+            <StatusBadge status={pStatus} category="payment" size="small" />
+          </Box>
+        );
+      },
+    },
+    {
+      key: 'status',
+      label: 'TRẠNG THÁI ĐƠN',
+      align: 'center',
+      render: (o) => <StatusBadge status={o.status || 'PENDING'} category="order" size="small" />,
+    },
+    {
+      key: 'actions',
+      label: 'THAO TÁC',
+      align: 'right',
+      render: (o) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.5 }}>
+          <Tooltip title="Xem chi tiết đơn hàng">
+            <IconButton size="small" color="primary" onClick={() => navigate(`/admin/orders/${o.id}`)}>
+              <ViewIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title="Cập nhật trạng thái">
+            <IconButton size="small" color="info" onClick={() => handleOpenStatusDialog(o)}>
+              <EditNoteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+
+          {isCancelableStatus(o.status) && (
+            <Tooltip title="Hủy đơn hàng">
+              <IconButton size="small" color="error" onClick={() => setCancelOrderTarget(o)}>
+                <CancelIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
+      ),
+    },
+  ];
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant="h4">{title}</Typography>
-          {subtitle && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              {subtitle}
-            </Typography>
-          )}
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button variant="outlined" startIcon={<RefreshIcon />} onClick={() => fetchOrders()} disabled={loading}>Làm mới</Button>
-        </Box>
-      </Box>
-
-      <AdminFiltersBar
-        searchValue={searchKeyword}
-        onSearchChange={(v) => setSearchKeyword(v)}
-  placeholder={userIdFilter !== undefined ? 'Tìm trong lịch sử đơn (giới hạn theo trang hiện tại)...' : 'Tìm mã đơn / username / email / số điện thoại'}
-        loading={loading}
-        onRefresh={fetchOrders}
-        actions={userIdFilter !== undefined ? (
-          <Button size="small" onClick={() => navigate('/admin/orders')}>
-            Xem tất cả đơn
-          </Button>
-        ) : undefined}
-      >
-        {/* Chips lọc nhanh theo trạng thái */}
-        <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }}>
-          <Chip
-            label="Tất cả"
-            size="small"
-            color={!filters.status ? 'primary' : 'default'}
-            onClick={() => setFilters({ ...filters, status: '' })}
-          />
-          {ORDER_STATUSES.map((s) => (
-            <Chip
-              key={s}
-              label={getOrderStatusLabel(s)}
-              size="small"
-              color={filters.status?.toUpperCase() === s ? 'primary' : 'default'}
-              onClick={() => setFilters({ ...filters, status: s })}
-            />
-          ))}
-        </Stack>
-
-        {/* Đã loại bỏ ô Select trạng thái theo yêu cầu; giữ lại chip lọc nhanh ở trên */}
-      </AdminFiltersBar>
-
-      <Card>
-        <CardContent>
-          {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress /></Box>
-          ) : (
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Mã đơn</TableCell>
-                    <TableCell>Username</TableCell>
-                    <TableCell>Họ tên / Email</TableCell>
-                    <TableCell>SĐT</TableCell>
-                    <TableCell>Tổng tiền</TableCell>
-                    <TableCell>Trạng thái</TableCell>
-                    <TableCell>Ngày tạo</TableCell>
-                    <TableCell align="right">Hành động</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {orders.map((order) => (
-                    <TableRow key={order.id} hover>
-                      <TableCell><Typography variant="body2" fontWeight="medium">{order.order_code ?? order.orderCode ?? order.orderCode}</Typography></TableCell>
-                      <TableCell>
-                        <Typography variant="body2" fontWeight="medium">{order.user_username ?? order.userUsername ?? '-'}</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Box>
-                          <Typography variant="body2" fontWeight="medium">{order.customer_name ?? order.customerName ?? (order.user_name ?? order.userName) ?? '-'}</Typography>
-                          <Typography variant="caption" color="text.secondary">{order.customer_email ?? order.customerEmail ?? order.user_email ?? order.userEmail ?? '-'}</Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">{order.shipping_phone ?? order.shippingPhone ?? order.user_phone ?? order.userPhone ?? '-'}</Typography>
-                      </TableCell>
-                      <TableCell><Typography variant="body2" fontWeight="medium">{formatCurrency(order.final_amount ?? order.finalAmount)}</Typography></TableCell>
-                      <TableCell><Chip label={getStatusLabel(order.status)} color={getStatusColor(order.status) as any} size="small" /></TableCell>
-                      <TableCell><Typography variant="body2">{formatDate(order.created_at ?? order.createdAt)}</Typography></TableCell>
-                      <TableCell align="right">
-                        <Tooltip title="Xem chi tiết"><IconButton size="small" onClick={() => navigate(`/admin/orders/${order.id}`)}><ViewIcon /></IconButton></Tooltip>
-                        {isCancelableStatus(order.status) && (
-                          <Tooltip title="Hủy đơn">
-                            <IconButton size="small" color="error" onClick={() => handleCancelOrder(order)}>
-                              <CancelIcon />
-                            </IconButton>
-                          </Tooltip>
-                        )}
-                        <Tooltip title="Thao tác khác"><IconButton size="small" onClick={(e) => handleMenuClick(e, order)}><MoreVertIcon /></IconButton></Tooltip>
-                      </TableCell>
-                    </TableRow>
+    <MotionPage>
+      <Box sx={{ pb: 4 }}>
+        <DataTable
+          title={userIdFilter !== undefined ? `Đơn hàng của người dùng #${userIdFilter}` : 'Quản lý đơn hàng'}
+          subtitle={`Tổng số ${total} đơn hàng`}
+          columns={columns}
+          data={orders}
+          loading={loading}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          totalRows={total}
+          onPageChange={setPage}
+          onRowsPerPageChange={setRowsPerPage}
+          searchValue={searchKeyword}
+          onSearchChange={setSearchKeyword}
+          searchPlaceholder="Tìm theo mã đơn, tên người nhận, SĐT..."
+          onRowClick={(item) => navigate(`/admin/orders/${item.id}`)}
+          filters={
+            <>
+              <FormControl size="small" sx={{ minWidth: 160 }}>
+                <InputLabel>Trạng thái đơn</InputLabel>
+                <Select
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                    setPage(0);
+                  }}
+                  label="Trạng thái đơn"
+                >
+                  <MenuItem value="">Tất cả trạng thái</MenuItem>
+                  {ORDER_STATUSES.map((status) => (
+                    <MenuItem key={status} value={status}>
+                      {status === 'PENDING'
+                        ? 'Chờ xử lý'
+                        : status === 'CONFIRMED'
+                        ? 'Đã xác nhận'
+                        : status === 'PROCESSING'
+                        ? 'Đang chuẩn bị'
+                        : status === 'SHIPPING'
+                        ? 'Đang giao hàng'
+                        : status === 'DELIVERED'
+                        ? 'Đã giao hàng'
+                        : status === 'COMPLETED'
+                        ? 'Hoàn tất'
+                        : status === 'CANCELLED'
+                        ? 'Đã hủy'
+                        : status}
+                    </MenuItem>
                   ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
+                </Select>
+              </FormControl>
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-            <Typography variant="body2">Hiển thị {orders.length} trên tổng {total} đơn hàng</Typography>
-            <Box>
-              <Button disabled={page <= 0} onClick={() => setPage(0)}>Đầu</Button>
-              <Button disabled={page <= 0} onClick={() => setPage(page - 1)}>Trước</Button>
-              <Button disabled>{page + 1}</Button>
-              <Button disabled={page >= Math.max(0, Math.ceil(total / PAGE_SIZE) - 1)} onClick={() => setPage(page + 1)}>Sau</Button>
-              <Button disabled={page >= Math.max(0, Math.ceil(total / PAGE_SIZE) - 1)} onClick={() => setPage(Math.ceil(total / PAGE_SIZE) - 1)}>Cuối</Button>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
+              <TextField
+                size="small"
+                type="date"
+                label="Từ ngày"
+                value={startDate}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  setPage(0);
+                }}
+                InputLabelProps={{ shrink: true }}
+                sx={{ width: 145 }}
+              />
 
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-        <MenuItem onClick={() => selectedOrder && handleViewOrder(selectedOrder)}><ViewIcon sx={{ mr: 1 }} /> Xem chi tiết</MenuItem>
-        <MenuItem onClick={() => selectedOrder && handleUpdateStatus(selectedOrder)}><EditIcon sx={{ mr: 1 }} /> Cập nhật trạng thái</MenuItem>
-        {selectedOrder && isCancelableStatus(selectedOrder.status) && (
-          <MenuItem onClick={() => handleCancelOrder(selectedOrder)}>
-            <CancelIcon sx={{ mr: 1 }} /> Hủy đơn
-          </MenuItem>
-        )}
-      </Menu>
+              <TextField
+                size="small"
+                type="date"
+                label="Đến ngày"
+                value={endDate}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setPage(0);
+                }}
+                InputLabelProps={{ shrink: true }}
+                sx={{ width: 145 }}
+              />
 
-      <Dialog open={statusDialogOpen} onClose={() => setStatusDialogOpen(false)}>
-        <DialogTitle>Cập nhật trạng thái đơn hàng</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 1 }}>
-            <Typography variant="body2" color="text.secondary" gutterBottom>Đơn hàng: {selectedOrder?.order_code ?? selectedOrder?.orderCode}</Typography>
-            <FormControl fullWidth sx={{ mt: 2 }}>
+              {(statusFilter || searchKeyword || startDate || endDate) && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<FilterOffIcon />}
+                  onClick={clearFilters}
+                  sx={{ borderRadius: 2 }}
+                >
+                  Xóa lọc
+                </Button>
+              )}
+            </>
+          }
+          emptyMessage="Chưa có đơn hàng nào"
+          emptyDescription="Không tìm thấy đơn hàng nào phù hợp với bộ lọc tìm kiếm hiện tại."
+        />
+
+        {/* Update Status Dialog */}
+        <Dialog
+          open={Boolean(statusDialogOrder)}
+          onClose={() => setStatusDialogOrder(null)}
+          maxWidth="xs"
+          fullWidth
+          slotProps={{ paper: { sx: { borderRadius: 2.5 } } }}
+        >
+          <DialogTitle sx={{ fontWeight: 700 }}>
+            Cập nhật trạng thái đơn hàng
+          </DialogTitle>
+          <DialogContent sx={{ pt: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Đơn hàng: <strong>#{statusDialogOrder?.order_code || statusDialogOrder?.id}</strong> —{' '}
+              {statusDialogOrder?.customer_name || 'Khách hàng'}
+            </Typography>
+
+            <FormControl fullWidth size="small">
               <InputLabel>Trạng thái mới</InputLabel>
-              <Select native value={newStatus} onChange={(e: any) => setNewStatus(e.target.value)} label="Trạng thái mới">
-                {ORDER_STATUSES.map(s => (
-                  <option key={s} value={s}>{getOrderStatusLabel(s)}</option>
+              <Select
+                value={nextStatus}
+                onChange={(e) => setNextStatus(e.target.value)}
+                label="Trạng thái mới"
+              >
+                {ORDER_STATUSES.map((status) => (
+                  <MenuItem key={status} value={status}>
+                    {status === 'PENDING'
+                      ? 'Chờ xử lý'
+                      : status === 'CONFIRMED'
+                      ? 'Đã xác nhận'
+                      : status === 'PROCESSING'
+                      ? 'Đang chuẩn bị'
+                      : status === 'SHIPPING'
+                      ? 'Đang giao hàng'
+                      : status === 'DELIVERED'
+                      ? 'Đã giao hàng'
+                      : status === 'COMPLETED'
+                      ? 'Hoàn tất'
+                      : status === 'CANCELLED'
+                      ? 'Đã hủy'
+                      : status}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setStatusDialogOpen(false)}>Hủy</Button>
-          <Button onClick={handleStatusUpdate} variant="contained">Cập nhật</Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2.5 }}>
+            <Button onClick={() => setStatusDialogOrder(null)} color="inherit">
+              Đóng
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleConfirmStatusUpdate}
+              disabled={updatingStatus}
+              sx={{ fontWeight: 700 }}
+            >
+              {updatingStatus ? 'Đang cập nhật...' : 'Lưu trạng thái'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Cancel Order Confirm Dialog */}
+        <ConfirmDialog
+          open={Boolean(cancelOrderTarget)}
+          title="Hủy đơn hàng"
+          message="Bạn có chắc chắn muốn hủy đơn hàng này không? Số lượng sản phẩm sẽ được tự động hoàn lại vào kho."
+          itemName={`Đơn #${cancelOrderTarget?.order_code || cancelOrderTarget?.id} (${cancelOrderTarget?.customer_name || 'Khách hàng'})`}
+          confirmText="Hủy đơn hàng này"
+          severity="warning"
+          loading={cancelling}
+          onConfirm={handleConfirmCancelOrder}
+          onCancel={() => setCancelOrderTarget(null)}
+        />
+      </Box>
+    </MotionPage>
   );
 };
 
