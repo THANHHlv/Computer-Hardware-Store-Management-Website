@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -10,8 +10,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Grid,
-  Divider,
   Card,
   CardMedia,
   IconButton,
@@ -101,8 +99,6 @@ export const ProductForm: React.FC = () => {
 
   // Field validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const imagesRef = useRef<ManagedImage[]>([]);
 
   const updateImages = (updater: (prev: ManagedImage[]) => ManagedImage[]) => {
     setImages((prev) => {
@@ -645,9 +641,9 @@ export const ProductForm: React.FC = () => {
         </Box>
 
         <form onSubmit={handleSubmit}>
-          <Grid container spacing={3}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 1fr) 380px' }, gap: 3, alignItems: 'start' }}>
             {/* Left Column: Core Info & Dynamic Attributes */}
-            <Grid item xs={12} lg={8}>
+            <Box sx={{ minWidth: 0 }}>
               <Stack spacing={3}>
                 {/* 1. Thông tin cơ bản */}
                 <Paper sx={{ p: 3, borderRadius: 2, border: `1px solid ${theme.palette.divider}` }}>
@@ -670,40 +666,35 @@ export const ProductForm: React.FC = () => {
                       placeholder="Ví dụ: CPU Intel Core i9-14900K (3.2GHz Turbo 6.0GHz)"
                     />
 
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
-                        <FormControl fullWidth required error={Boolean(errors.category)}>
-                          <InputLabel>Danh mục sản phẩm</InputLabel>
-                          <Select
-                            value={selectedCatId}
-                            onChange={handleCategoryChange}
-                            label="Danh mục sản phẩm"
-                          >
-                            <MenuItem value="">-- Chọn danh mục --</MenuItem>
-                            {categories.map((c) => (
-                              <MenuItem key={c.id} value={String(c.id)}>
-                                {c.name}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                          {errors.category && <FormHelperText>{errors.category}</FormHelperText>}
-                        </FormControl>
-                      </Grid>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, alignItems: 'center' }}>
+                      <FormControl fullWidth required error={Boolean(errors.category)}>
+                        <InputLabel>Danh mục sản phẩm</InputLabel>
+                        <Select
+                          value={selectedCatId}
+                          onChange={handleCategoryChange}
+                          label="Danh mục sản phẩm"
+                        >
+                          <MenuItem value="">-- Chọn danh mục --</MenuItem>
+                          {categories.map((c) => (
+                            <MenuItem key={c.id} value={String(c.id)}>
+                              {c.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {errors.category && <FormHelperText>{errors.category}</FormHelperText>}
+                      </FormControl>
 
-                      <Grid item xs={12} sm={6}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={product.is_active !== false}
-                              onChange={(e) => setProduct((p) => ({ ...p, is_active: e.target.checked }))}
-                              color="primary"
-                            />
-                          }
-                          label="Kích hoạt mở bán ngay"
-                          sx={{ mt: 1 }}
-                        />
-                      </Grid>
-                    </Grid>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={product.is_active !== false}
+                            onChange={(e) => setProduct((p) => ({ ...p, is_active: e.target.checked }))}
+                            color="primary"
+                          />
+                        }
+                        label="Kích hoạt mở bán ngay"
+                      />
+                    </Box>
 
                     <TextField
                       fullWidth
@@ -723,50 +714,44 @@ export const ProductForm: React.FC = () => {
                     2. Giá bán & Quản lý tồn kho
                   </Typography>
 
-                  <Grid container spacing={2.5}>
-                    <Grid item xs={12} sm={4}>
-                      <TextField
-                        fullWidth
-                        type="number"
-                        label="Giá bán (VNĐ)"
-                        required
-                        value={product.price || ''}
-                        onChange={(e) => {
-                          setProduct((p) => ({ ...p, price: Number(e.target.value) }));
-                          if (errors.price) setErrors((err) => ({ ...err, price: '' }));
-                        }}
-                        error={Boolean(errors.price)}
-                        helperText={errors.price}
-                      />
-                    </Grid>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2.5 }}>
+                    <TextField
+                      fullWidth
+                      type="number"
+                      label="Giá bán (VNĐ)"
+                      required
+                      value={product.price || ''}
+                      onChange={(e) => {
+                        setProduct((p) => ({ ...p, price: Number(e.target.value) }));
+                        if (errors.price) setErrors((err) => ({ ...err, price: '' }));
+                      }}
+                      error={Boolean(errors.price)}
+                      helperText={errors.price}
+                    />
 
-                    <Grid item xs={12} sm={4}>
-                      <TextField
-                        fullWidth
-                        type="number"
-                        label="Số lượng tồn kho"
-                        required
-                        value={product.quantity ?? ''}
-                        onChange={(e) => {
-                          setProduct((p) => ({ ...p, quantity: Number(e.target.value) }));
-                          if (errors.quantity) setErrors((err) => ({ ...err, quantity: '' }));
-                        }}
-                        error={Boolean(errors.quantity)}
-                        helperText={errors.quantity}
-                      />
-                    </Grid>
+                    <TextField
+                      fullWidth
+                      type="number"
+                      label="Số lượng tồn kho"
+                      required
+                      value={product.quantity ?? ''}
+                      onChange={(e) => {
+                        setProduct((p) => ({ ...p, quantity: Number(e.target.value) }));
+                        if (errors.quantity) setErrors((err) => ({ ...err, quantity: '' }));
+                      }}
+                      error={Boolean(errors.quantity)}
+                      helperText={errors.quantity}
+                    />
 
-                    <Grid item xs={12} sm={4}>
-                      <TextField
-                        fullWidth
-                        type="number"
-                        label="Ngưỡng cảnh báo tồn ít"
-                        value={product.low_stock_threshold ?? 10}
-                        onChange={(e) => setProduct((p) => ({ ...p, low_stock_threshold: Number(e.target.value) }))}
-                        helperText="Hệ thống sẽ báo động khi tồn kho dưới mức này"
-                      />
-                    </Grid>
-                  </Grid>
+                    <TextField
+                      fullWidth
+                      type="number"
+                      label="Ngưỡng cảnh báo tồn ít"
+                      value={product.low_stock_threshold ?? 10}
+                      onChange={(e) => setProduct((p) => ({ ...p, low_stock_threshold: Number(e.target.value) }))}
+                      helperText="Hệ thống sẽ báo động khi tồn kho dưới mức này"
+                    />
+                  </Box>
                 </Paper>
 
                 {/* 3. Thuộc tính động theo Danh mục */}
@@ -785,13 +770,13 @@ export const ProductForm: React.FC = () => {
                         : 'Vui lòng chọn danh mục ở Bước 1 để hiển thị các thuộc tính tương ứng (Socket, VRAM, TDP, Số nhân...).'}
                     </Typography>
                   ) : (
-                    <Grid container spacing={2.5}>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2.5 }}>
                       {attributeDefs.map((def) => (
-                        <Grid item xs={12} sm={6} key={def.code}>
+                        <Box key={def.code}>
                           {renderAttributeField(def)}
-                        </Grid>
+                        </Box>
                       ))}
-                    </Grid>
+                    </Box>
                   )}
                 </Paper>
 
@@ -839,10 +824,10 @@ export const ProductForm: React.FC = () => {
                   )}
                 </Paper>
               </Stack>
-            </Grid>
+            </Box>
 
             {/* Right Column: Image Management & Ordering */}
-            <Grid item xs={12} lg={4}>
+            <Box sx={{ minWidth: 0 }}>
               <Paper sx={{ p: 3, borderRadius: 2, border: `1px solid ${theme.palette.divider}`, position: 'sticky', top: 88 }}>
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
                   Hình ảnh sản phẩm
@@ -860,11 +845,11 @@ export const ProductForm: React.FC = () => {
                   fullWidth
                   sx={{ mb: 2 }}
                 >
-                  <ToggleButton value="upload" startIcon={<UploadIcon />}>
-                    Tải từ máy
+                  <ToggleButton value="upload" sx={{ display: 'flex', gap: 1 }}>
+                    <UploadIcon fontSize="small" /> Tải từ máy
                   </ToggleButton>
-                  <ToggleButton value="url" startIcon={<LinkIcon />}>
-                    Nhập URL
+                  <ToggleButton value="url" sx={{ display: 'flex', gap: 1 }}>
+                    <LinkIcon fontSize="small" /> Nhập URL
                   </ToggleButton>
                 </ToggleButtonGroup>
 
@@ -1002,8 +987,8 @@ export const ProductForm: React.FC = () => {
                   ))}
                 </Stack>
               </Paper>
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </form>
       </Box>
     </MotionPage>
