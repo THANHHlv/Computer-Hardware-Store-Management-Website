@@ -93,7 +93,7 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_orders_payment_status ON orders(payment_status);");
             System.out.println("[OK] 4. Đã tạo các index idx_orders_vnpay_txn và idx_orders_payment_status");
 
-            System.out.println("=== MIGRATION THÀNH CÔNG RỰC RỠ! ===");
+            System.out.println("=== MIGRATION THÀNH CÔNG! ===");
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);

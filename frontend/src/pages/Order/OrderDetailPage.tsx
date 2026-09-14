@@ -32,6 +32,8 @@ type NormalizedOrder = {
   shipping_phone?: string;
   notes?: string;
   status?: string;
+  payment_method?: string;
+  payment_status?: string;
   subtotal?: number;
   total_amount?: number;
   discount_amount?: number;
@@ -54,6 +56,8 @@ const normalizeOrder = (payload: any): NormalizedOrder => ({
   shipping_phone: payload.shipping_phone ?? payload.shippingPhone,
   notes: payload.notes ?? undefined,
   status: payload.status ?? undefined,
+  payment_method: payload.payment_method ?? payload.paymentMethod,
+  payment_status: payload.payment_status ?? payload.paymentStatus,
   subtotal: payload.subtotal ?? payload.total_amount ?? payload.totalAmount ?? 0,
   total_amount: payload.total_amount ?? payload.totalAmount ?? payload.total ?? 0,
   discount_amount: payload.discount_amount ?? payload.discountAmount ?? 0,
@@ -130,6 +134,27 @@ const OrderDetailPage: React.FC = () => {
   const [order, setOrder] = useState<NormalizedOrder | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [payingVnPay, setPayingVnPay] = useState<boolean>(false);
+
+  const handlePayVnPay = async () => {
+    if (!order?.id) return;
+    setPayingVnPay(true);
+    try {
+      const resp: any = await api.post(`/payments/vnpay/create/${order.id}`);
+      const body = resp?.data || resp;
+      const paymentUrl = body?.paymentUrl || body?.data?.paymentUrl;
+      if (paymentUrl) {
+        window.location.href = paymentUrl;
+      } else {
+        showError('Không thể tạo link thanh toán VNPay. Vui lòng kiểm tra lại thông tin kết nối VNPay.');
+      }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || 'Không thể kết nối VNPay';
+      showError(msg);
+    } finally {
+      setPayingVnPay(false);
+    }
+  };
 
   const currency = useMemo(() => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }), []);
   const fmt = (n?: number) => currency.format(Number(n ?? 0));
@@ -385,6 +410,18 @@ const OrderDetailPage: React.FC = () => {
               <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
                 <Typography variant="h6" fontWeight={600}>Thao tác</Typography>
                 <Stack spacing={1.5} sx={{ mt: 2 }}>
+                  {order.payment_method === 'VNPAY' && order.payment_status !== 'PAID' && order.status === 'PENDING' && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="large"
+                      disabled={payingVnPay}
+                      onClick={handlePayVnPay}
+                      sx={{ fontWeight: 600, py: 1.2 }}
+                    >
+                      {payingVnPay ? 'Đang chuyển hướng VNPay...' : 'Thanh toán qua VNPay'}
+                    </Button>
+                  )}
                   <Button
                     variant="outlined"
                     color="error"

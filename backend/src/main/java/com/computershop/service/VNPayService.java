@@ -40,6 +40,12 @@ public class VNPayService {
     public String createPaymentUrl(Order order, HttpServletRequest request) {
         log.info("Tạo URL thanh toán VNPay cho đơn hàng: {} (orderCode: {})", order.getId(), order.getOrderCode());
 
+        if (vnPayConfig.getTmnCode() == null || vnPayConfig.getTmnCode().isBlank()
+                || vnPayConfig.getHashSecret() == null || vnPayConfig.getHashSecret().isBlank()) {
+            log.error("VNPay configuration missing: VNPAY_TMN_CODE or VNPAY_HASH_SECRET is blank.");
+            throw new RuntimeException("Chưa cấu hình VNPAY_TMN_CODE hoặc VNPAY_HASH_SECRET trong file .env của backend.");
+        }
+
         // Số tiền VNPay yêu cầu nhân 100 (đơn vị xu)
         long amount = order.getFinalAmount()
                 .multiply(new BigDecimal("100"))
@@ -185,6 +191,9 @@ public class VNPayService {
      * Lấy IP thật của client, xử lý cả trường hợp qua proxy/load balancer.
      */
     private String getClientIpAddress(HttpServletRequest request) {
+        if (request == null) {
+            return "127.0.0.1";
+        }
         // Thử các header proxy phổ biến trước
         String[] headerNames = {
                 "X-Forwarded-For",

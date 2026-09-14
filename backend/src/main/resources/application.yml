@@ -4,9 +4,9 @@ spring:
 
   # Database Configuration
   datasource:
-    url: ${DATABASE_URL:${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/pc_shop_database_2}}
-    username: ${DB_USERNAME:${SPRING_DATASOURCE_USERNAME:postgres}}
-    password: ${DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:}}
+    url: ${DATABASE_URL:${SPRING_DATASOURCE_URL:jdbc:postgresql://dpg-dai27h1ijrss738c74m0-a.oregon-postgres.render.com:5432/pcshop_0uxk?sslmode=require}}
+    username: ${DB_USERNAME:${SPRING_DATASOURCE_USERNAME:thanhlv}}
+    password: ${DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:oOkgxCkPSnm7jj0sxbfmlSqWaHBDTleS}}
     driver-class-name: org.postgresql.Driver
 
     hikari:
@@ -79,8 +79,8 @@ logging:
 # Đăng ký tài khoản merchant sandbox tại: https://sandbox.vnpayment.vn
 # KHÔNG hardcode giá trị thật — dùng biến môi trường trên Render/server
 vnpay:
-  tmn-code: ${VNPAY_TMN_CODE:}
-  hash-secret: ${VNPAY_HASH_SECRET:}
+  tmn-code: ${VNPAY_TMN_CODE:D66TTI4G}
+  hash-secret: ${VNPAY_HASH_SECRET:PHZDECBXGRERDUMSMFRUUCWZNVKUVCYT}
   pay-url: ${VNPAY_PAY_URL:https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
   return-url: ${VNPAY_RETURN_URL:http://localhost:5173/order/vnpay-return}
   ipn-url: ${VNPAY_IPN_URL:http://localhost:8080/api/payments/vnpay/ipn}
