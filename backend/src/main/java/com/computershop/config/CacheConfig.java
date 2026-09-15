@@ -29,7 +29,8 @@ public class CacheConfig {
                 "productSearch",      // Cache cho search results
                 "categories",         // Cache cho categories
                 "promotions",         // Cache cho promotions
-                "activePromotions"    // Cache cho active promotions only
+                "activePromotions",   // Cache cho active promotions only
+                "recommendations"     // Cache cho recommendations (related, frequently bought together)
         );
 
         // Cấu hình cache mặc định

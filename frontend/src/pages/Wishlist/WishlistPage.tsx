@@ -17,8 +17,6 @@ import {
 } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
@@ -37,7 +35,7 @@ const WishlistPage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { addItem } = useCart();
-  const { showSnackbar } = useSnackbar();
+  const { showSuccess, showInfo } = useSnackbar();
   const { isAuthenticated } = useAuth();
 
   const { products, loading } = useAppSelector((state) => state.wishlist);
@@ -50,12 +48,12 @@ const WishlistPage: React.FC = () => {
 
   const handleRemove = (product: Product) => {
     dispatch(toggleWishlistItem({ productId: product.id, isCurrentlyWishlisted: true }));
-    showSnackbar(`Đã bỏ "${product.name}" khỏi yêu thích`, 'info');
+    showInfo(`Đã bỏ "${product.name}" khỏi yêu thích`);
   };
 
   const handleAddToCart = (product: Product) => {
-    addItem(product.id, 1);
-    showSnackbar(`Đã thêm "${product.name}" vào giỏ hàng`, 'success');
+    addItem(product, 1);
+    showSuccess(`Đã thêm "${product.name}" vào giỏ hàng`);
   };
 
   const handleProductClick = (product: Product) => {
@@ -104,7 +102,7 @@ const WishlistPage: React.FC = () => {
         {loading && (
           <Grid container spacing={3}>
             {Array.from({ length: 4 }).map((_, i) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={i}>
                 <Skeleton variant="rounded" height={380} sx={{ borderRadius: 3.5 }} />
               </Grid>
             ))}
@@ -150,7 +148,7 @@ const WishlistPage: React.FC = () => {
         {!loading && products.length > 0 && (
           <Grid container spacing={3}>
             {products.map((product) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={product.id}>
                 <ProductCard
                   product={product}
                   onProductClick={handleProductClick}

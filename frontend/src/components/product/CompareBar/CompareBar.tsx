@@ -7,7 +7,6 @@
 import React from 'react';
 import {
   Box,
-  Typography,
   Button,
   IconButton,
   Tooltip,

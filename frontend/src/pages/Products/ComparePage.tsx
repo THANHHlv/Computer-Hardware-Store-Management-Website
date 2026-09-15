@@ -27,7 +27,6 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 
 import { MotionPage } from '../../components/common/MotionPage';
 import { useAppSelector, useAppDispatch } from '../../store';
@@ -57,7 +56,7 @@ const ComparePage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { addItem } = useCart();
-  const { showSnackbar } = useSnackbar();
+  const { showSuccess } = useSnackbar();
   const items = useAppSelector(selectCompareItems);
   const categoryName = useAppSelector(selectCompareCategoryName);
   const [attrDefs, setAttrDefs] = useState<AttributeDefinition[]>([]);
@@ -242,8 +241,8 @@ const ComparePage: React.FC = () => {
                           variant="contained"
                           startIcon={<ShoppingCartIcon />}
                           onClick={() => {
-                            addItem(product.id, 1);
-                            showSnackbar(`Đã thêm "${product.name}" vào giỏ`, 'success');
+                            addItem(product, 1);
+                            showSuccess(`Đã thêm "${product.name}" vào giỏ`);
                           }}
                           sx={{ borderRadius: 2, fontSize: '0.7rem', textTransform: 'none' }}
                         >
