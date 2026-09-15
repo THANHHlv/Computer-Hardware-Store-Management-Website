@@ -2,6 +2,8 @@
  * 🛍️ PRODUCT CARD COMPONENT - Computer Shop E-commerce
  * International Clean & Bright Theme + Silky Ultra-Smooth Micro-interactions
  * Optimized for high conversion, Apple/NZXT-grade aesthetic, and 60fps fluidity
+ *
+ * Features: wishlist heart icon, compare toggle, add-to-cart, quick view
  */
 
 import React, { useState } from 'react';
@@ -19,6 +21,9 @@ import {
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import CheckIcon from '@mui/icons-material/Check';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import { motion, useReducedMotion } from 'framer-motion';
 
 // Types
@@ -28,6 +33,14 @@ import type { ProductCardProps } from './ProductCard.types';
 
 export interface ExtendedProductCardProps extends ProductCardProps {
   onAddToCart?: (product: Product) => void;
+  /** Whether this product is in the user's wishlist */
+  isWishlisted?: boolean;
+  /** Toggle wishlist (add/remove). If undefined, heart icon is hidden. */
+  onToggleWishlist?: (product: Product) => void;
+  /** Whether this product is in the compare list */
+  isInCompare?: boolean;
+  /** Toggle compare. If undefined, compare icon is hidden. */
+  onToggleCompare?: (product: Product) => void;
 }
 
 const formatPrice = (price: number): string => {
@@ -92,6 +105,10 @@ export const ProductCard: React.FC<ExtendedProductCardProps> = ({
   onQuickView,
   onProductClick,
   onAddToCart,
+  isWishlisted = false,
+  onToggleWishlist,
+  isInCompare = false,
+  onToggleCompare,
   className,
   sx,
   imageAspectRatio = '1/1',
@@ -101,6 +118,7 @@ export const ProductCard: React.FC<ExtendedProductCardProps> = ({
   const isLight = theme.palette.mode === 'light';
   const shouldReduceMotion = useReducedMotion();
   const [addedBounce, setAddedBounce] = useState(false);
+  const [heartBounce, setHeartBounce] = useState(false);
   const imageUrl = getImageUrl(product);
   const stockInfo = getStockStatus(product);
 
@@ -135,6 +153,24 @@ export const ProductCard: React.FC<ExtendedProductCardProps> = ({
       onAddToCart(product);
       setAddedBounce(true);
       setTimeout(() => setAddedBounce(false), 800);
+    }
+  };
+
+  const handleToggleWishlist = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onToggleWishlist) {
+      onToggleWishlist(product);
+      if (!isWishlisted) {
+        setHeartBounce(true);
+        setTimeout(() => setHeartBounce(false), 600);
+      }
+    }
+  };
+
+  const handleToggleCompare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onToggleCompare) {
+      onToggleCompare(product);
     }
   };
 
@@ -235,6 +271,37 @@ export const ProductCard: React.FC<ExtendedProductCardProps> = ({
           }}
         />
 
+        {/* Wishlist Heart Button */}
+        {onToggleWishlist && (
+          <IconButton
+            component={motion.button as any}
+            animate={heartBounce ? { scale: [1, 1.35, 0.9, 1.1, 1] } : {}}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            onClick={handleToggleWishlist}
+            aria-label={isWishlisted ? `Bỏ ${product.name} khỏi yêu thích` : `Thêm ${product.name} vào yêu thích`}
+            size="small"
+            sx={{
+              position: 'absolute',
+              top: 10,
+              left: 10,
+              backgroundColor: isLight ? 'rgba(255, 255, 255, 0.9)' : 'rgba(17, 24, 39, 0.85)',
+              backdropFilter: 'blur(8px)',
+              border: `1px solid ${isWishlisted ? '#ef4444' : theme.palette.divider}`,
+              color: isWishlisted ? '#ef4444' : theme.palette.text.secondary,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              transition: 'all 200ms cubic-bezier(0.16, 1, 0.3, 1)',
+              '&:hover': {
+                backgroundColor: isWishlisted ? '#fef2f2' : (isLight ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 24, 39, 0.95)'),
+                color: '#ef4444',
+                borderColor: '#ef4444',
+                transform: 'scale(1.1)',
+              },
+            }}
+          >
+            {isWishlisted ? <FavoriteIcon fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />}
+          </IconButton>
+        )}
+
         {/* Quick View Button */}
         {onQuickView && (
           <IconButton
@@ -244,7 +311,7 @@ export const ProductCard: React.FC<ExtendedProductCardProps> = ({
             size="small"
             sx={{
               position: 'absolute',
-              top: 10,
+              top: onToggleWishlist ? 48 : 10,
               left: 10,
               opacity: 0,
               transform: 'scale(0.85)',
@@ -262,6 +329,40 @@ export const ProductCard: React.FC<ExtendedProductCardProps> = ({
             }}
           >
             <VisibilityIcon fontSize="small" />
+          </IconButton>
+        )}
+
+        {/* Compare Toggle Button */}
+        {onToggleCompare && (
+          <IconButton
+            className="quick-action-button"
+            onClick={handleToggleCompare}
+            aria-label={isInCompare ? `Bỏ ${product.name} khỏi so sánh` : `Thêm ${product.name} vào so sánh`}
+            size="small"
+            sx={{
+              position: 'absolute',
+              bottom: 10,
+              left: 10,
+              opacity: isInCompare ? 1 : 0,
+              transform: isInCompare ? 'scale(1)' : 'scale(0.85)',
+              backgroundColor: isInCompare
+                ? alpha(theme.palette.info.main, 0.12)
+                : (isLight ? 'rgba(255, 255, 255, 0.9)' : 'rgba(17, 24, 39, 0.85)'),
+              backdropFilter: 'blur(8px)',
+              border: `1px solid ${isInCompare ? theme.palette.info.main : theme.palette.divider}`,
+              color: isInCompare ? theme.palette.info.main : theme.palette.text.primary,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              transition: 'all 200ms cubic-bezier(0.16, 1, 0.3, 1)',
+              '&:hover': {
+                backgroundColor: isInCompare
+                  ? alpha(theme.palette.info.main, 0.2)
+                  : theme.palette.info.main,
+                color: isInCompare ? theme.palette.info.main : '#FFFFFF',
+                borderColor: theme.palette.info.main,
+              },
+            }}
+          >
+            <CompareArrowsIcon fontSize="small" />
           </IconButton>
         )}
       </Box>

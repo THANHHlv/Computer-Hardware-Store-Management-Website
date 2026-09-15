@@ -240,6 +240,19 @@ CREATE TABLE tokens (
     CONSTRAINT chk_token_type CHECK (token_type IN ('ACCESS_TOKEN', 'REFRESH_TOKEN', 'RESET_PASSWORD', 'EMAIL_VERIFICATION'))
 );
 
+-- Wishlists table (sản phẩm yêu thích)
+CREATE SEQUENCE IF NOT EXISTS wishlists_seq START 1;
+CREATE TABLE wishlists (
+    id BIGINT PRIMARY KEY DEFAULT nextval('wishlists_seq'),
+    user_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+    CONSTRAINT uq_wishlist_user_product UNIQUE (user_id, product_id)
+);
+
 -- Add foreign key for promotions in orders table
 ALTER TABLE orders ADD CONSTRAINT fk_orders_promotion 
     FOREIGN KEY (promotion_id) REFERENCES promotions(id) ON DELETE SET NULL;

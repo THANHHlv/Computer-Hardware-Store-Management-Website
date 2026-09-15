@@ -125,6 +125,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/comments/*/reply").hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers("/api/v1/orders/*/status").hasAnyRole("STAFF", "ADMIN")
 
+                        // Wishlist — yêu cầu đăng nhập (CUSTOMER, STAFF, ADMIN)
+                        .requestMatchers("/api/v1/wishlist/**").hasAnyRole("CUSTOMER", "STAFF", "ADMIN")
+
                         // Khách hàng / Nhân viên / Quản trị (đã xác thực)
                         .requestMatchers("/api/v1/cart/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/v1/orders/**").hasAnyRole("CUSTOMER", "STAFF", "ADMIN")
