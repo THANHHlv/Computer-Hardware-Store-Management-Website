@@ -35,6 +35,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import CloseIcon from '@mui/icons-material/Close';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { logoutUser } from '../../store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
@@ -126,6 +127,7 @@ export const AppBar: React.FC<AppBarProps> = ({ onMenuToggle, showMenuButton = f
   // creating a new reference each render which causes unnecessary rerenders.
   const user = useAppSelector((state) => state.auth.user);
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const wishlistCount = useAppSelector((state) => state.wishlist.itemIds.length);
 
   if (import.meta.env.DEV) {
     console.debug('🔎 AppBar: trạng thái xác thực thay đổi', {
@@ -783,6 +785,39 @@ export const AppBar: React.FC<AppBarProps> = ({ onMenuToggle, showMenuButton = f
             )}
           </IconButton>
         </Tooltip>
+
+        {/* Yêu thích (Wishlist) */}
+        {isAuthenticated && (
+          <Tooltip title="Sản phẩm yêu thích">
+            <IconButton
+              color="inherit"
+              onClick={() => navigate('/wishlist')}
+              aria-label="danh sách yêu thích"
+              sx={{
+                mr: 0.5,
+                transition: 'all 0.2s ease-in-out',
+                '&:hover': { transform: 'scale(1.08)', color: '#ef4444' },
+              }}
+            >
+              <Badge
+                badgeContent={wishlistCount > 0 ? wishlistCount : null}
+                color="error"
+                sx={{
+                  '& .MuiBadge-badge': {
+                    fontWeight: 700,
+                    fontSize: '0.72rem',
+                    minWidth: '18px',
+                    height: '18px',
+                    borderRadius: '9px',
+                    border: `2px solid ${theme.palette.background.paper}`,
+                  },
+                }}
+              >
+                <FavoriteIcon />
+              </Badge>
+            </IconButton>
+          </Tooltip>
+        )}
 
         {/* Giỏ hàng */}
         <IconButton

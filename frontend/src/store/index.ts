@@ -7,6 +7,8 @@ import authReducer from './slices/authSlice';
 import cartSlice from './slices/cartSlice';
 import productSlice from './slices/productSlice';
 import snackbarSlice from './slices/snackbarSlice';
+import wishlistSlice from './slices/wishlistSlice';
+import compareSlice from './slices/compareSlice';
 
 // Configure Redux store
 export const store = configureStore({
@@ -15,6 +17,8 @@ export const store = configureStore({
     cart: cartSlice,
     products: productSlice,
     snackbar: snackbarSlice,
+    wishlist: wishlistSlice,
+    compare: compareSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -35,3 +39,4 @@ export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export default store;
+

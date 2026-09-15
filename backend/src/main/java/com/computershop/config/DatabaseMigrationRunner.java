@@ -51,6 +51,24 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
             jdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_orders_payment_status ON orders(payment_status);");
 
             log.info("Migration database cho VNPay hoàn tất thành công!");
+
+            // ===== WISHLIST MIGRATION =====
+            jdbcTemplate.execute("CREATE SEQUENCE IF NOT EXISTS wishlists_seq START 1;");
+            jdbcTemplate.execute("""
+                CREATE TABLE IF NOT EXISTS wishlists (
+                    id BIGINT PRIMARY KEY DEFAULT nextval('wishlists_seq'),
+                    user_id BIGINT NOT NULL,
+                    product_id BIGINT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+                    CONSTRAINT uq_wishlist_user_product UNIQUE (user_id, product_id)
+                );
+            """);
+            jdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_wishlists_user ON wishlists(user_id);");
+            jdbcTemplate.execute("CREATE INDEX IF NOT EXISTS idx_wishlists_product ON wishlists(product_id);");
+            log.info("Migration database cho Wishlist hoàn tất thành công!");
+
         } catch (Exception e) {
             log.error("Lỗi khi thực thi database migration: {}", e.getMessage(), e);
         }

@@ -5,6 +5,7 @@ import { AppBar } from './AppBar'; // Restored with fixes
 // import { SimpleAppBar } from './SimpleAppBar'; // Testing completed
 import { Footer } from './Footer';
 import { Breadcrumbs } from './Breadcrumbs';
+import { CompareBar } from '../product/CompareBar';
 
 interface MainLayoutProps {
   children?: React.ReactNode;
@@ -50,6 +51,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
 
       {/* Footer */}
       <Footer variant={footerVariant} />
+
+      {/* Floating Compare Bar */}
+      <CompareBar />
     </Box>
   );
 };

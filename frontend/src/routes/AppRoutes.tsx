@@ -51,6 +51,12 @@ const PaymentGuidePage = React.lazy(
 const BuildPcGuidePage = React.lazy(
   () => import("../pages/Guides/BuildPcGuidePage")
 );
+const WishlistPage = React.lazy(
+  () => import("../pages/Wishlist/WishlistPage")
+);
+const ComparePage = React.lazy(
+  () => import("../pages/Products/ComparePage")
+);
 
 // Auth pages
 const LoginPage = React.lazy(() => import("../pages/auth/LoginPage"));
@@ -170,6 +176,10 @@ export const AppRoutes: React.FC = () => {
           <Route path="payment" element={<PaymentGuidePage />} />
           {/* Alias SEO/legacy: /return-policy */}
           <Route path="return-policy" element={<ReturnsPolicyPage />} />
+
+          {/* Wishlist & Compare */}
+          <Route path="wishlist" element={<WishlistPage />} />
+          <Route path="compare" element={<ComparePage />} />
 
           {/* Các trang đã triển khai */}
           <Route path="profile" element={<ProfilePage />} />
